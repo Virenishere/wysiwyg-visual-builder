@@ -42,6 +42,7 @@ A powerful, intuitive drag-and-drop visual website builder built with React, fea
 - Node.js 16+ 
 - npm or yarn
 - React 18+
+- Nextjs 15+
 
 ### Installation
 
