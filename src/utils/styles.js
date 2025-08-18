@@ -2,8 +2,8 @@ export const style = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  border: "1px solid blue",
-  background: "#f0f0f0",
+  // border: "1px solid blue",
+  // background: "#f0f0f0",
 };
 
 export const parentBoundary = {

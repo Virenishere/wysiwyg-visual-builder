@@ -28,7 +28,7 @@ export default function RichTextEditor({
             'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
             'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
             'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
-            'textcolor', 'colorpicker'
+            'textcolor', 'colorpicker','autoresize'
           ],
           toolbar: 'undo redo | blocks | ' +
             'bold italic forecolor backcolor | alignleft aligncenter ' +

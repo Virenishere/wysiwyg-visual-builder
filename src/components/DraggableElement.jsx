@@ -35,14 +35,15 @@ export default function DraggableElement({
       height: '100%',
       margin: `${element.margin?.top || 0}px ${element.margin?.right || 0}px ${element.margin?.bottom || 0}px ${element.margin?.left || 0}px`,
       padding: `${element.padding?.top || 5}px ${element.padding?.right || 10}px ${element.padding?.bottom || 5}px ${element.padding?.left || 10}px`,
-      fontSize: `${element.fontSize}px`,
-      fontFamily: element.fontFamily,
-      color: element.color,
-      backgroundColor: element.backgroundColor,
-      borderRadius: `${element.borderRadius}px`,
-      border: element.border,
+      fontSize: `${element.fontSize || 16}px`,
+      fontFamily: element.fontFamily || 'Arial, sans-serif',
+      color: element.color || '#000000',
+      backgroundColor: element.backgroundColor || 'transparent',
+      borderRadius: `${element.borderRadius || 0}px`,
+      border: element.border || 'none',
       cursor: 'pointer',
       boxSizing: 'border-box',
+      overflow: 'hidden',
     };
 
     switch (element.type) {
@@ -62,6 +63,8 @@ export default function DraggableElement({
                 border: 'none',
                 outline: 'none',
                 background: 'transparent',
+                width: '100%',
+                height: '100%',
               }}
               autoFocus
             />
@@ -69,9 +72,15 @@ export default function DraggableElement({
         }
         return (
           <div
-            style={baseStyle}
+            style={{
+              ...baseStyle,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              fontWeight: element.fontSize > 24 ? 'bold' : 'normal',
+              textAlign: 'left',
+            }}
             onDoubleClick={() => setIsEditingText(true)}
-            className="flex items-center justify-center"
           >
             {element.content}
           </div>
@@ -79,13 +88,13 @@ export default function DraggableElement({
 
       case 'paragraph':
         return (
-          <div style={{ ...baseStyle, padding: 0 }}>
+          <div style={{ ...baseStyle, padding: '5px' }}>
             <RichTextEditor
               value={element.content}
               onChange={(content) => 
                 updateElement(parentId, boxId, element.id, { content })
               }
-              height={element.height - 20}
+              height={Math.max(element.height - 20, 100)}
             />
           </div>
         );
@@ -93,12 +102,25 @@ export default function DraggableElement({
       case 'button':
         return (
           <button
-            style={baseStyle}
-            className="hover:opacity-80 transition-opacity"
+            style={{
+              ...baseStyle,
+              cursor: 'pointer',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.3s ease',
+            }}
+            className="hover:opacity-80 hover:scale-105 active:scale-95"
             onClick={(e) => {
               e.stopPropagation();
-              // Button click logic here
               console.log('Button clicked:', element.content);
+            }}
+            onDoubleClick={() => {
+              const newContent = prompt('Edit button text:', element.content);
+              if (newContent !== null) {
+                updateElement(parentId, boxId, element.id, { content: newContent });
+              }
             }}
           >
             {element.content}
@@ -123,7 +145,8 @@ export default function DraggableElement({
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  borderRadius: `${element.borderRadius}px`,
+                  borderRadius: `${element.borderRadius || 0}px`,
+                  border: element.border || 'none',
                   cursor: 'pointer'
                 }}
                 onClick={(e) => {
@@ -140,15 +163,16 @@ export default function DraggableElement({
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexDirection: 'column',
-                  gap: '8px'
+                  gap: '8px',
+                  backgroundColor: '#f9f9f9',
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
               >
-                <span>📷</span>
-                <span style={{ fontSize: '12px' }}>Click to upload</span>
+                <span style={{ fontSize: '24px' }}>📷</span>
+                <span style={{ fontSize: '12px', color: '#666' }}>Click to upload</span>
               </div>
             )}
           </div>
@@ -181,6 +205,7 @@ export default function DraggableElement({
       style={{
         border: isSelected ? '2px solid #007bff' : '1px solid transparent',
         borderRadius: '2px',
+        zIndex: isSelected ? 10 : 1,
       }}
       className="element-rnd"
     >
