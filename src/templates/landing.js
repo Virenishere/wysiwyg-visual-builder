@@ -1,0 +1,217 @@
+// templates/landing.js
+export const landingPageTemplate = {
+  id: 'landing',
+  name: 'Landing Page',
+  description: 'Professional landing page with hero, services, and contact sections',
+  thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop',
+  parents: [
+    // Hero Section
+    {
+      size: { height: 600, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" },
+      rnds: [
+        {
+          width: 500,
+          height: 250,
+          x: 100,
+          y: 150,
+          elements: [
+            {
+              type: 'text',
+              x: 20,
+              y: 20,
+              width: 460,
+              height: 80,
+              content: 'Welcome to Our Amazing Website',
+              fontSize: 36,
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 20, bottom: 10, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'text',
+              x: 20,
+              y: 110,
+              width: 460,
+              height: 40,
+              content: 'Transform your business with our innovative solutions',
+              fontSize: 18,
+              fontFamily: 'Arial, sans-serif',
+              color: '#e8e8e8',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 20, bottom: 5, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'button',
+              x: 20,
+              y: 170,
+              width: 160,
+              height: 50,
+              content: 'Get Started Today',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: '#ff6b6b',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 12, right: 24, bottom: 12, left: 24 },
+              borderRadius: 25,
+              border: 'none',
+            },
+            {
+              type: 'button',
+              x: 200,
+              y: 170,
+              width: 140,
+              height: 50,
+              content: 'Learn More',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 12, right: 24, bottom: 12, left: 24 },
+              borderRadius: 25,
+              border: '2px solid #ffffff',
+            }
+          ]
+        }
+      ]
+    },
+    // Services Section
+    {
+      size: { height: 500, background: "#f8f9fa" },
+      rnds: [
+        {
+          width: 400,
+          height: 200,
+          x: 50,
+          y: 80,
+          elements: [
+            {
+              type: 'text',
+              x: 10,
+              y: 10,
+              width: 380,
+              height: 50,
+              content: 'Our Services',
+              fontSize: 32,
+              fontFamily: 'Arial, sans-serif',
+              color: '#333333',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'paragraph',
+              x: 10,
+              y: 70,
+              width: 380,
+              height: 120,
+              content: '<p style="line-height: 1.6;">We provide exceptional services tailored to your specific needs. Our team delivers quality results that drive your business forward.</p>',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#666666',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            }
+          ]
+        },
+        {
+          width: 250,
+          height: 250,
+          x: 500,
+          y: 80,
+          elements: [
+            {
+              type: 'image',
+              x: 10,
+              y: 10,
+              width: 230,
+              height: 230,
+              content: 'Service Image',
+              imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 0, right: 0, bottom: 0, left: 0 },
+              borderRadius: 15,
+              border: 'none',
+            }
+          ]
+        }
+      ]
+    },
+    // Contact Section
+    {
+      size: { height: 400, background: "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)" },
+      rnds: [
+        {
+          width: 500,
+          height: 300,
+          x: 150,
+          y: 50,
+          elements: [
+            {
+              type: 'text',
+              x: 20,
+              y: 20,
+              width: 460,
+              height: 50,
+              content: 'Get In Touch',
+              fontSize: 32,
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 20, bottom: 10, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'text',
+              x: 20,
+              y: 80,
+              width: 460,
+              height: 40,
+              content: 'Ready to start your project? Contact us today!',
+              fontSize: 18,
+              fontFamily: 'Arial, sans-serif',
+              color: '#f0f0f0',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 20, bottom: 5, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'button',
+              x: 20,
+              y: 140,
+              width: 140,
+              height: 45,
+              content: 'Contact Us',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#333333',
+              backgroundColor: '#ffffff',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 20, bottom: 10, left: 20 },
+              borderRadius: 25,
+              border: 'none',
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};

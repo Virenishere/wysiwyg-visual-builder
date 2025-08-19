@@ -1,0 +1,267 @@
+// templates/contact.js
+export const contactPageTemplate = {
+  id: 'contact',
+  name: 'Contact Us',
+  description: 'Professional contact page with form, location, and contact information',
+  thumbnail: 'https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=200&h=150&fit=crop',
+  parents: [
+    // Header Section
+    {
+      size: { height: 400, background: "linear-gradient(135deg, #00b894 0%, #00a085 100%)" },
+      rnds: [
+        {
+          width: 500,
+          height: 150,
+          x: 150,
+          y: 125,
+          elements: [
+            {
+              type: 'text',
+              x: 20,
+              y: 20,
+              width: 460,
+              height: 60,
+              content: 'Get In Touch',
+              fontSize: 38,
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 20, bottom: 10, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'text',
+              x: 20,
+              y: 90,
+              width: 460,
+              height: 40,
+              content: 'We\'d love to hear from you. Send us a message!',
+              fontSize: 18,
+              fontFamily: 'Arial, sans-serif',
+              color: '#e8fff8',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 20, bottom: 5, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            }
+          ]
+        }
+      ]
+    },
+    // Contact Form & Info Section
+    {
+      size: { height: 600, background: "#ffffff" },
+      rnds: [
+        // Contact Form
+        {
+          width: 400,
+          height: 450,
+          x: 80,
+          y: 80,
+          elements: [
+            {
+              type: 'text',
+              x: 10,
+              y: 10,
+              width: 380,
+              height: 40,
+              content: 'Send us a Message',
+              fontSize: 24,
+              fontFamily: 'Arial, sans-serif',
+              color: '#333333',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'paragraph',
+              x: 10,
+              y: 60,
+              width: 380,
+              height: 300,
+              content: '<div style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f9f9f9;"><p style="margin-bottom: 15px; font-weight: bold; color: #333;">Contact Form</p><p style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: white;">📧 Your Email</p><p style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: white;">👤 Your Name</p><p style="margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: white; min-height: 60px;">💬 Your Message</p></div>',
+              fontSize: 14,
+              fontFamily: 'Arial, sans-serif',
+              color: '#666666',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'button',
+              x: 10,
+              y: 380,
+              width: 150,
+              height: 45,
+              content: 'Send Message',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: '#00b894',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 20, bottom: 10, left: 20 },
+              borderRadius: 8,
+              border: 'none',
+            }
+          ]
+        },
+        // Contact Information
+        {
+          width: 300,
+          height: 450,
+          x: 520,
+          y: 80,
+          elements: [
+            {
+              type: 'text',
+              x: 10,
+              y: 10,
+              width: 280,
+              height: 40,
+              content: 'Contact Information',
+              fontSize: 24,
+              fontFamily: 'Arial, sans-serif',
+              color: '#333333',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'text',
+              x: 10,
+              y: 70,
+              width: 280,
+              height: 40,
+              content: '📧 hello@yourcompany.com',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#666666',
+              backgroundColor: '#f8f9fa',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 15, bottom: 10, left: 15 },
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+            },
+            {
+              type: 'text',
+              x: 10,
+              y: 130,
+              width: 280,
+              height: 40,
+              content: '📞 +1 (555) 123-4567',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#666666',
+              backgroundColor: '#f8f9fa',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 15, bottom: 10, left: 15 },
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+            },
+            {
+              type: 'text',
+              x: 10,
+              y: 190,
+              width: 280,
+              height: 40,
+              content: '📍 123 Business St, City, ST 12345',
+              fontSize: 16,
+              fontFamily: 'Arial, sans-serif',
+              color: '#666666',
+              backgroundColor: '#f8f9fa',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 15, bottom: 10, left: 15 },
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+            },
+            {
+              type: 'text',
+              x: 10,
+              y: 260,
+              width: 280,
+              height: 30,
+              content: 'Business Hours',
+              fontSize: 18,
+              fontFamily: 'Arial, sans-serif',
+              color: '#333333',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'paragraph',
+              x: 10,
+              y: 300,
+              width: 280,
+              height: 120,
+              content: '<p style="margin-bottom: 8px; color: #666;">Monday - Friday: 9:00 AM - 6:00 PM</p><p style="margin-bottom: 8px; color: #666;">Saturday: 10:00 AM - 4:00 PM</p><p style="margin-bottom: 8px; color: #666;">Sunday: Closed</p><br/><p style="color: #00b894; font-weight: bold;">Response time: Within 24 hours</p>',
+              fontSize: 14,
+              fontFamily: 'Arial, sans-serif',
+              color: '#666666',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            }
+          ]
+        }
+      ]
+    },
+    // Map/Location Section
+    {
+      size: { height: 350, background: "#f8f9fa" },
+      rnds: [
+        {
+          width: 700,
+          height: 250,
+          x: 50,
+          y: 50,
+          elements: [
+            {
+              type: 'text',
+              x: 10,
+              y: 10,
+              width: 680,
+              height: 40,
+              content: 'Visit Our Office',
+              fontSize: 28,
+              fontFamily: 'Arial, sans-serif',
+              color: '#333333',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 10, bottom: 5, left: 10 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'image',
+              x: 10,
+              y: 60,
+              width: 680,
+              height: 180,
+              content: 'Office Location Map',
+              imageUrl: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=400&fit=crop',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 0, right: 0, bottom: 0, left: 0 },
+              borderRadius: 10,
+              border: '1px solid #e0e0e0',
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};

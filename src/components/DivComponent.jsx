@@ -20,7 +20,8 @@ export default function DivComponent() {
             background: parent.size.background,
             position: "relative",
           }}
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setSelectedParent(parent.id);
             setSelectedBox(null);
             setSelectedElement(null);

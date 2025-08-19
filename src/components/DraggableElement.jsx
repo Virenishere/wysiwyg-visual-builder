@@ -188,6 +188,9 @@ export default function DraggableElement({
       size={{ width: element.width, height: element.height }}
       position={{ x: element.x, y: element.y }}
       bounds="parent"
+      onDragStart={(e) => {
+        e.stopPropagation();
+      }}
       onDragStop={(e, d) => {
         updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
       }}

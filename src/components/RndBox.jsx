@@ -23,7 +23,7 @@ export default function RndBox({ box, parentId }) {
           selectedBoxId === box.id
             ? "2px solid blue"
             : isHovered
-            ? "1px dashed gray"
+            ? "1px dashed black"
             : "1px solid transparent",
         overflow: "visible",
         borderRadius: "2px",
@@ -31,6 +31,9 @@ export default function RndBox({ box, parentId }) {
       bounds="parent"
       size={{ width: box.width, height: box.height }}
       position={{ x: box.x, y: box.y }}
+      onDragStart={(e) => {
+        e.stopPropagation();
+      }}
       onClick={(e) => {
         e.stopPropagation();
         setSelectedBox(box.id);
