@@ -1,6 +1,14 @@
-import React from "react";
+"use client";
+import { FiPlus, FiImage } from "react-icons/fi";
+import { RiImageAddFill } from "react-icons/ri";
 
-export default function ImageElement({ element, parentId, boxId, updateElement, fileInputRef }) {
+export default function ImageElement({
+  element,
+  parentId,
+  boxId,
+  updateElement,
+  fileInputRef,
+}) {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -16,49 +24,58 @@ export default function ImageElement({ element, parentId, boxId, updateElement, 
   };
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div className="relative w-full h-full">
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={handleImageUpload}
-        style={{ display: "none" }}
+        className="hidden"
       />
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          fileInputRef.current?.click();
+        }}
+        className="absolute -top-2 -right-2 z-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+        title={element.imageUrl ? "Change image" : "Add image"}
+      >
+        {element.imageUrl ? (
+          <FiImage className="w-4 h-4" />
+        ) : (
+          <RiImageAddFill className="w-4 h-4" />
+        )}
+      </button>
+
       {element.imageUrl ? (
-        <img
-          src={element.imageUrl}
-          alt={element.content}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            cursor: "pointer",
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            fileInputRef.current?.click();
-          }}
-        />
+        /* removed all hover effects, scaling, and preview button from image display */
+        <div className="w-full h-full overflow-hidden">
+          <img
+            src={element.imageUrl || "/placeholder.svg"}
+            alt={element.content}
+            className="w-full h-full object-cover pointer-events-none select-none"
+            style={{
+              borderRadius: `${element.borderRadius || 0}px`,
+            }}
+            onContextMenu={(e) => e.preventDefault()}
+            draggable={false}
+          />
+        </div>
       ) : (
-        <div
-          style={{
-            border: "2px dashed #ccc",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            backgroundColor: "#f9f9f9",
-            height: "100%",
-            cursor: "pointer",
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            fileInputRef.current?.click();
-          }}
-        >
-          <span style={{ fontSize: "24px" }}>📷</span>
-          <span style={{ fontSize: "12px", color: "#666" }}>Click to upload</span>
+        /* kept placeholder div simple without any interactions */
+        <div className="border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center gap-3 h-full rounded-lg">
+          <div className="p-4 bg-white rounded-full shadow-sm">
+            <FiImage className="w-8 h-8 text-gray-400" />
+          </div>
+          <div className="text-center">
+            <span className="text-sm font-medium text-gray-500 block">
+              No image selected
+            </span>
+            <span className="text-xs text-gray-400 mt-1 block">
+              Use the + button to add an image
+            </span>
+          </div>
         </div>
       )}
     </div>
