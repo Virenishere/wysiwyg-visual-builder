@@ -1,12 +1,3 @@
-import React from "react";
-import { FaDownload, FaEye } from "react-icons/fa";
-
-export default function TemplateCard({
-  template,
-  isSelected,
-  onSelect,
-  onLoad,
-}) {
   return (
     <div
       key={template.id}
@@ -73,4 +64,3 @@ export default function TemplateCard({
       </div>
     </div>
   );
-}

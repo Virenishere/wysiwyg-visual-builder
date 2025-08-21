@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { getTemplateById } from '@/templates';
-import { generateUniqueIds } from './storeUtils';
+import { generateUniqueIds, deepClone } from './storeUtils';
 
 let nextParentId = 1;
 let nextBoxId = 1;
@@ -40,19 +40,34 @@ const useDivStore = create(
             return state;
           }
 
-          // Process template data and assign new IDs
-          const processedParents = template.parents.map(parent => ({
-            ...parent,
-            id: nextParentId++,
-            rnds: parent.rnds.map(rnd => ({
-              ...rnd,
-              id: nextBoxId++,
-              elements: rnd.elements.map(element => ({
-                ...element,
-                id: nextElementId++
-              }))
-            }))
-          }));
+          // Deep clone to avoid reference issues
+          const templateCopy = deepClone(template);
+
+          // Generate unique IDs for the template
+          const { parents: processedParents } = generateUniqueIds(templateCopy, {
+            parentId: nextParentId,
+            boxId: nextBoxId,
+            elementId: nextElementId
+          });
+
+          // Update the next ID counters
+          let maxParentId = 0;
+          let maxBoxId = 0;
+          let maxElementId = 0;
+
+          processedParents.forEach(parent => {
+            maxParentId = Math.max(maxParentId, parent.id);
+            parent.rnds.forEach(rnd => {
+              maxBoxId = Math.max(maxBoxId, rnd.id);
+              rnd.elements.forEach(element => {
+                maxElementId = Math.max(maxElementId, element.id);
+              });
+            });
+          });
+
+          nextParentId = maxParentId + 1;
+          nextBoxId = maxBoxId + 1;
+          nextElementId = maxElementId + 1;
 
           return {
             parents: processedParents,
@@ -64,25 +79,32 @@ const useDivStore = create(
 
       // Reset to default
       resetToDefault: () =>
-        set(() => ({
-          parents: [
-            {
-              id: nextParentId++,
-              size: { height: 300, background: "#ffffff" },
-              rnds: [{ 
-                id: nextBoxId++, 
-                width: 150, 
-                height: 150, 
-                x: 0, 
-                y: 0,
-                elements: []
-              }],
-            },
-          ],
-          selectedParentId: null,
-          selectedBoxId: null,
-          selectedElementId: null,
-        })),
+        set(() => {
+          // Reset ID counters
+          nextParentId = 1;
+          nextBoxId = 1;
+          nextElementId = 1;
+
+          return {
+            parents: [
+              {
+                id: nextParentId++,
+                size: { height: 300, background: "#ffffff" },
+                rnds: [{ 
+                  id: nextBoxId++, 
+                  width: 150, 
+                  height: 150, 
+                  x: 0, 
+                  y: 0,
+                  elements: []
+                }],
+              },
+            ],
+            selectedParentId: null,
+            selectedBoxId: null,
+            selectedElementId: null,
+          };
+        }),
 
       // Parent actions
       addParent: () =>
@@ -348,8 +370,35 @@ const useDivStore = create(
           return;
         }
 
+        // Deep clone and generate unique IDs
+        const dataCopy = deepClone(data);
+        const { parents: processedParents } = generateUniqueIds(dataCopy, {
+          parentId: nextParentId,
+          boxId: nextBoxId,
+          elementId: nextElementId
+        });
+
+        // Update the next ID counters
+        let maxParentId = 0;
+        let maxBoxId = 0;
+        let maxElementId = 0;
+
+        processedParents.forEach(parent => {
+          maxParentId = Math.max(maxParentId, parent.id);
+          parent.rnds.forEach(rnd => {
+            maxBoxId = Math.max(maxBoxId, rnd.id);
+            rnd.elements.forEach(element => {
+              maxElementId = Math.max(maxElementId, element.id);
+            });
+          });
+        });
+
+        nextParentId = maxParentId + 1;
+        nextBoxId = maxBoxId + 1;
+        nextElementId = maxElementId + 1;
+
         set({
-          parents: data.parents,
+          parents: processedParents,
           selectedParentId: null,
           selectedBoxId: null,
           selectedElementId: null,

@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import { getAllTemplates } from "@/templates";
 import useDivStore from "@/store/UseDivStore";
-import TemplateHeader from "./TemplateSectorSection/TemplateHeader";
-import TemplateGrid from "./TemplateSectorSection/TemplateGrid";
-import TemplateSidebar from "./TemplateSectorSection/TemplateSidebar";
+import TemplateHeader from "./TemplateSelectorSection/TemplateHeader";
+import TemplateGrid from "./TemplateSelectorSection/TemplateGrid";
+import TemplateSidebar from "./TemplateSelectorSection/TemplateSidebar";
 
 export default function TemplateSelector({ isOpen, onClose }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);

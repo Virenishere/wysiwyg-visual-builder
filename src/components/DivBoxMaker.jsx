@@ -26,9 +26,28 @@ export default function DivBoxMaker() {
       {selectedElementId && <ElementProperties parentId={selectedParent.id} />}
 
       {/* Render RND Boxes */}
-      {selectedParent.rnds.map((box) => (
-        <BoxCard key={box.id} parentId={selectedParent.id} box={box} />
-      ))}
+      {selectedParent.rnds && Array.isArray(selectedParent.rnds) ? (
+        selectedParent.rnds.map((box, boxIndex) => {
+          // Ensure box has required properties
+          if (!box || !box.id) {
+            console.warn(`Invalid box at index ${boxIndex}:`, box);
+            return null;
+          }
+
+          return (
+            <BoxCard 
+              key={`boxcard-${box.id}-${boxIndex}`} // More unique key
+              parentId={selectedParent.id} 
+              box={box} 
+            />
+          );
+        })
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          <p>No boxes in this section yet.</p>
+          <p className="text-sm">Use the button above to add content boxes.</p>
+        </div>
+      )}
     </div>
   );
 }

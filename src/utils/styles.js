@@ -10,7 +10,7 @@ export const parentBoundary = {
   background: "#fff",
   width: "100%",
   height: "200px",
-  border: "2px solid red"
+  border: "2px solid #6F56F9"
 };
 
 export const selectorBoundary = {
