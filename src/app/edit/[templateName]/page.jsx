@@ -6,6 +6,7 @@ import DivComponent from "@/components/DivComponent";
 import useDivStore from "@/store/UseDivStore";
 import LeftEditorPanel from "@/components/EditorPanelSection/LeftEditorPanel";
 import RightEditorPanel from "@/components/EditorPanelSection/RightEditorPanel";
+import PropertiesTab from "@/components/PropertiesTab";
 
 const TemplatePage = ({ params }) => {
   const messages = [
@@ -87,11 +88,12 @@ const TemplatePage = ({ params }) => {
   return (
     <div className="flex ">
       <LeftEditorPanel />
-      
 
-      <DivComponent key={templateName} />
-      
-      <RightEditorPanel />
+      <div className="flex items-center justify-center w-full h-screen shadow-2xl">
+        <DivComponent key={templateName} />
+      </div>
+
+      <PropertiesTab />
     </div>
   );
 };

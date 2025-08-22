@@ -1,7 +1,7 @@
 export default function RightEditorPanel(){
     return(
         <div>
-            RightEditorPanel
+            Right Section panel
         </div>
     )
 }
