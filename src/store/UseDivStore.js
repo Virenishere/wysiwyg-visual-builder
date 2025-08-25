@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { getTemplateById } from '@/templates';
 import { generateUniqueIds, deepClone } from './storeUtils';
+import toast from 'react-hot-toast';
 
 let nextParentId = 1;
 let nextBoxId = 1;
@@ -30,84 +31,96 @@ const useDivStore = create(
       selectedBoxId: null,
       selectedElementId: null,
       isResizing: false,
+      previewingImage: null,
+
+      // Image actions
+      setPreviewingImage: (imageUrl) => set({ previewingImage: imageUrl }),
+      removeAllImageElements: () => {
+        set((state) => ({
+          parents: state.parents.map(parent => ({
+            ...parent,
+            rnds: parent.rnds.map(rnd => ({
+              ...rnd,
+              elements: rnd.elements.filter(element => element.type !== 'image'),
+            })),
+          })),
+        }));
+        toast.success('All image elements have been removed.', { icon: '🗑️' });
+      },
 
       // Template Actions
-      loadTemplate: (templateId) =>
-        set((state) => {
-          const template = getTemplateById(templateId);
-          if (!template) {
-            console.error('Template not found:', templateId);
-            return state;
-          }
+      loadTemplate: (templateId) => {
+        const template = getTemplateById(templateId);
+        if (!template) {
+          console.error('Template not found:', templateId);
+          toast.error('Template not found!');
+          return;
+        }
 
-          // Deep clone to avoid reference issues
-          const templateCopy = deepClone(template);
+        const templateCopy = deepClone(template);
+        const { parents: processedParents } = generateUniqueIds(templateCopy, {
+          parentId: nextParentId,
+          boxId: nextBoxId,
+          elementId: nextElementId
+        });
 
-          // Generate unique IDs for the template
-          const { parents: processedParents } = generateUniqueIds(templateCopy, {
-            parentId: nextParentId,
-            boxId: nextBoxId,
-            elementId: nextElementId
-          });
+        let maxParentId = 0;
+        let maxBoxId = 0;
+        let maxElementId = 0;
 
-          // Update the next ID counters
-          let maxParentId = 0;
-          let maxBoxId = 0;
-          let maxElementId = 0;
-
-          processedParents.forEach(parent => {
-            maxParentId = Math.max(maxParentId, parent.id);
-            parent.rnds.forEach(rnd => {
-              maxBoxId = Math.max(maxBoxId, rnd.id);
-              rnd.elements.forEach(element => {
-                maxElementId = Math.max(maxElementId, element.id);
-              });
+        processedParents.forEach(parent => {
+          maxParentId = Math.max(maxParentId, parent.id);
+          parent.rnds.forEach(rnd => {
+            maxBoxId = Math.max(maxBoxId, rnd.id);
+            rnd.elements.forEach(element => {
+              maxElementId = Math.max(maxElementId, element.id);
             });
           });
+        });
 
-          nextParentId = maxParentId + 1;
-          nextBoxId = maxBoxId + 1;
-          nextElementId = maxElementId + 1;
+        nextParentId = maxParentId + 1;
+        nextBoxId = maxBoxId + 1;
+        nextElementId = maxElementId + 1;
 
-          return {
-            parents: processedParents,
-            selectedParentId: null,
-            selectedBoxId: null,
-            selectedElementId: null,
-          };
-        }),
+        set({
+          parents: processedParents,
+          selectedParentId: null,
+          selectedBoxId: null,
+          selectedElementId: null,
+        });
+        toast.success(`Template '${templateId}' loaded successfully!`);
+      },
 
       // Reset to default
-      resetToDefault: () =>
-        set(() => {
-          // Reset ID counters
-          nextParentId = 1;
-          nextBoxId = 1;
-          nextElementId = 1;
+      resetToDefault: () => {
+        nextParentId = 1;
+        nextBoxId = 1;
+        nextElementId = 1;
 
-          return {
-            parents: [
-              {
-                id: nextParentId++,
-                size: { height: 300, background: "#ffffff" },
-                rnds: [{ 
-                  id: nextBoxId++, 
-                  width: 150, 
-                  height: 150, 
-                  x: 0, 
-                  y: 0,
-                  elements: []
-                }],
-              },
-            ],
-            selectedParentId: null,
-            selectedBoxId: null,
-            selectedElementId: null,
-          };
-        }),
+        set({
+          parents: [
+            {
+              id: nextParentId++,
+              size: { height: 300, background: "#ffffff" },
+              rnds: [{ 
+                id: nextBoxId++, 
+                width: 150, 
+                height: 150, 
+                x: 0, 
+                y: 0,
+                elements: []
+              }],
+            },
+          ],
+          selectedParentId: null,
+          selectedBoxId: null,
+          selectedElementId: null,
+        });
+        toast.success('Canvas has been reset to default!');
+      },
 
       // Parent actions
-      addParent: () =>
+      addParent: () => {
         set((state) => ({
           parents: [
             ...state.parents,
@@ -117,15 +130,19 @@ const useDivStore = create(
               rnds: [],
             },
           ],
-        })),
+        }));
+        toast.success('New section added!');
+      },
 
-      removeParent: (parentId) =>
+      removeParent: (parentId) => {
         set((state) => ({
           parents: state.parents.filter(p => p.id !== parentId),
           selectedParentId: state.selectedParentId === parentId ? null : state.selectedParentId,
           selectedBoxId: null,
           selectedElementId: null,
-        })),
+        }));
+        toast.success('Section removed.', { icon: '🗑️' });
+      },
 
       updateParentSize: (parentId, size) =>
         set((state) => ({
@@ -135,7 +152,7 @@ const useDivStore = create(
         })),
 
       // RND actions inside a parent
-      addRnd: (parentId) =>
+      addRnd: (parentId) => {
         set((state) => ({
           parents: state.parents.map((p) =>
             p.id === parentId
@@ -155,7 +172,9 @@ const useDivStore = create(
                 }
               : p
           ),
-        })),
+        }));
+        toast.success('New div box added!');
+      },
 
       updateRnd: (parentId, boxId, updates) =>
         set((state) => ({
@@ -171,7 +190,7 @@ const useDivStore = create(
           ),
         })),
 
-      removeRnd: (parentId, boxId) =>
+      removeRnd: (parentId, boxId) => {
         set((state) => ({
           parents: state.parents.map((p) =>
             p.id === parentId
@@ -180,10 +199,12 @@ const useDivStore = create(
           ),
           selectedBoxId: state.selectedBoxId === boxId ? null : state.selectedBoxId,
           selectedElementId: null,
-        })),
+        }));
+        toast.success('Div box removed.', { icon: '🗑️' });
+      },
 
       // Element actions inside RND boxes
-      addElement: (parentId, boxId, elementType) =>
+      addElement: (parentId, boxId, elementType) => {
         set((state) => ({
           parents: state.parents.map((p) =>
             p.id === parentId
@@ -222,7 +243,9 @@ const useDivStore = create(
                 }
               : p
           ),
-        })),
+        }));
+        toast.success(`'${elementType}' element added!`);
+      },
 
       updateElement: (parentId, boxId, elementId, updates) =>
         set((state) => ({
@@ -247,7 +270,7 @@ const useDivStore = create(
           ),
         })),
 
-      removeElement: (parentId, boxId, elementId) =>
+      removeElement: (parentId, boxId, elementId) => {
         set((state) => ({
           parents: state.parents.map((p) =>
             p.id === parentId
@@ -265,10 +288,12 @@ const useDivStore = create(
               : p
           ),
           selectedElementId: state.selectedElementId === elementId ? null : state.selectedElementId,
-        })),
+        }));
+        toast.success('Element removed.', { icon: '🗑️' });
+      },
 
       // Duplicate actions
-      duplicateParent: (parentId) =>
+      duplicateParent: (parentId) => {
         set((state) => {
           const parentToDuplicate = state.parents.find(p => p.id === parentId);
           if (!parentToDuplicate) return state;
@@ -289,9 +314,11 @@ const useDivStore = create(
           return {
             parents: [...state.parents, duplicatedParent]
           };
-        }),
+        });
+        toast.success('Section duplicated!');
+      },
 
-      duplicateRnd: (parentId, boxId) =>
+      duplicateRnd: (parentId, boxId) => {
         set((state) => ({
           parents: state.parents.map(p =>
             p.id === parentId
@@ -316,9 +343,11 @@ const useDivStore = create(
                 }
               : p
           )
-        })),
+        }));
+        toast.success('Div box duplicated!');
+      },
 
-      duplicateElement: (parentId, boxId, elementId) =>
+      duplicateElement: (parentId, boxId, elementId) => {
         set((state) => ({
           parents: state.parents.map(p =>
             p.id === parentId
@@ -346,7 +375,9 @@ const useDivStore = create(
                 }
               : p
           )
-        })),
+        }));
+        toast.success('Element duplicated!');
+      },
 
       // Selection actions
       setSelectedParent: (id) => set({ selectedParentId: id }),
@@ -357,20 +388,22 @@ const useDivStore = create(
       // Utility actions
       exportData: () => {
         const state = get();
-        return {
+        const data = {
           parents: state.parents,
           version: '1.0.0',
           exportDate: new Date().toISOString()
         };
+        toast.success('Data exported successfully!');
+        return data;
       },
 
       importData: (data) => {
         if (!data || !data.parents) {
           console.error('Invalid import data');
+          toast.error('Invalid import data!');
           return;
         }
 
-        // Deep clone and generate unique IDs
         const dataCopy = deepClone(data);
         const { parents: processedParents } = generateUniqueIds(dataCopy, {
           parentId: nextParentId,
@@ -378,7 +411,6 @@ const useDivStore = create(
           elementId: nextElementId
         });
 
-        // Update the next ID counters
         let maxParentId = 0;
         let maxBoxId = 0;
         let maxElementId = 0;
@@ -403,6 +435,7 @@ const useDivStore = create(
           selectedBoxId: null,
           selectedElementId: null,
         });
+        toast.success('Data imported successfully!');
       },
 
       // Get computed values
@@ -430,10 +463,21 @@ const useDivStore = create(
       // Exclude some values from persistence for performance
       partialize: (state) => ({
         parents: state.parents,
-        // Don't persist selection states as they should reset on reload
       }),
     }
   )
 );
 
 export default useDivStore;
+
+// Utility to find parent and box of a selected element
+export const findElementLocation = (parents, elementId) => {
+  for (const parent of parents) {
+    for (const box of parent.rnds) {
+      if (box.elements.some(el => el.id === elementId)) {
+        return { parentId: parent.id, boxId: box.id };
+      }
+    }
+  }
+  return null;
+};

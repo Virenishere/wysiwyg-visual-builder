@@ -1,7 +1,9 @@
+import ElementPropertiesPanel from "../ElementPropertiesPanel";
+
 export default function RightEditorPanel(){
     return(
         <div>
-            Right Section panel
+            <ElementPropertiesPanel />
         </div>
     )
 }

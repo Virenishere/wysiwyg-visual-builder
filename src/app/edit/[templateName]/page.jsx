@@ -5,8 +5,7 @@ import GlobalLoader from "@/components/GlobalLoader";
 import DivComponent from "@/components/DivComponent";
 import useDivStore from "@/store/UseDivStore";
 import LeftEditorPanel from "@/components/EditorPanelSection/LeftEditorPanel";
-import RightEditorPanel from "@/components/EditorPanelSection/RightEditorPanel";
-import PropertiesTab from "@/components/PropertiesTab";
+import { RxCross1 } from "react-icons/rx";
 
 const TemplatePage = ({ params }) => {
   const messages = [
@@ -16,17 +15,14 @@ const TemplatePage = ({ params }) => {
     "Applying template styles...",
   ];
 
-  // Unwrap params using React.use()
   const resolvedParams = use(params);
   const { templateName } = resolvedParams;
 
-  const { importData } = useDivStore();
+  const { importData, previewingImage, setPreviewingImage } = useDivStore();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
 
-  // Helper function to get template by ID - you'll need to implement this
   const getTemplateById = (templateId) => {
-    // Convert template name back to ID format
     const templateIdMap = {
       "landing-page": "landing",
       "about-page": "about",
@@ -52,7 +48,6 @@ const TemplatePage = ({ params }) => {
 
     if (templateName) {
       loadTemplate();
-      // Reset loading state when template changes
       setLoading(true);
       setStep(0);
     }
@@ -86,14 +81,36 @@ const TemplatePage = ({ params }) => {
   }
 
   return (
-    <div className="flex ">
+    <div className="flex h-screen bg-gray-100">
       <LeftEditorPanel />
 
-      <div className="flex items-center justify-center w-full h-screen shadow-2xl">
-        <DivComponent key={templateName} />
-      </div>
+      <main className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full h-full shadow-2xl overflow-hidden bg-white">
+          <DivComponent key={templateName} />
+        </div>
+      </main>
 
-      <PropertiesTab />
+      {previewingImage && (
+        <div
+  className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-[2000]"
+  onClick={() => setPreviewingImage(null)}
+>
+  <div className="relative" onClick={(e) => e.stopPropagation()}>
+    <img
+      src={previewingImage}
+      alt="preview"
+      className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-xl"
+    />
+    <button
+      onClick={() => setPreviewingImage(null)}
+      className="absolute -top-4 -right-4 bg-white text-black p-2 rounded-full shadow-lg hover:bg-gray-200 transition-colors"
+    >
+      <RxCross1 size={20} />
+    </button>
+  </div>
+</div>
+
+      )}
     </div>
   );
 };

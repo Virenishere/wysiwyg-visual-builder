@@ -33,7 +33,7 @@ export default function ElementPropertiesPanel() {
   }
 
   return (
-    <div className="p-4 mb-4 rounded-xl border border-purple-200 shadow-sm bg-gradient-to-br from-purple-50 to-white">
+    <div className="p-4 mb-4 rounded-xl border border-purple-200 shadow-sm bg-gradient-to-br from-purple-50 to-white overflow-y-auto max-h-[calc(100vh-120px)]">
       {/* Header */}
       <Header
         selectedElement={selectedElement}

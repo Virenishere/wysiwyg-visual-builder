@@ -42,7 +42,7 @@ export default function LeftEditorPanel() {
   const renderPanel = () => {
     switch (activePanel) {
       case "AddElementPanel":
-        return <AddElementPanel onClose={handleClosePanel} />;
+        return <AddElementPanel onClose={handleClosePanel}  />;
       case "AddMediaPanel":
         return <AddMediaPanel onClose={handleClosePanel} />;
       case "AddSectionPanel":

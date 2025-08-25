@@ -1,41 +1,83 @@
 import React from "react";
+import { RiEdit2Line, RiDeleteBin6Line } from "react-icons/ri";
 import useDivStore from "@/store/UseDivStore";
 
 export default function ElementList({ parentId, box }) {
-  const { selectedElementId, removeElement } = useDivStore();
+  const { selectedElementId, removeElement, setSelectedElement } = useDivStore();
+  const elements = box?.elements ?? [];
 
   return (
-    <div className="mt-4 pt-3 border-t border-gray-200">
-      <h4 className="text-xs font-semibold text-gray-500 mb-2">Elements in this box:</h4>
-      <div className="space-y-1">
-        {box.elements.map((el) => (
-          <div
-            key={el.id}
-            className={`text-xs p-2 rounded flex justify-between items-center cursor-pointer ${
-              selectedElementId === el.id
-                ? "bg-purple-100 border border-purple-300"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-            onClick={() => {
-              useDivStore.getState().setSelectedElement(el.id);
-              useDivStore.getState().setSelectedBox(box.id);
-            }}
-          >
-            <span className="font-medium">
-              {el.type.charAt(0).toUpperCase() + el.type.slice(1)} #{el.id}
-            </span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                removeElement(parentId, box.id, el.id);
-              }}
-              className="text-red-500 hover:text-red-700 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="mt-4 p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
+      {/* Header */}
+      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+        Elements in this box
+      </h4>
+
+      {/* Empty state */}
+      {elements.length === 0 ? (
+        <div className="text-xs text-gray-400 bg-gray-50 border border-dashed border-gray-300 rounded-lg p-3 text-center">
+          No elements yet — add one to get started.
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+          {elements.map((el) => {
+            const isSelected = selectedElementId === el.id;
+            return (
+              <div
+                key={el.id}
+                className={`flex justify-between items-center p-3 rounded-lg border shadow-sm cursor-pointer transition-colors
+                  ${
+                    isSelected
+                      ? "bg-purple-50 border-purple-300"
+                      : "bg-white border-gray-200 hover:bg-gray-50"
+                  }`}
+                onClick={() => {
+                  setSelectedElement(el.id);
+                  useDivStore.getState().setSelectedBox(box.id);
+                }}
+              >
+                {/* Element Name */}
+                <span className="text-sm font-medium text-gray-700">
+                  {el.type.charAt(0).toUpperCase() + el.type.slice(1)} #{el.id}
+                </span>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  {/* Edit Button */}
+                  <button
+                    type="button"
+                    aria-label="Edit element"
+                    title="Edit element"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedElement(el.id);
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                  >
+                    <RiEdit2Line size={16} />
+                    <span className="text-xs font-medium">Edit</span>
+                  </button>
+
+                  {/* Delete Button */}
+                  <button
+                    type="button"
+                    aria-label="Delete element"
+                    title="Delete element"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeElement(parentId, box.id, el.id);
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                  >
+                    <RiDeleteBin6Line size={16} />
+                    <span className="text-xs font-medium">Delete</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
