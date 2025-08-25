@@ -78,7 +78,7 @@ const TemplatePage = ({ params }) => {
       <LeftEditorPanel />
 
       <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full h-full shadow-2xl rounded-lg overflow-hidden bg-white">
+        <div className="w-full h-full shadow-2xl  overflow-hidden bg-white">
           <DivComponent key={templateName} />
         </div>
       </main>

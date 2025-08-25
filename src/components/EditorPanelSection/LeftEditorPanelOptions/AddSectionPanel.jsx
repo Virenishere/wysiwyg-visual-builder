@@ -31,10 +31,18 @@ export default function AddSectionPanel({ onClose }) {
       <div>
         <button
           onClick={() => addParent()}
-          className="flex items-center justify-center text-blue-800 hover:text-blue-500 cursor-pointer"
+          className="relative flex items-center justify-center gap-2 cursor-pointer group"
         >
-          <GoPlus />
-          Blank Section
+          {/* ✅ Icon with hover color */}
+          <GoPlus className="text-blue-800 group-hover:text-blue-500" />
+
+          {/* ✅ Label text */}
+          <span className="text-blue-800">Blank Section</span>
+
+          {/* ✅ Tooltip */}
+          <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
+            Adds a new blank section to create page
+          </span>
         </button>
 
         <div className="my-4 w-full">

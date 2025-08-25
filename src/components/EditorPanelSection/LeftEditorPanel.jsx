@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { IoSettings } from "react-icons/io5";
 import { FaCircleUser } from "react-icons/fa6";
 import { FaPlusCircle } from "react-icons/fa";
@@ -11,6 +10,7 @@ import AddMediaPanel from "./LeftEditorPanelOptions/AddMediaPanel";
 import AddSectionPanel from "./LeftEditorPanelOptions/AddSectionPanel";
 import AiToolPanel from "./LeftEditorPanelOptions/AiToolPanel";
 import PagesAndMenuPanel from "./LeftEditorPanelOptions/PagesAndMenuPanel";
+import useDivStore from "@/store/UseDivStore";
 
 const topIcons = [
   { id: "settings", icon: IoSettings, size: 30, className: "text-[#9a27d5]", showLabel: false, label: "Settings" },
@@ -29,18 +29,18 @@ const bottomIcons = [
 ];
 
 export default function LeftEditorPanel() {
-  const [activePanel, setActivePanel] = useState(null);
+  const { leftPanel, setLeftPanel } = useDivStore();
 
   const handleIconClick = (panel) => {
-    setActivePanel(panel);
+    setLeftPanel(panel);
   };
 
   const handleClosePanel = () => {
-    setActivePanel(null);
+    setLeftPanel(null);
   };
 
   const renderPanel = () => {
-    switch (activePanel) {
+    switch (leftPanel) {
       case "AddElementPanel":
         return <AddElementPanel onClose={handleClosePanel}  />;
       case "AddMediaPanel":
@@ -129,7 +129,7 @@ export default function LeftEditorPanel() {
       </div>
       <div
         className={`fixed top-0 left-16 h-full transition-transform duration-300 ease-in-out transform z-100 ${
-          activePanel ? "translate-x-0" : "-translate-x-64"
+          leftPanel ? "translate-x-0" : "-translate-x-64"
         }`}
       >
         {renderPanel()}

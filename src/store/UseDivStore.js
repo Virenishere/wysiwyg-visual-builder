@@ -32,6 +32,7 @@ const useDivStore = create(
       selectedElementId: null,
       isResizing: false,
       previewingImage: null,
+      leftPanel: null,
 
       // Image actions
       setPreviewingImage: (imageUrl) => set({ previewingImage: imageUrl }),
@@ -153,6 +154,7 @@ const useDivStore = create(
 
       // RND actions inside a parent
       addRnd: (parentId) => {
+        const newBoxId = nextBoxId++;
         set((state) => ({
           parents: state.parents.map((p) =>
             p.id === parentId
@@ -160,20 +162,22 @@ const useDivStore = create(
                   ...p,
                   rnds: [
                     ...p.rnds,
-                    { 
-                      id: nextBoxId++, 
-                      width: 150, 
-                      height: 150, 
-                      x: 50, 
+                    {
+                      id: newBoxId,
+                      width: 150,
+                      height: 150,
+                      x: 50,
                       y: 50,
-                      elements: []
+                      elements: [],
                     },
                   ],
                 }
               : p
           ),
+          selectedBoxId: newBoxId,
+          leftPanel: null,
         }));
-        toast.success('New div box added!');
+        toast.success("New div box added!");
       },
 
       updateRnd: (parentId, boxId, updates) =>
@@ -384,6 +388,7 @@ const useDivStore = create(
       setSelectedBox: (id) => set({ selectedBoxId: id }),
       setSelectedElement: (id) => set({ selectedElementId: id }),
       setIsResizing: (status) => set({ isResizing: status }),
+      setLeftPanel: (panel) => set({ leftPanel: panel }),
 
       // Utility actions
       exportData: () => {

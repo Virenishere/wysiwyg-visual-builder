@@ -1,6 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { FaCopy, FaTrash, FaGripVertical, FaPalette, FaCode, FaExpand } from "react-icons/fa"
+import { FaCopy, FaTrash, FaGripVertical, FaPalette, FaCode, FaExpand } from 
+"react-icons/fa"
+import { MdModeEditOutline } from "react-icons/md";
+
 
 export default function SectionsPanel({ 
   parents, 
@@ -93,18 +96,18 @@ export default function SectionsPanel({
                     toggleSettings(parent.id)
                   }}
                   className={`p-2 rounded-xl transition-all duration-200 ${
-                    isExpanded ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    isExpanded ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
                   }`}
                   title="Toggle Settings"
                 >
-                  <FaExpand size={12} />
+                  <MdModeEditOutline size={12} />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     duplicateParent(parent.id)
                   }}
-                  className="p-2 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200"
+                  className="p-2 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200 cursor-pointer"
                   title="Duplicate Section"
                 >
                   <FaCopy size={12} />
@@ -116,7 +119,7 @@ export default function SectionsPanel({
                       removeParent(parent.id)
                     }
                   }}
-                  className="p-2 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-200"
+                  className="p-2 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-200 cursor-pointer"
                   title="Delete Section"
                 >
                   <FaTrash size={12} />

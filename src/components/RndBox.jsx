@@ -3,6 +3,7 @@ import React from "react";
 import { Rnd } from "react-rnd";
 import useDivStore from "@/store/UseDivStore";
 import DraggableElement from "./DraggableElement";
+import { FaPlus } from "react-icons/fa";
 
 export default function RndBox({ box, parentId }) {
   const {
@@ -11,6 +12,7 @@ export default function RndBox({ box, parentId }) {
     setSelectedElement,
     selectedBoxId,
     selectedElementId,
+    setLeftPanel,
   } = useDivStore();
 
   const isSelected = selectedBoxId === box.id;
@@ -54,6 +56,17 @@ export default function RndBox({ box, parentId }) {
         <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium z-20">
           Box {box.id}
         </div>
+      )}
+
+      {/* Add element button */}
+      {isSelected && (
+        <button
+          onClick={() => setLeftPanel('AddElementPanel')}
+          className="absolute -top-6 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer"
+          aria-label="Add element"
+        >
+          <FaPlus />
+        </button>
       )}
 
       {/* Render elements inside this box */}
