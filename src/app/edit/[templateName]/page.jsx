@@ -18,27 +18,20 @@ const TemplatePage = ({ params }) => {
   const resolvedParams = use(params);
   const { templateName } = resolvedParams;
 
-  const { importData, previewingImage, setPreviewingImage } = useDivStore();
+  const { importData, previewingImage, setPreviewingImage, resetToDefault } =
+    useDivStore();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
 
-  const getTemplateById = (templateId) => {
-    const templateIdMap = {
-      "landing-page": "landing",
-      "about-page": "about",
-      "contact-page": "contact",
-      "services-page": "services",
-      testimonials: "testimonial",
-      products: "products",
-    };
-
-    const actualId = templateIdMap[templateId] || templateId;
-    return templates.getTemplateById(actualId);
-  };
-
   useEffect(() => {
+    if (templateName === "blank") {
+      resetToDefault();
+      setLoading(false);
+      return;
+    }
+
     const loadTemplate = () => {
-      const template = getTemplateById(templateName);
+      const template = templates.getTemplateById(templateName);
       if (template) {
         importData(template);
       } else {
@@ -51,7 +44,7 @@ const TemplatePage = ({ params }) => {
       setLoading(true);
       setStep(0);
     }
-  }, [templateName, importData]);
+  }, [templateName, importData, resetToDefault]);
 
   useEffect(() => {
     let timer;
@@ -85,31 +78,30 @@ const TemplatePage = ({ params }) => {
       <LeftEditorPanel />
 
       <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full h-full shadow-2xl overflow-hidden bg-white">
+        <div className="w-full h-full shadow-2xl rounded-lg overflow-hidden bg-white">
           <DivComponent key={templateName} />
         </div>
       </main>
 
       {previewingImage && (
         <div
-  className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-[2000]"
-  onClick={() => setPreviewingImage(null)}
->
-  <div className="relative" onClick={(e) => e.stopPropagation()}>
-    <img
-      src={previewingImage}
-      alt="preview"
-      className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-xl"
-    />
-    <button
-      onClick={() => setPreviewingImage(null)}
-      className="absolute -top-4 -right-4 bg-white text-black p-2 rounded-full shadow-lg hover:bg-gray-200 transition-colors"
-    >
-      <RxCross1 size={20} />
-    </button>
-  </div>
-</div>
-
+          className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-[2000]"
+          onClick={() => setPreviewingImage(null)}
+        >
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={previewingImage}
+              alt="preview"
+              className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-xl"
+            />
+            <button
+              onClick={() => setPreviewingImage(null)}
+              className="absolute -top-4 -right-4 bg-white text-black p-2 rounded-full shadow-lg hover:bg-gray-200 transition-colors"
+            >
+              <RxCross1 size={20} />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

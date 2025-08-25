@@ -50,9 +50,7 @@ export default function TemplateCard({
             <div className="flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               {/* Edit Button */}
               <Link
-                href={`/edit/${template.name
-                  .toLowerCase()
-                  .replace(/\s/g, "-")}`}
+                href={`/edit/${template.id}`}
               >
                 <button
                   className="flex items-center justify-center px-4 py-2 w-24 
@@ -65,9 +63,7 @@ export default function TemplateCard({
 
               {/* View Button */}
               <Link
-                href={`/preview/${template.name
-                  .toLowerCase()
-                  .replace(/\s/g, "-")}`}
+                href={`/preview/${template.id}`}
               >
                 <button
                   className="flex items-center justify-center px-4 py-2 w-24 
