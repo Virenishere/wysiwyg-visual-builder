@@ -1,27 +1,44 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { getAllTemplates } from "@/templates";
 import useDivStore from "@/store/UseDivStore";
 import TemplateGrid from "@/components/TemplateSelectorSection/TemplateGrid";
 import TemplateSidebar from "@/components/TemplateSelectorSection/TemplateSidebar";
+import { useRouter } from 'next/navigation';
 
 export default function TemplatePreview() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const { loadTemplate } = useDivStore();
-  const templates = getAllTemplates();
+  const { loadTemplate, createNewTemplate } = useDivStore();
+  const [templates, setTemplates] = useState([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const savedTemplates = JSON.parse(localStorage.getItem('savedTemplates') || '{}');
+    const customTemplates = Object.values(savedTemplates);
+    const defaultTemplates = getAllTemplates();
+    setTemplates([...defaultTemplates, ...customTemplates]);
+  }, []);
 
   const handleLoadTemplate = (templateId) => {
     loadTemplate(templateId);
-    setTimeout(() => {
-      const state = useDivStore.getState();
-      if (state.parents.length > 0) {
-        state.setSelectedParent(state.parents[0].id);
-      }
-    }, 100);
+    router.push(`/edit/${templateId}`);
+  };
+
+  const handleCreateNew = () => {
+    createNewTemplate();
+    router.push('/edit/new-template');
   };
 
   return (
     <div className="flex flex-col min-h-screen w-full justify-center items-center">
+       <div className="w-full flex justify-end px-16 pt-4">
+        <button 
+          onClick={handleCreateNew}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          Create New Template
+        </button>
+      </div>
       <div className="text-center space-y-4 my-8">
         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight flex items-center justify-center gap-3">
           Welcome, <span className="text-blue-600">Viren!</span>

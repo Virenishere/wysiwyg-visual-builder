@@ -55,24 +55,31 @@ const useDivStore = create(
 
       // Template Actions
       loadTemplate: (templateId) => {
-        const template = getTemplateById(templateId);
+        let template = getTemplateById(templateId);
+    
         if (!template) {
-          console.error("Template not found:", templateId);
-          toast.error("Template not found!");
-          return;
+          // Try loading from localStorage
+          const savedTemplates = JSON.parse(localStorage.getItem('savedTemplates') || '{}');
+          if (savedTemplates[templateId]) {
+            template = savedTemplates[templateId];
+          } else {
+            console.error("Template not found:", templateId);
+            toast.error("Template not found!");
+            return;
+          }
         }
-
+    
         const templateCopy = deepClone(template);
         const { parents: processedParents } = generateUniqueIds(templateCopy, {
           parentId: nextParentId,
           boxId: nextBoxId,
           elementId: nextElementId,
         });
-
+    
         let maxParentId = 0;
         let maxBoxId = 0;
         let maxElementId = 0;
-
+    
         processedParents.forEach((parent) => {
           maxParentId = Math.max(maxParentId, parent.id);
           parent.rnds.forEach((rnd) => {
@@ -82,11 +89,11 @@ const useDivStore = create(
             });
           });
         });
-
+    
         nextParentId = maxParentId + 1;
         nextBoxId = maxBoxId + 1;
         nextElementId = maxElementId + 1;
-
+    
         set({
           parents: processedParents,
           selectedParentId: null,
@@ -94,6 +101,29 @@ const useDivStore = create(
           selectedElementId: null,
         });
         toast.success(`Template '${templateId}' loaded successfully!`);
+      },
+    
+      createNewTemplate: () => {
+        nextParentId = 1;
+        nextBoxId = 1;
+        nextElementId = 1;
+        const newParentId = nextParentId++;
+        const newTemplate = {
+          parents: [
+            {
+              id: newParentId,
+              size: { height: 400, background: "#ffffff" },
+              rnds: [],
+            },
+          ],
+        };
+        set({
+          parents: newTemplate.parents,
+          selectedParentId: newParentId,
+          selectedBoxId: null,
+          selectedElementId: null,
+        });
+        toast.success("New empty template created!");
       },
 
       // Reset to default

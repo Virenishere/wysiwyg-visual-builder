@@ -22,7 +22,15 @@ const PreviewPage = ({ params }) => {
       const templateKey = Object.keys(templates.templateRegistry).find(
         (key) => key === templateName
       );
-      const templateData = templates.templateRegistry[templateKey];
+      let templateData = templates.templateRegistry[templateKey];
+
+      if (!templateData) {
+        const savedTemplates = JSON.parse(localStorage.getItem('savedTemplates') || '{}');
+        if (savedTemplates[templateName]) {
+          templateData = savedTemplates[templateName];
+        }
+      }
+
       if (templateData) {
         setTemplate(templateData);
       } else {

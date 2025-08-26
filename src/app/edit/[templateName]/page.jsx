@@ -18,33 +18,16 @@ const TemplatePage = ({ params }) => {
   const resolvedParams = use(params);
   const { templateName } = resolvedParams;
 
-  const { importData, previewingImage, setPreviewingImage, resetToDefault } =
+  const { loadTemplate, importData, previewingImage, setPreviewingImage, resetToDefault } =
     useDivStore();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    if (templateName === "blank") {
-      resetToDefault();
-      setLoading(false);
-      return;
+    if (templateName && templateName !== 'new-template') {
+      loadTemplate(templateName);
     }
-
-    const loadTemplate = () => {
-      const template = templates.getTemplateById(templateName);
-      if (template) {
-        importData(template);
-      } else {
-        console.error("Template not found:", templateName);
-      }
-    };
-
-    if (templateName) {
-      loadTemplate();
-      setLoading(true);
-      setStep(0);
-    }
-  }, [templateName, importData, resetToDefault]);
+  }, [templateName, loadTemplate]);
 
   useEffect(() => {
     let timer;
