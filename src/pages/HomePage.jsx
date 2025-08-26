@@ -1,13 +1,22 @@
 "use client";
-import React, { useState } from "react";
-import DivComponent from "@/components/DivComponent";
-import PropertiesTab from "@/components/PropertiesTab";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { FaTimes } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
 import TemplatePreview from "@/components/TemplateSelectorSection/TemplatePreview";
+import GlobalLoader from "@/components/GlobalLoader";
 
 export default function HomePage() {
-  const [isPropertiesTabVisible, setIsPropertiesTabVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500); // Adjust time as needed
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <GlobalLoader />;
+  }
 
   return (
     <div className="bg-[#F5F7F7] min-h-screen flex w-full gap-4 p-4 relative">
