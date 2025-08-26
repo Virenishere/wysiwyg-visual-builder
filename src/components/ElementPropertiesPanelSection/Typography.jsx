@@ -1,72 +1,118 @@
-import React from "react";
+"use client"
+import { FiType, FiDroplet, FiEdit3 } from "react-icons/fi"
 
 export default function Typography({ selectedElement, updateElement, parentId, boxId, elementId }) {
   return (
-    <div className="mb-4">
-      <h4 className="text-xs font-semibold text-gray-600 mb-2">Typography</h4>
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <div>
-          <label className="text-xs font-medium text-gray-600 mb-1 block">Font Size (px)</label>
-          <input
-            type="number"
-            value={selectedElement.fontSize}
-            onChange={(e) =>
-              updateElement(parentId, boxId, elementId, { fontSize: parseInt(e.target.value) || 12 })
-            }
-            className="border p-2 rounded-lg text-sm w-full focus:ring-2 focus:ring-purple-400 focus:outline-none"
-          />
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-1.5 bg-gradient-to-r from-pink-500 to-rose-600 rounded-lg">
+          <FiType className="w-3.5 h-3.5 text-white" />
         </div>
-        <div>
-          <label className="text-xs font-medium text-gray-600 mb-1 block">Font Family</label>
+        <h4 className="text-sm font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
+          Typography & Colors
+        </h4>
+      </div>
+
+      <div className="space-y-4">
+        {/* Font Size Slider */}
+        <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl border border-pink-100">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <FiType className="w-4 h-4" />
+              Font Size
+            </label>
+            <span className="px-2 py-1 bg-white rounded-lg text-xs font-bold text-gray-600 border">
+              {selectedElement.fontSize}px
+            </span>
+          </div>
+          <div className="space-y-2">
+            <input
+              type="range"
+              min="8"
+              max="72"
+              value={selectedElement.fontSize}
+              onChange={(e) =>
+                updateElement(parentId, boxId, elementId, { fontSize: Number.parseInt(e.target.value) || 12 })
+              }
+              className="w-full h-2 bg-gradient-to-r from-pink-200 to-rose-300 rounded-lg appearance-none cursor-pointer slider"
+            />
+            <input
+              type="number"
+              value={selectedElement.fontSize}
+              onChange={(e) =>
+                updateElement(parentId, boxId, elementId, { fontSize: Number.parseInt(e.target.value) || 12 })
+              }
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-100 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Font Family */}
+        <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+          <label className="text-sm font-medium text-gray-700 mb-3 block flex items-center gap-2">
+            <FiEdit3 className="w-4 h-4" />
+            Font Family
+          </label>
           <select
             value={selectedElement.fontFamily}
             onChange={(e) => updateElement(parentId, boxId, elementId, { fontFamily: e.target.value })}
-            className="border p-2 rounded-lg text-sm w-full focus:ring-2 focus:ring-purple-400 focus:outline-none"
+            className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none hover:border-gray-300 cursor-pointer"
           >
-            <option value="Arial, sans-serif">Arial</option>
-            <option value="Times, serif">Times New Roman</option>
-            <option value="Courier, monospace">Courier</option>
-            <option value="Georgia, serif">Georgia</option>
-            <option value="Verdana, sans-serif">Verdana</option>
-            <option value="Comic Sans MS, cursive">Comic Sans</option>
+            <option value="Arial, sans-serif">Arial (Sans-serif)</option>
+            <option value="Times, serif">Times New Roman (Serif)</option>
+            <option value="Courier, monospace">Courier (Monospace)</option>
+            <option value="Georgia, serif">Georgia (Serif)</option>
+            <option value="Verdana, sans-serif">Verdana (Sans-serif)</option>
+            <option value="Comic Sans MS, cursive">Comic Sans (Cursive)</option>
           </select>
         </div>
-      </div>
 
-      {/* Text & Background Color */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs font-medium text-gray-600 mb-1 block">Text Color</label>
-          <input
-            type="color"
-            value={selectedElement.color}
-            onChange={(e) => updateElement(parentId, boxId, elementId, { color: e.target.value })}
-            className="border p-1 rounded-lg w-full h-10 cursor-pointer"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-gray-600 mb-1 block">Background Color</label>
-          <div className="flex gap-2">
-            <input
-              type="color"
-              value={
-                selectedElement.backgroundColor !== "transparent"
-                  ? selectedElement.backgroundColor
-                  : "#ffffff"
-              }
-              onChange={(e) => updateElement(parentId, boxId, elementId, { backgroundColor: e.target.value })}
-              className="border p-1 rounded-lg flex-1 h-10 cursor-pointer"
-            />
-            <button
-              onClick={() => updateElement(parentId, boxId, elementId, { backgroundColor: "transparent" })}
-              className="border px-2 rounded-lg text-xs hover:bg-gray-100 transition"
-              title="Make transparent"
-            >
-              Clear
-            </button>
+        {/* Colors */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
+            <label className="text-sm font-medium text-gray-700 mb-3 block flex items-center gap-2">
+              <FiDroplet className="w-4 h-4" />
+              Text Color
+            </label>
+            <div className="relative group">
+              <input
+                type="color"
+                value={selectedElement.color}
+                onChange={(e) => updateElement(parentId, boxId, elementId, { color: e.target.value })}
+                className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-cyan-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-100">
+            <label className="text-sm font-medium text-gray-700 mb-3 block flex items-center gap-2">
+              <FiDroplet className="w-4 h-4" />
+              Background
+            </label>
+            <div className="flex gap-2">
+              <div className="relative group flex-1">
+                <input
+                  type="color"
+                  value={
+                    selectedElement.backgroundColor !== "transparent" ? selectedElement.backgroundColor : "#ffffff"
+                  }
+                  onChange={(e) => updateElement(parentId, boxId, elementId, { backgroundColor: e.target.value })}
+                  className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-violet-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              </div>
+              <button
+                onClick={() => updateElement(parentId, boxId, elementId, { backgroundColor: "transparent" })}
+                className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 active:scale-95"
+                title="Make transparent"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

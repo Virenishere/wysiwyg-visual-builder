@@ -9,8 +9,9 @@ import AddElementPanel from "./LeftEditorPanelOptions/AddElementPanel";
 import AddMediaPanel from "./LeftEditorPanelOptions/AddMediaPanel";
 import AddSectionPanel from "./LeftEditorPanelOptions/AddSectionPanel";
 import AiToolPanel from "./LeftEditorPanelOptions/AiToolPanel";
-import PagesAndMenuPanel from "./LeftEditorPanelOptions/PagesAndMenuPanel";
 import useDivStore from "@/store/UseDivStore";
+import SiteActionsPanel from "./LeftEditorPanelOptions/SiteActionsPanel";
+import Link from "next/link";
 
 const topIcons = [
   { id: "settings", icon: IoSettings, size: 30, className: "text-[#9a27d5]", showLabel: false, label: "Settings" },
@@ -20,7 +21,7 @@ const middleIcons = [
   { id: "addelements", icon: FaPlusCircle, size: 25, className: "text-green-500 hover:text-green-600", showLabel: true, label: "Add Elements", panel: "AddElementPanel" },
   { id: "addsection", icon: BsStack, size: 25, className: "text-blue-500 hover:text-blue-600", showLabel: true, label: "Add Section", panel: "AddSectionPanel" },
   { id: "media", icon: FcGallery, size: 25, className: "", showLabel: true, label: "Media", panel: "AddMediaPanel" },
-  { id: "pages&menu", icon: IoIosPaper, size: 25, className: "text-orange-500 hover:text-orange-600", showLabel: true, label: "Pages & Menu", panel: "PagesAndMenuPanel" },
+  { id: "siteactions", icon: IoIosPaper, size: 25, className: "text-orange-500 hover:text-orange-600", showLabel: true, label: "Site Actions", panel: "SiteActionsPanel" },
 ];
 
 const bottomIcons = [
@@ -49,8 +50,8 @@ export default function LeftEditorPanel() {
         return <AddSectionPanel onClose={handleClosePanel} />;
       case "AiToolPanel":
         return <AiToolPanel onClose={handleClosePanel} />;
-      case "PagesAndMenuPanel":
-        return <PagesAndMenuPanel onClose={handleClosePanel} />;
+      case "SiteActionsPanel":
+        return <SiteActionsPanel onClose={handleClosePanel} />;
       default:
         return null;
     }
@@ -62,8 +63,9 @@ export default function LeftEditorPanel() {
         {/* Top */}
         <div className="mt-4">
           {topIcons.map(({ id, icon: Icon, size, className, label, showLabel }) => (
-            <div
+            <Link
               key={id}
+              href='/'
               className="group relative flex justify-center items-center w-12 h-12 cursor-pointer hover:scale-110 transition-transform"
             >
               <Icon size={size} className={className} />
@@ -77,7 +79,7 @@ export default function LeftEditorPanel() {
                   {label}
                 </span>
               )}
-            </div>
+            </Link>
           ))}
         </div>
 

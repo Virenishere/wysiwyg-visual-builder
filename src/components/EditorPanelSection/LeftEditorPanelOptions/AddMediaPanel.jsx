@@ -54,7 +54,7 @@ export default function AddMediaPanel({ onClose }) {
                 <div className="absolute inset-0 bg-transparent flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setPreviewingImage(imageElement.imageUrl)}
-                    className="text-white bg-blue-500 p-2 rounded-full hover:bg-blue-600 transition-colors"
+                    className="text-white bg-blue-500 p-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer"
                   >
                     <FaEye />
                   </button>
@@ -64,7 +64,7 @@ export default function AddMediaPanel({ onClose }) {
                         removeElement(imageElement.parentId, imageElement.boxId, imageElement.id)
                       }
                     }}
-                    className="text-white bg-red-500 p-2 rounded-full hover:bg-red-600 transition-colors"
+                    className="text-white bg-red-500 p-2 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
                   >
                     <FaTrashAlt />
                   </button>
