@@ -1,22 +1,38 @@
-"use client"
-import { FiBox, FiArrowUp, FiArrowRight, FiArrowDown, FiArrowLeft, FiPackage, FiTarget } from "react-icons/fi"
+"use client";
+import {
+  FiBox,
+  FiArrowUp,
+  FiArrowRight,
+  FiArrowDown,
+  FiArrowLeft,
+  FiPackage,
+  FiTarget,
+} from "react-icons/fi";
 
-export default function Spacing({ selectedElement, updateElement, parentId, boxId, elementId }) {
+export default function Spacing({
+  selectedElement,
+  updateElement,
+  parentId,
+  boxId,
+  elementId,
+}) {
   const sides = [
     { key: "top", label: "T", icon: <FiArrowUp className="w-3 h-3" /> },
     { key: "right", label: "R", icon: <FiArrowRight className="w-3 h-3" /> },
     { key: "bottom", label: "B", icon: <FiArrowDown className="w-3 h-3" /> },
     { key: "left", label: "L", icon: <FiArrowLeft className="w-3 h-3" /> },
-  ]
+  ];
 
   const handleChange = (type, side, value) => {
     updateElement(parentId, boxId, elementId, {
       [type]: { ...selectedElement[type], [side]: Number.parseInt(value) || 0 },
-    })
-  }
+    });
+  };
 
   const SpacingSection = ({ type, title, icon, gradientFrom, gradientTo }) => (
-    <div className={`p-4 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-xl border border-gray-200`}>
+    <div
+      className={`p-4 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-xl border border-gray-200`}
+    >
       <div className="flex items-center gap-2 mb-3">
         {icon}
         <label className="text-sm font-medium text-gray-700">{title}</label>
@@ -49,7 +65,7 @@ export default function Spacing({ selectedElement, updateElement, parentId, boxI
         ))}
       </div>
     </div>
-  )
+  );
 
   return (
     <div className="mb-6">
@@ -79,5 +95,5 @@ export default function Spacing({ selectedElement, updateElement, parentId, boxI
         />
       </div>
     </div>
-  )
+  );
 }

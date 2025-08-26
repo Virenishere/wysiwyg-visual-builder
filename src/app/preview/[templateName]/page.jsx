@@ -2,36 +2,72 @@
 import { useEffect, useState } from "react";
 import * as templates from "@/templates";
 import GlobalLoader from "@/components/GlobalLoader";
-
 import PreviewComponent from "@/components/PreviewComponent";
 
 const PreviewPage = ({ params }) => {
+  const messages = [
+    "Loading template...",
+    "Preparing the editor...",
+    "Fetching components...",
+    "Applying template styles...",
+  ];
+
   const { templateName } = params;
   const [template, setTemplate] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const loadTemplate = () => {
+    const loadTemplateData = () => {
       const templateKey = Object.keys(templates.templateRegistry).find(
-        (key) =>
-          templates.templateRegistry[key].name.toLowerCase().replace(/\s/g, "-") ===
-          templateName
+        (key) => key === templateName
       );
-
       const templateData = templates.templateRegistry[templateKey];
-
       if (templateData) {
         setTemplate(templateData);
+      } else {
+        // If template not found, stop loading to show an error or fallback
+        setLoading(false);
       }
     };
-    loadTemplate();
+    loadTemplateData();
   }, [templateName]);
+
+  useEffect(() => {
+    let timer;
+    // Only start the animation if a template has been found
+    if (template) {
+      if (step < messages.length) {
+        timer = setTimeout(() => {
+          setStep((prev) => prev + 1);
+        }, 1000);
+      } else {
+        // Animation finished, stop loading
+        timer = setTimeout(() => {
+          setLoading(false);
+        }, 500);
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [step, template]);
+
+  if (loading && template) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <GlobalLoader />
+        <p className="text-lg font-medium text-gray-700 animate-pulse">
+          {messages[step] || messages[messages.length - 1]}
+        </p>
+      </div>
+    );
+  }
 
   if (!template) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <GlobalLoader />
         <p className="text-lg font-medium text-gray-700 animate-pulse">
-          Loading template...
+          Template not found or still loading...
         </p>
       </div>
     );

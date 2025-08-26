@@ -1,6 +1,11 @@
 import React from "react";
 
-export default function ButtonElement({ element, parentId, boxId, updateElement }) {
+export default function ButtonElement({
+  element,
+  parentId,
+  boxId,
+  updateElement,
+}) {
   const {
     content,
     fontSize,

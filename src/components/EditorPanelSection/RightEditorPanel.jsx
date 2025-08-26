@@ -1,9 +1,9 @@
 import ElementPropertiesPanel from "../ElementPropertiesPanel";
 
-export default function RightEditorPanel(){
-    return(
-        <div>
-            <ElementPropertiesPanel />
-        </div>
-    )
+export default function RightEditorPanel() {
+  return (
+    <div>
+      <ElementPropertiesPanel />
+    </div>
+  );
 }

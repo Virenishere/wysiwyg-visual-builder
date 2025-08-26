@@ -4,15 +4,16 @@ import { FaTrashAlt, FaEye } from "react-icons/fa";
 import useDivStore from "@/store/UseDivStore";
 
 export default function AddMediaPanel({ onClose }) {
-  const { parents, removeAllImageElements, removeElement, setPreviewingImage } = useDivStore();
+  const { parents, removeAllImageElements, removeElement, setPreviewingImage } =
+    useDivStore();
 
   const allImageElements = useMemo(() => {
     const images = [];
-    parents.forEach(parent => {
-      parent.rnds.forEach(rnd => {
-        rnd.elements.forEach(element => {
-          if (element.type === 'image' && element.imageUrl) {
-            images.push({ 
+    parents.forEach((parent) => {
+      parent.rnds.forEach((rnd) => {
+        rnd.elements.forEach((element) => {
+          if (element.type === "image" && element.imageUrl) {
+            images.push({
               ...element,
               parentId: parent.id,
               boxId: rnd.id,
@@ -36,7 +37,11 @@ export default function AddMediaPanel({ onClose }) {
       <div className="flex flex-col gap-4">
         <button
           onClick={() => {
-            if (window.confirm('Are you sure you want to delete all image elements? This action cannot be undone.')) {
+            if (
+              window.confirm(
+                "Are you sure you want to delete all image elements? This action cannot be undone."
+              )
+            ) {
               removeAllImageElements();
             }
           }}
@@ -50,7 +55,12 @@ export default function AddMediaPanel({ onClose }) {
           {allImageElements.length > 0 ? (
             allImageElements.map((imageElement) => (
               <div key={imageElement.id} className="relative group">
-                <img src={imageElement.imageUrl} alt={`media-${imageElement.id}`} className="w-full h-24 object-cover rounded-md cursor-pointer" onClick={() => setPreviewingImage(imageElement.imageUrl)} />
+                <img
+                  src={imageElement.imageUrl}
+                  alt={`media-${imageElement.id}`}
+                  className="w-full h-24 object-cover rounded-md cursor-pointer"
+                  onClick={() => setPreviewingImage(imageElement.imageUrl)}
+                />
                 <div className="absolute inset-0 bg-transparent flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setPreviewingImage(imageElement.imageUrl)}
@@ -60,8 +70,16 @@ export default function AddMediaPanel({ onClose }) {
                   </button>
                   <button
                     onClick={() => {
-                      if(window.confirm('Are you sure you want to remove this image element?')) {
-                        removeElement(imageElement.parentId, imageElement.boxId, imageElement.id)
+                      if (
+                        window.confirm(
+                          "Are you sure you want to remove this image element?"
+                        )
+                      ) {
+                        removeElement(
+                          imageElement.parentId,
+                          imageElement.boxId,
+                          imageElement.id
+                        );
                       }
                     }}
                     className="text-white bg-red-500 p-2 rounded-full hover:bg-red-600 transition-colors cursor-pointer"

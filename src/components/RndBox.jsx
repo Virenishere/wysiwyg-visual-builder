@@ -46,7 +46,9 @@ export default function RndBox({ box, parentId }) {
       style={{
         border: isSelected ? "3px solid #3b82f6" : "2px dashed #d1d5db",
         borderRadius: "4px",
-        backgroundColor: isSelected ? "rgba(59, 130, 246, 0.05)" : "rgba(0, 0, 0, 0.02)",
+        backgroundColor: isSelected
+          ? "rgba(59, 130, 246, 0.05)"
+          : "rgba(0, 0, 0, 0.02)",
         zIndex: isSelected ? 5 : 1,
       }}
       className="rnd-box"
@@ -61,17 +63,17 @@ export default function RndBox({ box, parentId }) {
       {/* Add element button */}
       {isSelected && (
         <button
-  onClick={() => setLeftPanel('AddElementPanel')}
-  className="absolute -top-6 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
-  aria-label="Add element"
->
-  <FaPlus />
+          onClick={() => setLeftPanel("AddElementPanel")}
+          className="absolute -top-6 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          aria-label="Add element"
+        >
+          <FaPlus />
 
-  {/* Tooltip */}
-  <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-    Add element
-  </span>
-</button>
+          {/* Tooltip */}
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+            Add element
+          </span>
+        </button>
       )}
 
       {/* Render elements inside this box */}

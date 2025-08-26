@@ -27,7 +27,7 @@ export default function PreviewComponent() {
       {parents.map((parent, index) => (
         <ParentPreview
           key={parent.id}
-          parent={parent}
+        parent={parent}
           index={index}
           total={parents.length}
         />

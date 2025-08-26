@@ -35,10 +35,10 @@ export default function DivBoxMaker() {
           }
 
           return (
-            <BoxCard 
+            <BoxCard
               key={`boxcard-${box.id}-${boxIndex}`} // More unique key
-              parentId={selectedParent.id} 
-              box={box} 
+              parentId={selectedParent.id}
+              box={box}
             />
           );
         })

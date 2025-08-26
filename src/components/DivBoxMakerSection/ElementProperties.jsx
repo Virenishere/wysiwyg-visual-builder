@@ -3,7 +3,14 @@ import { FaTrashAlt } from "react-icons/fa";
 import useDivStore from "@/store/UseDivStore";
 
 export default function ElementProperties({ parentId }) {
-  const { parents, selectedParentId, selectedBoxId, selectedElementId, updateElement, removeElement } = useDivStore();
+  const {
+    parents,
+    selectedParentId,
+    selectedBoxId,
+    selectedElementId,
+    updateElement,
+    removeElement,
+  } = useDivStore();
 
   const selectedParent = parents.find((p) => p.id === selectedParentId);
   const selectedBox = selectedParent?.rnds.find((b) => b.id === selectedBoxId);
@@ -19,7 +26,9 @@ export default function ElementProperties({ parentId }) {
           {el.type.charAt(0).toUpperCase() + el.type.slice(1)} Element
         </h3>
         <button
-          onClick={() => removeElement(parentId, selectedBoxId, selectedElementId)}
+          onClick={() =>
+            removeElement(parentId, selectedBoxId, selectedElementId)
+          }
           className="bg-red-500 text-white px-2 py-2 rounded-lg text-xs font-medium hover:bg-red-600 transition"
         >
           <FaTrashAlt />
@@ -31,14 +40,22 @@ export default function ElementProperties({ parentId }) {
         <input
           type="number"
           value={el.width}
-          onChange={(e) => updateElement(parentId, selectedBoxId, selectedElementId, { width: +e.target.value || 0 })}
+          onChange={(e) =>
+            updateElement(parentId, selectedBoxId, selectedElementId, {
+              width: +e.target.value || 0,
+            })
+          }
           className="border p-2 rounded-lg text-sm w-full"
           placeholder="Width"
         />
         <input
           type="number"
           value={el.height}
-          onChange={(e) => updateElement(parentId, selectedBoxId, selectedElementId, { height: +e.target.value || 0 })}
+          onChange={(e) =>
+            updateElement(parentId, selectedBoxId, selectedElementId, {
+              height: +e.target.value || 0,
+            })
+          }
           className="border p-2 rounded-lg text-sm w-full"
           placeholder="Height"
         />

@@ -27,7 +27,7 @@ export default function DivComponent() {
   }
 
   return (
-    <div className="w-full h-screen overflow-y-auto p-5">
+    <div className="w-full h-screen overflow-y-auto ">
       {parents.map((parent, parentIndex) => {
         // Ensure parent has required properties
         if (!parent || !parent.id) {

@@ -3,16 +3,18 @@ import React from "react";
 import { FaFileExport, FaFileImport, FaTrash } from "react-icons/fa";
 import TemplateSelector from "../TemplateSelector";
 
-export default function TemplatesPanel({ 
-  setIsTemplateModalOpen, 
-  handleExport, 
-  handleImport, 
-  resetToDefault 
+export default function TemplatesPanel({
+  setIsTemplateModalOpen,
+  handleExport,
+  handleImport,
+  resetToDefault,
 }) {
   return (
     <div className="p-4 mb-4 rounded-xl border border-blue-200 shadow-sm bg-gradient-to-br from-blue-50 to-white">
-      <h3 className="text-sm font-semibold mb-3 text-blue-600">Templates & Data</h3>
-      
+      <h3 className="text-sm font-semibold mb-3 text-blue-600">
+        Templates & Data
+      </h3>
+
       <div className="grid grid-cols-1 gap-2">
         <button
           onClick={() => setIsTemplateModalOpen(true)}
@@ -20,7 +22,7 @@ export default function TemplatesPanel({
         >
           <TemplateSelector className="text-sm" /> Choose Template
         </button>
-        
+
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleExport}
@@ -28,7 +30,7 @@ export default function TemplatesPanel({
           >
             <FaFileExport className="text-xs" /> Export
           </button>
-          
+
           <label className="bg-orange-500 text-white px-2 py-2 rounded-lg flex justify-center items-center gap-1 font-semibold transition-all duration-300 hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98] text-xs cursor-pointer">
             <FaFileImport className="text-xs" /> Import
             <input
@@ -39,10 +41,14 @@ export default function TemplatesPanel({
             />
           </label>
         </div>
-        
+
         <button
           onClick={() => {
-            if (confirm('Are you sure you want to reset? This will delete all current content.')) {
+            if (
+              confirm(
+                "Are you sure you want to reset? This will delete all current content."
+              )
+            ) {
               resetToDefault();
             }
           }}
@@ -51,7 +57,7 @@ export default function TemplatesPanel({
           <FaTrash className="text-sm" /> Reset All
         </button>
       </div>
-      
+
       <p className="text-xs text-blue-600 mt-2 italic">
         Choose from professional templates or manage your data
       </p>

@@ -38,7 +38,9 @@ export default function SiteActionsPanel({ onClose }) {
         <Link href="/host-site">
           <button className="flex items-center gap-3 w-full px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer">
             <FaGlobe className="text-purple-600" size={20} />
-            <span className="text-gray-800 font-medium">Host This Page on Site</span>
+            <span className="text-gray-800 font-medium">
+              Host This Page on Site
+            </span>
           </button>
         </Link>
       </div>

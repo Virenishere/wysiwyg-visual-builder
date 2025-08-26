@@ -34,7 +34,8 @@ export default function AiToolPanel({ onClose }) {
       <style jsx>{`
         /* Smooth floating animation */
         @keyframes float {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0);
           }
           50% {
@@ -47,7 +48,8 @@ export default function AiToolPanel({ onClose }) {
 
         /* Gentle blink for text */
         @keyframes blink {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 1;
           }
           50% {

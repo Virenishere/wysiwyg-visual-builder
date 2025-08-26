@@ -3,7 +3,8 @@ import { RiEdit2Line, RiDeleteBin6Line } from "react-icons/ri";
 import useDivStore from "@/store/UseDivStore";
 
 export default function ElementList({ parentId, box }) {
-  const { selectedElementId, removeElement, setSelectedElement } = useDivStore();
+  const { selectedElementId, removeElement, setSelectedElement } =
+    useDivStore();
   const elements = box?.elements ?? [];
 
   return (

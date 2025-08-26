@@ -32,12 +32,14 @@ export default function PropertiesTab() {
   const handleExport = () => {
     const data = exportData();
     const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `website-export-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `website-export-${new Date()
+      .toISOString()
+      .slice(0, 10)}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -53,10 +55,10 @@ export default function PropertiesTab() {
       try {
         const data = JSON.parse(e.target.result);
         importData(data);
-        alert('Import successful!');
+        alert("Import successful!");
       } catch (error) {
-        alert('Error importing file. Please check the file format.');
-        console.error('Import error:', error);
+        alert("Error importing file. Please check the file format.");
+        console.error("Import error:", error);
       }
     };
     reader.readAsText(file);
@@ -71,13 +73,13 @@ export default function PropertiesTab() {
       </h2>
 
       <ActionButtons />
-      <TemplatesPanel 
-        setIsTemplateModalOpen={setIsTemplateModalOpen} 
-        handleExport={handleExport} 
-        handleImport={handleImport} 
-        resetToDefault={resetToDefault} 
+      <TemplatesPanel
+        setIsTemplateModalOpen={setIsTemplateModalOpen}
+        handleExport={handleExport}
+        handleImport={handleImport}
+        resetToDefault={resetToDefault}
       />
-      <SectionsPanel 
+      <SectionsPanel
         parents={parents}
         selectedParentId={selectedParentId}
         setSelectedParent={setSelectedParent}
@@ -92,9 +94,9 @@ export default function PropertiesTab() {
       <DivBoxMaker />
       <QuickGuide />
 
-      <TemplateSelector 
-        isOpen={isTemplateModalOpen} 
-        onClose={() => setIsTemplateModalOpen(false)} 
+      <TemplateSelector
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
       />
     </div>
   );

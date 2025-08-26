@@ -12,7 +12,7 @@ export default function ParentPreview({ parent, index, total }) {
         background: parent.size.background || "#fff",
         position: "relative",
         overflow: "hidden",
-        borderBottom: index < total - 1 ? "1px solid #e0e0e0" : "none",
+        // borderBottom: index < total - 1 ? "1px solid #e0e0e0" : "none",
       }}
     >
       {parent.rnds.map((box) => (

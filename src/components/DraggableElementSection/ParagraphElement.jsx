@@ -1,7 +1,12 @@
 import React from "react";
 import RichTextEditor from "../RichTextEditor";
 
-export default function ParagraphElement({ element, parentId, boxId, updateElement }) {
+export default function ParagraphElement({
+  element,
+  parentId,
+  boxId,
+  updateElement,
+}) {
   return (
     <div style={{ padding: "5px", width: "100%", height: "100%" }}>
       <RichTextEditor

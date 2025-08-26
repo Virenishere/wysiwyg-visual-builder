@@ -1,7 +1,11 @@
 import React from "react";
 import { FaDownload } from "react-icons/fa";
 
-export default function TemplateSidebar({ selectedTemplate, handleLoadTemplate, onClose }) {
+export default function TemplateSidebar({
+  selectedTemplate,
+  handleLoadTemplate,
+  onClose,
+}) {
   return (
     <div className="w-80 border-l border-gray-200 p-6 overflow-y-auto bg-gray-50">
       <div className="mb-4">
@@ -22,7 +26,9 @@ export default function TemplateSidebar({ selectedTemplate, handleLoadTemplate, 
 
       {/* Structure */}
       <div className="mb-6">
-        <h4 className="font-semibold text-gray-800 mb-3">Template Structure:</h4>
+        <h4 className="font-semibold text-gray-800 mb-3">
+          Template Structure:
+        </h4>
         <div className="space-y-2">
           {selectedTemplate.parents?.map((parent, index) => (
             <div

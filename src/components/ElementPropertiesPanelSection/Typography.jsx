@@ -1,7 +1,13 @@
-"use client"
-import { FiType, FiDroplet, FiEdit3 } from "react-icons/fi"
+"use client";
+import { FiType, FiDroplet, FiEdit3 } from "react-icons/fi";
 
-export default function Typography({ selectedElement, updateElement, parentId, boxId, elementId }) {
+export default function Typography({
+  selectedElement,
+  updateElement,
+  parentId,
+  boxId,
+  elementId,
+}) {
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -32,7 +38,9 @@ export default function Typography({ selectedElement, updateElement, parentId, b
               max="72"
               value={selectedElement.fontSize}
               onChange={(e) =>
-                updateElement(parentId, boxId, elementId, { fontSize: Number.parseInt(e.target.value) || 12 })
+                updateElement(parentId, boxId, elementId, {
+                  fontSize: Number.parseInt(e.target.value) || 12,
+                })
               }
               className="w-full h-2 bg-gradient-to-r from-pink-200 to-rose-300 rounded-lg appearance-none cursor-pointer slider"
             />
@@ -40,7 +48,9 @@ export default function Typography({ selectedElement, updateElement, parentId, b
               type="number"
               value={selectedElement.fontSize}
               onChange={(e) =>
-                updateElement(parentId, boxId, elementId, { fontSize: Number.parseInt(e.target.value) || 12 })
+                updateElement(parentId, boxId, elementId, {
+                  fontSize: Number.parseInt(e.target.value) || 12,
+                })
               }
               className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-100 focus:outline-none"
             />
@@ -55,7 +65,11 @@ export default function Typography({ selectedElement, updateElement, parentId, b
           </label>
           <select
             value={selectedElement.fontFamily}
-            onChange={(e) => updateElement(parentId, boxId, elementId, { fontFamily: e.target.value })}
+            onChange={(e) =>
+              updateElement(parentId, boxId, elementId, {
+                fontFamily: e.target.value,
+              })
+            }
             className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none hover:border-gray-300 cursor-pointer"
           >
             <option value="Arial, sans-serif">Arial (Sans-serif)</option>
@@ -78,7 +92,11 @@ export default function Typography({ selectedElement, updateElement, parentId, b
               <input
                 type="color"
                 value={selectedElement.color}
-                onChange={(e) => updateElement(parentId, boxId, elementId, { color: e.target.value })}
+                onChange={(e) =>
+                  updateElement(parentId, boxId, elementId, {
+                    color: e.target.value,
+                  })
+                }
                 className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-cyan-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -95,15 +113,25 @@ export default function Typography({ selectedElement, updateElement, parentId, b
                 <input
                   type="color"
                   value={
-                    selectedElement.backgroundColor !== "transparent" ? selectedElement.backgroundColor : "#ffffff"
+                    selectedElement.backgroundColor !== "transparent"
+                      ? selectedElement.backgroundColor
+                      : "#ffffff"
                   }
-                  onChange={(e) => updateElement(parentId, boxId, elementId, { backgroundColor: e.target.value })}
+                  onChange={(e) =>
+                    updateElement(parentId, boxId, elementId, {
+                      backgroundColor: e.target.value,
+                    })
+                  }
                   className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-violet-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <button
-                onClick={() => updateElement(parentId, boxId, elementId, { backgroundColor: "transparent" })}
+                onClick={() =>
+                  updateElement(parentId, boxId, elementId, {
+                    backgroundColor: "transparent",
+                  })
+                }
                 className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 active:scale-95"
                 title="Make transparent"
               >
@@ -114,5 +142,5 @@ export default function Typography({ selectedElement, updateElement, parentId, b
         </div>
       </div>
     </div>
-  )
+  );
 }

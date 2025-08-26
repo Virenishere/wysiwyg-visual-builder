@@ -1,9 +1,9 @@
 // store/UseDivStore.js
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { getTemplateById } from '@/templates';
-import { generateUniqueIds, deepClone } from './storeUtils';
-import toast from 'react-hot-toast';
+import { getTemplateById } from "@/templates";
+import { generateUniqueIds, deepClone } from "./storeUtils";
+import toast from "react-hot-toast";
 
 let nextParentId = 1;
 let nextBoxId = 1;
@@ -17,14 +17,16 @@ const useDivStore = create(
         {
           id: nextParentId++,
           size: { height: 300, background: "#ffffff" },
-          rnds: [{ 
-            id: nextBoxId++, 
-            width: 150, 
-            height: 150, 
-            x: 0, 
-            y: 0,
-            elements: []
-          }],
+          rnds: [
+            {
+              id: nextBoxId++,
+              width: 150,
+              height: 150,
+              x: 0,
+              y: 0,
+              elements: [],
+            },
+          ],
         },
       ],
       selectedParentId: null,
@@ -38,23 +40,25 @@ const useDivStore = create(
       setPreviewingImage: (imageUrl) => set({ previewingImage: imageUrl }),
       removeAllImageElements: () => {
         set((state) => ({
-          parents: state.parents.map(parent => ({
+          parents: state.parents.map((parent) => ({
             ...parent,
-            rnds: parent.rnds.map(rnd => ({
+            rnds: parent.rnds.map((rnd) => ({
               ...rnd,
-              elements: rnd.elements.filter(element => element.type !== 'image'),
+              elements: rnd.elements.filter(
+                (element) => element.type !== "image"
+              ),
             })),
           })),
         }));
-        toast.success('All image elements have been removed.', { icon: '🗑️' });
+        toast.success("All image elements have been removed.", { icon: "🗑️" });
       },
 
       // Template Actions
       loadTemplate: (templateId) => {
         const template = getTemplateById(templateId);
         if (!template) {
-          console.error('Template not found:', templateId);
-          toast.error('Template not found!');
+          console.error("Template not found:", templateId);
+          toast.error("Template not found!");
           return;
         }
 
@@ -62,18 +66,18 @@ const useDivStore = create(
         const { parents: processedParents } = generateUniqueIds(templateCopy, {
           parentId: nextParentId,
           boxId: nextBoxId,
-          elementId: nextElementId
+          elementId: nextElementId,
         });
 
         let maxParentId = 0;
         let maxBoxId = 0;
         let maxElementId = 0;
 
-        processedParents.forEach(parent => {
+        processedParents.forEach((parent) => {
           maxParentId = Math.max(maxParentId, parent.id);
-          parent.rnds.forEach(rnd => {
+          parent.rnds.forEach((rnd) => {
             maxBoxId = Math.max(maxBoxId, rnd.id);
-            rnd.elements.forEach(element => {
+            rnd.elements.forEach((element) => {
               maxElementId = Math.max(maxElementId, element.id);
             });
           });
@@ -103,21 +107,23 @@ const useDivStore = create(
             {
               id: nextParentId++,
               size: { height: 300, background: "#ffffff" },
-              rnds: [{ 
-                id: nextBoxId++, 
-                width: 150, 
-                height: 150, 
-                x: 0, 
-                y: 0,
-                elements: []
-              }],
+              rnds: [
+                {
+                  id: nextBoxId++,
+                  width: 150,
+                  height: 150,
+                  x: 0,
+                  y: 0,
+                  elements: [],
+                },
+              ],
             },
           ],
           selectedParentId: null,
           selectedBoxId: null,
           selectedElementId: null,
         });
-        toast.success('Canvas has been reset to default!');
+        toast.success("Canvas has been reset to default!");
       },
 
       // Parent actions
@@ -132,17 +138,18 @@ const useDivStore = create(
             },
           ],
         }));
-        toast.success('New section added!');
+        toast.success("New section added!");
       },
 
       removeParent: (parentId) => {
         set((state) => ({
-          parents: state.parents.filter(p => p.id !== parentId),
-          selectedParentId: state.selectedParentId === parentId ? null : state.selectedParentId,
+          parents: state.parents.filter((p) => p.id !== parentId),
+          selectedParentId:
+            state.selectedParentId === parentId ? null : state.selectedParentId,
           selectedBoxId: null,
           selectedElementId: null,
         }));
-        toast.success('Section removed.', { icon: '🗑️' });
+        toast.success("Section removed.", { icon: "🗑️" });
       },
 
       updateParentSize: (parentId, size) =>
@@ -201,10 +208,11 @@ const useDivStore = create(
               ? { ...p, rnds: p.rnds.filter((box) => box.id !== boxId) }
               : p
           ),
-          selectedBoxId: state.selectedBoxId === boxId ? null : state.selectedBoxId,
+          selectedBoxId:
+            state.selectedBoxId === boxId ? null : state.selectedBoxId,
           selectedElementId: null,
         }));
-        toast.success('Div box removed.', { icon: '🗑️' });
+        toast.success("Div box removed.", { icon: "🗑️" });
       },
 
       // Element actions inside RND boxes
@@ -225,19 +233,47 @@ const useDivStore = create(
                               type: elementType,
                               x: 10,
                               y: 10,
-                              width: elementType === 'text' ? 100 : elementType === 'image' ? 80 : 120,
-                              height: elementType === 'text' ? 30 : elementType === 'image' ? 80 : elementType === 'paragraph' ? 60 : 35,
-                              content: elementType === 'text' ? 'Sample Text' : 
-                                      elementType === 'paragraph' ? '<p>Sample paragraph content</p>' :
-                                      elementType === 'button' ? 'Click Me' : '',
-                              fontSize: elementType === 'text' ? 16 : 14,
-                              fontFamily: 'Arial, sans-serif',
-                              color: elementType === 'button' ? '#ffffff' : '#000000',
-                              backgroundColor: elementType === 'button' ? '#007bff' : 'transparent',
+                              width:
+                                elementType === "text"
+                                  ? 100
+                                  : elementType === "image"
+                                  ? 80
+                                  : 120,
+                              height:
+                                elementType === "text"
+                                  ? 30
+                                  : elementType === "image"
+                                  ? 80
+                                  : elementType === "paragraph"
+                                  ? 60
+                                  : 35,
+                              content:
+                                elementType === "text"
+                                  ? "Sample Text"
+                                  : elementType === "paragraph"
+                                  ? "<p>Sample paragraph content</p>"
+                                  : elementType === "button"
+                                  ? "Click Me"
+                                  : "",
+                              fontSize: elementType === "text" ? 16 : 14,
+                              fontFamily: "Arial, sans-serif",
+                              color:
+                                elementType === "button"
+                                  ? "#ffffff"
+                                  : "#000000",
+                              backgroundColor:
+                                elementType === "button"
+                                  ? "#007bff"
+                                  : "transparent",
                               margin: { top: 0, right: 0, bottom: 0, left: 0 },
-                              padding: { top: 5, right: 10, bottom: 5, left: 10 },
-                              borderRadius: elementType === 'button' ? 5 : 0,
-                              border: 'none',
+                              padding: {
+                                top: 5,
+                                right: 10,
+                                bottom: 5,
+                                left: 10,
+                              },
+                              borderRadius: elementType === "button" ? 5 : 0,
+                              border: "none",
                               imageUrl: null,
                             },
                           ],
@@ -284,47 +320,54 @@ const useDivStore = create(
                     box.id === boxId
                       ? {
                           ...box,
-                          elements: box.elements.filter((element) => element.id !== elementId),
+                          elements: box.elements.filter(
+                            (element) => element.id !== elementId
+                          ),
                         }
                       : box
                   ),
                 }
               : p
           ),
-          selectedElementId: state.selectedElementId === elementId ? null : state.selectedElementId,
+          selectedElementId:
+            state.selectedElementId === elementId
+              ? null
+              : state.selectedElementId,
         }));
-        toast.success('Element removed.', { icon: '🗑️' });
+        toast.success("Element removed.", { icon: "🗑️" });
       },
 
       // Duplicate actions
       duplicateParent: (parentId) => {
         set((state) => {
-          const parentToDuplicate = state.parents.find(p => p.id === parentId);
+          const parentToDuplicate = state.parents.find(
+            (p) => p.id === parentId
+          );
           if (!parentToDuplicate) return state;
 
           const duplicatedParent = {
             ...parentToDuplicate,
             id: nextParentId++,
-            rnds: parentToDuplicate.rnds.map(rnd => ({
+            rnds: parentToDuplicate.rnds.map((rnd) => ({
               ...rnd,
               id: nextBoxId++,
-              elements: rnd.elements.map(element => ({
+              elements: rnd.elements.map((element) => ({
                 ...element,
-                id: nextElementId++
-              }))
-            }))
+                id: nextElementId++,
+              })),
+            })),
           };
 
           return {
-            parents: [...state.parents, duplicatedParent]
+            parents: [...state.parents, duplicatedParent],
           };
         });
-        toast.success('Section duplicated!');
+        toast.success("Section duplicated!");
       },
 
       duplicateRnd: (parentId, boxId) => {
         set((state) => ({
-          parents: state.parents.map(p =>
+          parents: state.parents.map((p) =>
             p.id === parentId
               ? {
                   ...p,
@@ -336,28 +379,28 @@ const useDivStore = create(
                         id: nextBoxId++,
                         x: box.x + 20,
                         y: box.y + 20,
-                        elements: box.elements.map(element => ({
+                        elements: box.elements.map((element) => ({
                           ...element,
-                          id: nextElementId++
-                        }))
+                          id: nextElementId++,
+                        })),
                       });
                     }
                     return acc;
-                  }, [])
+                  }, []),
                 }
               : p
-          )
+          ),
         }));
-        toast.success('Div box duplicated!');
+        toast.success("Div box duplicated!");
       },
 
       duplicateElement: (parentId, boxId, elementId) => {
         set((state) => ({
-          parents: state.parents.map(p =>
+          parents: state.parents.map((p) =>
             p.id === parentId
               ? {
                   ...p,
-                  rnds: p.rnds.map(box =>
+                  rnds: p.rnds.map((box) =>
                     box.id === boxId
                       ? {
                           ...box,
@@ -368,19 +411,19 @@ const useDivStore = create(
                                 ...element,
                                 id: nextElementId++,
                                 x: element.x + 10,
-                                y: element.y + 10
+                                y: element.y + 10,
                               });
                             }
                             return acc;
-                          }, [])
+                          }, []),
                         }
                       : box
-                  )
+                  ),
                 }
               : p
-          )
+          ),
         }));
-        toast.success('Element duplicated!');
+        toast.success("Element duplicated!");
       },
 
       // Selection actions
@@ -395,17 +438,17 @@ const useDivStore = create(
         const state = get();
         const data = {
           parents: state.parents,
-          version: '1.0.0',
-          exportDate: new Date().toISOString()
+          version: "1.0.0",
+          exportDate: new Date().toISOString(),
         };
-        toast.success('Data exported successfully!');
+        toast.success("Data exported successfully!");
         return data;
       },
 
       importData: (data) => {
         if (!data || !data.parents) {
-          console.error('Invalid import data');
-          toast.error('Invalid import data!');
+          console.error("Invalid import data");
+          toast.error("Invalid import data!");
           return;
         }
 
@@ -413,18 +456,18 @@ const useDivStore = create(
         const { parents: processedParents } = generateUniqueIds(dataCopy, {
           parentId: nextParentId,
           boxId: nextBoxId,
-          elementId: nextElementId
+          elementId: nextElementId,
         });
 
         let maxParentId = 0;
         let maxBoxId = 0;
         let maxElementId = 0;
 
-        processedParents.forEach(parent => {
+        processedParents.forEach((parent) => {
           maxParentId = Math.max(maxParentId, parent.id);
-          parent.rnds.forEach(rnd => {
+          parent.rnds.forEach((rnd) => {
             maxBoxId = Math.max(maxBoxId, rnd.id);
-            rnd.elements.forEach(element => {
+            rnd.elements.forEach((element) => {
               maxElementId = Math.max(maxElementId, element.id);
             });
           });
@@ -440,30 +483,42 @@ const useDivStore = create(
           selectedBoxId: null,
           selectedElementId: null,
         });
-        toast.success('Data imported successfully!');
+        toast.success("Data imported successfully!");
       },
 
       // Get computed values
       getSelectedParent: () => {
         const state = get();
-        return state.parents.find(p => p.id === state.selectedParentId) || null;
+        return (
+          state.parents.find((p) => p.id === state.selectedParentId) || null
+        );
       },
 
       getSelectedBox: () => {
         const state = get();
-        const parent = state.parents.find(p => p.id === state.selectedParentId);
-        return parent?.rnds.find(box => box.id === state.selectedBoxId) || null;
+        const parent = state.parents.find(
+          (p) => p.id === state.selectedParentId
+        );
+        return (
+          parent?.rnds.find((box) => box.id === state.selectedBoxId) || null
+        );
       },
 
       getSelectedElement: () => {
         const state = get();
-        const parent = state.parents.find(p => p.id === state.selectedParentId);
-        const box = parent?.rnds.find(box => box.id === state.selectedBoxId);
-        return box?.elements?.find(element => element.id === state.selectedElementId) || null;
+        const parent = state.parents.find(
+          (p) => p.id === state.selectedParentId
+        );
+        const box = parent?.rnds.find((box) => box.id === state.selectedBoxId);
+        return (
+          box?.elements?.find(
+            (element) => element.id === state.selectedElementId
+          ) || null
+        );
       },
     }),
     {
-      name: 'div-store',
+      name: "div-store",
       storage: createJSONStorage(() => localStorage),
       // Exclude some values from persistence for performance
       partialize: (state) => ({
@@ -479,10 +534,11 @@ export default useDivStore;
 export const findElementLocation = (parents, elementId) => {
   for (const parent of parents) {
     for (const box of parent.rnds) {
-      if (box.elements.some(el => el.id === elementId)) {
+      if (box.elements.some((el) => el.id === elementId)) {
         return { parentId: parent.id, boxId: box.id };
       }
     }
   }
   return null;
 };
+

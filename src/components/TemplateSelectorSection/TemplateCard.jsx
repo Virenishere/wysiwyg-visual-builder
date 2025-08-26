@@ -49,9 +49,7 @@ export default function TemplateCard({
           <div className="absolute inset-0 bg-white/90 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               {/* Edit Button */}
-              <Link
-                href={`/edit/${template.id}`}
-              >
+              <Link href={`/edit/${template.id}`}>
                 <button
                   className="flex items-center justify-center px-4 py-2 w-24 
                   bg-blue-600 text-white rounded-full font-medium cursor-pointer 
@@ -62,9 +60,7 @@ export default function TemplateCard({
               </Link>
 
               {/* View Button */}
-              <Link
-                href={`/preview/${template.id}`}
-              >
+              <Link href={`/preview/${template.id}`}>
                 <button
                   className="flex items-center justify-center px-4 py-2 w-24 
                   bg-white border border-blue-600 text-black rounded-full font-medium cursor-pointer 

@@ -2,10 +2,10 @@
 
 // Element Types
 export const ELEMENT_TYPES = {
-  TEXT: 'text',
-  PARAGRAPH: 'paragraph',
-  BUTTON: 'button',
-  IMAGE: 'image',
+  TEXT: "text",
+  PARAGRAPH: "paragraph",
+  BUTTON: "button",
+  IMAGE: "image",
 };
 
 // Default Dimensions
@@ -18,50 +18,50 @@ export const DEFAULT_DIMENSIONS = {
     paragraph: { width: 200, height: 60 },
     button: { width: 120, height: 35 },
     image: { width: 80, height: 80 },
-  }
+  },
 };
 
 // Color Schemes
 export const COLOR_SCHEMES = {
   PRIMARY: {
-    blue: '#007bff',
-    purple: '#6c5ce7',
-    green: '#00b894',
-    red: '#e74c3c',
-    orange: '#e67e22',
+    blue: "#007bff",
+    purple: "#6c5ce7",
+    green: "#00b894",
+    red: "#e74c3c",
+    orange: "#e67e22",
   },
   GRADIENTS: {
-    sunset: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    ocean: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
-    forest: 'linear-gradient(135deg, #00b894 0%, #00a085 100%)',
-    sunset2: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
-    cosmic: 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)',
-    warm: 'linear-gradient(135deg, #fd79a8 0%, #e84393 100%)',
-    cool: 'linear-gradient(135deg, #00cec9 0%, #55a3ff 100%)',
-  }
+    sunset: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    ocean: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
+    forest: "linear-gradient(135deg, #00b894 0%, #00a085 100%)",
+    sunset2: "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)",
+    cosmic: "linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)",
+    warm: "linear-gradient(135deg, #fd79a8 0%, #e84393 100%)",
+    cool: "linear-gradient(135deg, #00cec9 0%, #55a3ff 100%)",
+  },
 };
 
 // Font Families
 export const FONT_FAMILIES = [
-  'Arial, sans-serif',
-  'Times New Roman, serif',
-  'Courier New, monospace',
-  'Georgia, serif',
-  'Verdana, sans-serif',
-  'Comic Sans MS, cursive',
-  'Impact, sans-serif',
-  'Trebuchet MS, sans-serif',
-  'Palatino, serif',
-  'Garamond, serif',
+  "Arial, sans-serif",
+  "Times New Roman, serif",
+  "Courier New, monospace",
+  "Georgia, serif",
+  "Verdana, sans-serif",
+  "Comic Sans MS, cursive",
+  "Impact, sans-serif",
+  "Trebuchet MS, sans-serif",
+  "Palatino, serif",
+  "Garamond, serif",
 ];
 
 // Template Categories
 export const TEMPLATE_CATEGORIES = {
-  BUSINESS: 'business',
-  ECOMMERCE: 'ecommerce',
-  PORTFOLIO: 'portfolio',
-  BLOG: 'blog',
-  LANDING: 'landing',
+  BUSINESS: "business",
+  ECOMMERCE: "ecommerce",
+  PORTFOLIO: "portfolio",
+  BLOG: "blog",
+  LANDING: "landing",
 };
 
 // Animation Durations
@@ -75,25 +75,25 @@ export const ANIMATIONS = {
 export const GRID = {
   SNAP_SIZE: 10,
   SHOW_GRID: false,
-  GRID_COLOR: '#e0e0e0',
+  GRID_COLOR: "#e0e0e0",
 };
 
 // Keyboard Shortcuts
 export const SHORTCUTS = {
-  SAVE: 'Ctrl+S',
-  COPY: 'Ctrl+C',
-  PASTE: 'Ctrl+V',
-  DELETE: 'Delete',
-  UNDO: 'Ctrl+Z',
-  REDO: 'Ctrl+Y',
+  SAVE: "Ctrl+S",
+  COPY: "Ctrl+C",
+  PASTE: "Ctrl+V",
+  DELETE: "Delete",
+  UNDO: "Ctrl+Z",
+  REDO: "Ctrl+Y",
 };
 
 // File Types
 export const FILE_TYPES = {
-  JSON: 'application/json',
-  PNG: 'image/png',
-  JPG: 'image/jpeg',
-  SVG: 'image/svg+xml',
+  JSON: "application/json",
+  PNG: "image/png",
+  JPG: "image/jpeg",
+  SVG: "image/svg+xml",
 };
 
 // Validation Rules
@@ -112,26 +112,26 @@ export const VALIDATION = {
 
 // Storage Keys
 export const STORAGE_KEYS = {
-  DIV_STORE: 'div-store',
-  USER_PREFERENCES: 'user-preferences',
-  RECENT_TEMPLATES: 'recent-templates',
+  DIV_STORE: "div-store",
+  USER_PREFERENCES: "user-preferences",
+  RECENT_TEMPLATES: "recent-templates",
 };
 
 // UI States
 export const UI_STATES = {
-  IDLE: 'idle',
-  LOADING: 'loading',
-  EDITING: 'editing',
-  SAVING: 'saving',
-  ERROR: 'error',
+  IDLE: "idle",
+  LOADING: "loading",
+  EDITING: "editing",
+  SAVING: "saving",
+  ERROR: "error",
 };
 
 // Export Formats
 export const EXPORT_FORMATS = {
-  JSON: 'json',
-  HTML: 'html',
-  CSS: 'css',
-  IMAGE: 'image',
+  JSON: "json",
+  HTML: "html",
+  CSS: "css",
+  IMAGE: "image",
 };
 
 export default {
