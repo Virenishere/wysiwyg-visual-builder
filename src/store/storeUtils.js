@@ -30,10 +30,10 @@ export const generateUniqueIds = (templateData, startIds = {}) => {
  * Deep clone object to avoid reference issues
  */
 export const deepClone = (obj) => {
-  if (obj === null || typeof obj !== "object") return obj;
+  if (obj === null || typeof obj !== 'object') return obj;
   if (obj instanceof Date) return new Date(obj);
   if (obj instanceof Array) return obj.map((item) => deepClone(item));
-  if (typeof obj === "object") {
+  if (typeof obj === 'object') {
     const clonedObj = {};
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
@@ -48,18 +48,18 @@ export const deepClone = (obj) => {
  * Validate template structure
  */
 export const validateTemplate = (template) => {
-  if (!template || typeof template !== "object") {
-    return { valid: false, error: "Template is not a valid object" };
+  if (!template || typeof template !== 'object') {
+    return { valid: false, error: 'Template is not a valid object' };
   }
 
   if (!template.parents || !Array.isArray(template.parents)) {
-    return { valid: false, error: "Template must have a parents array" };
+    return { valid: false, error: 'Template must have a parents array' };
   }
 
   for (let i = 0; i < template.parents.length; i++) {
     const parent = template.parents[i];
 
-    if (!parent.size || typeof parent.size.height !== "number") {
+    if (!parent.size || typeof parent.size.height !== 'number') {
       return { valid: false, error: `Parent ${i} must have valid size.height` };
     }
 
@@ -71,10 +71,10 @@ export const validateTemplate = (template) => {
       const rnd = parent.rnds[j];
 
       if (
-        typeof rnd.width !== "number" ||
-        typeof rnd.height !== "number" ||
-        typeof rnd.x !== "number" ||
-        typeof rnd.y !== "number"
+        typeof rnd.width !== 'number' ||
+        typeof rnd.height !== 'number' ||
+        typeof rnd.x !== 'number' ||
+        typeof rnd.y !== 'number'
       ) {
         return {
           valid: false,
@@ -86,7 +86,7 @@ export const validateTemplate = (template) => {
         for (let k = 0; k < rnd.elements.length; k++) {
           const element = rnd.elements[k];
 
-          if (!element.type || typeof element.type !== "string") {
+          if (!element.type || typeof element.type !== 'string') {
             return {
               valid: false,
               error: `Element ${k} in RND ${j} of parent ${i} has invalid type`,
@@ -94,10 +94,10 @@ export const validateTemplate = (template) => {
           }
 
           if (
-            typeof element.x !== "number" ||
-            typeof element.y !== "number" ||
-            typeof element.width !== "number" ||
-            typeof element.height !== "number"
+            typeof element.x !== 'number' ||
+            typeof element.y !== 'number' ||
+            typeof element.width !== 'number' ||
+            typeof element.height !== 'number'
           ) {
             return {
               valid: false,
@@ -118,36 +118,36 @@ export const validateTemplate = (template) => {
 export const getDefaultElementProps = (type) => {
   const baseProps = {
     fontSize: 16,
-    fontFamily: "Arial, sans-serif",
-    color: "#000000",
-    backgroundColor: "transparent",
+    fontFamily: 'Arial, sans-serif',
+    color: '#000000',
+    backgroundColor: 'transparent',
     margin: { top: 0, right: 0, bottom: 0, left: 0 },
     padding: { top: 5, right: 10, bottom: 5, left: 10 },
     borderRadius: 0,
-    border: "none",
+    border: 'none',
   };
 
   const typeSpecificProps = {
     text: {
-      content: "Sample Text",
+      content: 'Sample Text',
       width: 100,
       height: 30,
     },
     paragraph: {
-      content: "<p>Sample paragraph content</p>",
+      content: '<p>Sample paragraph content</p>',
       width: 200,
       height: 60,
     },
     button: {
-      content: "Click Me",
+      content: 'Click Me',
       width: 120,
       height: 35,
-      backgroundColor: "#007bff",
-      color: "#ffffff",
+      backgroundColor: '#007bff',
+      color: '#ffffff',
       borderRadius: 5,
     },
     image: {
-      content: "",
+      content: '',
       width: 80,
       height: 80,
       imageUrl: null,
@@ -222,12 +222,12 @@ export const searchElements = (parents, searchTerm) => {
 /**
  * Export data as JSON
  */
-export const exportAsJSON = (data, filename = "website-export") => {
+export const exportAsJSON = (data, filename = 'website-export') => {
   const jsonString = JSON.stringify(data, null, 2);
-  const blob = new Blob([jsonString], { type: "application/json" });
+  const blob = new Blob([jsonString], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
 
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.href = url;
   link.download = `${filename}.json`;
   document.body.appendChild(link);
@@ -255,11 +255,11 @@ export const importFromJSON = (file) => {
 
         resolve(data);
       } catch (error) {
-        reject(new Error("Invalid JSON file"));
+        reject(new Error('Invalid JSON file'));
       }
     };
 
-    reader.onerror = () => reject(new Error("Error reading file"));
+    reader.onerror = () => reject(new Error('Error reading file'));
     reader.readAsText(file);
   });
 };
@@ -269,24 +269,24 @@ export const importFromJSON = (file) => {
  */
 export const generateElementCSS = (element) => {
   const styles = {
-    position: "absolute",
+    position: 'absolute',
     left: `${element.x}px`,
     top: `${element.y}px`,
     width: `${element.width}px`,
     height: `${element.height}px`,
     fontSize: `${element.fontSize || 16}px`,
-    fontFamily: element.fontFamily || "Arial, sans-serif",
-    color: element.color || "#000000",
-    backgroundColor: element.backgroundColor || "transparent",
+    fontFamily: element.fontFamily || 'Arial, sans-serif',
+    color: element.color || '#000000',
+    backgroundColor: element.backgroundColor || 'transparent',
     borderRadius: `${element.borderRadius || 0}px`,
-    border: element.border || "none",
+    border: element.border || 'none',
     margin: `${element.margin?.top || 0}px ${element.margin?.right || 0}px ${
       element.margin?.bottom || 0
     }px ${element.margin?.left || 0}px`,
     padding: `${element.padding?.top || 5}px ${
       element.padding?.right || 10
     }px ${element.padding?.bottom || 5}px ${element.padding?.left || 10}px`,
-    boxSizing: "border-box",
+    boxSizing: 'border-box',
   };
 
   return styles;
@@ -295,8 +295,8 @@ export const generateElementCSS = (element) => {
 /**
  * Generate unique filename
  */
-export const generateFilename = (prefix = "export", extension = "json") => {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+export const generateFilename = (prefix = 'export', extension = 'json') => {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   return `${prefix}-${timestamp}.${extension}`;
 };
 

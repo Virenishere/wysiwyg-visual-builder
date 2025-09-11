@@ -1,7 +1,7 @@
-"use client";
-import React from "react";
-import useDivStore from "@/store/UseDivStore";
-import ParentPreview from "./PreviewComponentSection/ParentPreview";
+'use client';
+import React from 'react';
+import useDivStore from '@/store/UseDivStore';
+import ParentPreview from './PreviewComponentSection/ParentPreview';
 
 export default function PreviewComponent({ parents: parentsProp }) {
   const { parents: parentsFromStore } = useDivStore();

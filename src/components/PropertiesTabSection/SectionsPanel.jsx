@@ -1,5 +1,5 @@
-"use client";
-import React, { useEffect, useState } from "react";
+'use client';
+import React, { useEffect, useState } from 'react';
 import {
   FaCopy,
   FaTrash,
@@ -7,8 +7,8 @@ import {
   FaPalette,
   FaCode,
   FaExpand,
-} from "react-icons/fa";
-import { MdModeEditOutline } from "react-icons/md";
+} from 'react-icons/fa';
+import { MdModeEditOutline } from 'react-icons/md';
 
 export default function SectionsPanel({
   parents,
@@ -28,8 +28,8 @@ export default function SectionsPanel({
     };
 
     updateWindowHeight();
-    window.addEventListener("resize", updateWindowHeight);
-    return () => window.removeEventListener("resize", updateWindowHeight);
+    window.addEventListener('resize', updateWindowHeight);
+    return () => window.removeEventListener('resize', updateWindowHeight);
   }, []);
 
   const toggleSettings = (parentId) => {
@@ -40,7 +40,7 @@ export default function SectionsPanel({
   };
 
   const getBackgroundPreview = (background) => {
-    if (background.startsWith("linear") || background.startsWith("radial")) {
+    if (background.startsWith('linear') || background.startsWith('radial')) {
       return { background };
     }
     return { backgroundColor: background };
@@ -69,8 +69,8 @@ export default function SectionsPanel({
                   key={parent.id}
                   className={`relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
                     isSelected
-                      ? "border-blue-500 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-50 to-indigo-50"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
+                      ? 'border-blue-500 shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-50 to-indigo-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
                   }`}
                 >
                   {/* Main Card Header */}
@@ -91,7 +91,7 @@ export default function SectionsPanel({
                           Section {index + 1}
                         </h3>
                         <p className="text-xs text-gray-500">
-                          {parent.size.height}px • {parent.rnds?.length || 0}{" "}
+                          {parent.size.height}px • {parent.rnds?.length || 0}{' '}
                           boxes
                         </p>
                       </div>
@@ -105,8 +105,8 @@ export default function SectionsPanel({
                         }}
                         className={`p-2 rounded-xl transition-all duration-200 ${
                           isExpanded
-                            ? "bg-blue-500 text-white shadow-md"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
+                            ? 'bg-blue-500 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
                         }`}
                         title="Toggle Settings"
                       >
@@ -125,7 +125,7 @@ export default function SectionsPanel({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm("Delete this section?")) {
+                          if (confirm('Delete this section?')) {
                             removeParent(parent.id);
                           }
                         }}
@@ -194,9 +194,9 @@ export default function SectionsPanel({
                             <input
                               type="color"
                               value={
-                                parent.size.background.startsWith("linear") ||
-                                parent.size.background.startsWith("radial")
-                                  ? "#3b82f6"
+                                parent.size.background.startsWith('linear') ||
+                                parent.size.background.startsWith('radial')
+                                  ? '#3b82f6'
                                   : parent.size.background
                               }
                               onChange={(e) =>
@@ -218,12 +218,12 @@ export default function SectionsPanel({
                           </label>
                           <div className="grid grid-cols-3 gap-2">
                             {[
-                              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                              "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                              "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-                              "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-                              "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-                              "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+                              'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                              'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                              'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                              'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                              'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
                             ].map((gradient, idx) => (
                               <button
                                 key={idx}

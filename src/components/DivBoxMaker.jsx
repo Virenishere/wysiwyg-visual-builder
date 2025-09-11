@@ -1,9 +1,9 @@
-"use client";
-import React from "react";
-import useDivStore from "@/store/UseDivStore";
-import AddDivButton from "./DivBoxMakerSection/AddDivButton";
-import BoxCard from "./DivBoxMakerSection/BoxCard";
-import ElementProperties from "./DivBoxMakerSection/ElementProperties";
+'use client';
+import React from 'react';
+import useDivStore from '@/store/UseDivStore';
+import AddDivButton from './DivBoxMakerSection/AddDivButton';
+import BoxCard from './DivBoxMakerSection/BoxCard';
+import ElementProperties from './DivBoxMakerSection/ElementProperties';
 
 export default function DivBoxMaker() {
   const { parents, selectedParentId, selectedElementId } = useDivStore();

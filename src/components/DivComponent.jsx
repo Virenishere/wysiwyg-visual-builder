@@ -1,10 +1,10 @@
 // Fixed DivComponent.jsx with better parent handling
-"use client";
-import { parentBoundary } from "@/utils/styles";
-import useDivStore from "@/store/UseDivStore";
-import SizeToaster from "./SizeToaster";
-import React from "react";
-import RndBox from "./RndBox";
+'use client';
+import { parentBoundary } from '@/utils/styles';
+import useDivStore from '@/store/UseDivStore';
+import SizeToaster from './SizeToaster';
+import React from 'react';
+import RndBox from './RndBox';
 
 export default function DivComponent() {
   const {
@@ -41,14 +41,11 @@ export default function DivComponent() {
             style={{
               ...parentBoundary,
               height: parent.size?.height || 300,
-              background: parent.size?.background || "#ffffff",
-              position: "relative",
+              background: parent.size?.background || '#ffffff',
+              position: 'relative',
               // marginBottom: "20px",
-              border:
-                selectedParentId === parent.id
-                  ? "3px solid #6f56f9"
-                  : "",
-              padding: "10px",
+              border: selectedParentId === parent.id ? '3px solid #6f56f9' : '',
+              padding: '10px',
             }}
             onClick={(e) => {
               // Only select parent if clicking on empty space
@@ -65,7 +62,7 @@ export default function DivComponent() {
             <div
               className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium z-20"
               style={{
-                display: selectedParentId === parent.id ? "block" : "none",
+                display: selectedParentId === parent.id ? 'block' : 'none',
               }}
             >
               Section {parent.id}

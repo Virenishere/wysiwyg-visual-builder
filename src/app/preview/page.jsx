@@ -1,14 +1,14 @@
-"use client";
-import { useEffect, useState } from "react";
-import GlobalLoader from "@/components/GlobalLoader";
-import PreviewComponent from "@/components/PreviewComponent";
-import useDivStore from "@/store/UseDivStore";
+'use client';
+import { useEffect, useState } from 'react';
+import GlobalLoader from '@/components/GlobalLoader';
+import PreviewComponent from '@/components/PreviewComponent';
+import useDivStore from '@/store/UseDivStore';
 
 const PreviewPage = () => {
   const messages = [
-    "Loading preview...",
-    "Preparing components...",
-    "Applying styles...",
+    'Loading preview...',
+    'Preparing components...',
+    'Applying styles...',
   ];
 
   const { parents } = useDivStore();

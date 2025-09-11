@@ -1,4 +1,4 @@
-import ElementPropertiesPanel from "../ElementPropertiesPanel";
+import ElementPropertiesPanel from '../ElementPropertiesPanel';
 
 export default function RightEditorPanel() {
   return (

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 import {
   FiMaximize2,
   FiMaximize,
   FiArrowRight,
   FiArrowDown,
-} from "react-icons/fi";
+} from 'react-icons/fi';
 
 export default function PositionSize({
   selectedElement,
@@ -15,26 +15,26 @@ export default function PositionSize({
 }) {
   const fields = [
     {
-      label: "Width",
-      key: "width",
+      label: 'Width',
+      key: 'width',
       icon: <FiMaximize className="w-4 h-4" />,
       max: 1000,
     },
     {
-      label: "Height",
-      key: "height",
+      label: 'Height',
+      key: 'height',
       icon: <FiMaximize2 className="w-4 h-4" />,
       max: 1000,
     },
     {
-      label: "X Position",
-      key: "x",
+      label: 'X Position',
+      key: 'x',
       icon: <FiArrowRight className="w-4 h-4" />,
       max: 500,
     },
     {
-      label: "Y Position",
-      key: "y",
+      label: 'Y Position',
+      key: 'y',
       icon: <FiArrowDown className="w-4 h-4" />,
       max: 500,
     },

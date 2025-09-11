@@ -1,8 +1,8 @@
-"use client";
-import React from "react";
-import Link from "next/link";
-import { FaGlobe } from "react-icons/fa6";
-import { MdRemoveRedEye } from "react-icons/md";
+'use client';
+import React from 'react';
+import Link from 'next/link';
+import { FaGlobe } from 'react-icons/fa6';
+import { MdRemoveRedEye } from 'react-icons/md';
 
 export default function ActionButtons() {
   return (

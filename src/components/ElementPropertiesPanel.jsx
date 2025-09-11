@@ -1,19 +1,31 @@
-"use client"
-import useDivStore from "@/store/UseDivStore"
-import { FiTarget } from "react-icons/fi"
-import Header from "./ElementPropertiesPanelSection/Header"
-import PositionSize from "./ElementPropertiesPanelSection/PositionSize"
-import Spacing from "./ElementPropertiesPanelSection/Spacing"
-import Typography from "./ElementPropertiesPanelSection/Typography"
-import BorderEffects from "./ElementPropertiesPanelSection/BorderEffects"
-import ContentInput from "./ElementPropertiesPanelSection/ContentInput"
+'use client';
+import useDivStore from '@/store/UseDivStore';
+import { FiTarget } from 'react-icons/fi';
+import Header from './ElementPropertiesPanelSection/Header';
+import PositionSize from './ElementPropertiesPanelSection/PositionSize';
+import Spacing from './ElementPropertiesPanelSection/Spacing';
+import Typography from './ElementPropertiesPanelSection/Typography';
+import BorderEffects from './ElementPropertiesPanelSection/BorderEffects';
+import ContentInput from './ElementPropertiesPanelSection/ContentInput';
+import LineElementProperties from './ElementPropertiesPanelSection/LineElementProperties';
 
 export default function ElementPropertiesPanel() {
-  const { parents, selectedParentId, selectedBoxId, selectedElementId, updateElement, removeElement } = useDivStore()
+  const {
+    parents,
+    selectedParentId,
+    selectedBoxId,
+    selectedElementId,
+    updateElement,
+    removeElement,
+  } = useDivStore();
 
-  const selectedParent = parents.find((p) => p.id === selectedParentId)
-  const selectedBox = selectedParent?.rnds.find((box) => box.id === selectedBoxId)
-  const selectedElement = selectedBox?.elements?.find((el) => el.id === selectedElementId)
+  const selectedParent = parents.find((p) => p.id === selectedParentId);
+  const selectedBox = selectedParent?.rnds.find(
+    (box) => box.id === selectedBoxId
+  );
+  const selectedElement = selectedBox?.elements?.find(
+    (el) => el.id === selectedElementId
+  );
 
   if (!selectedElement) {
     return (
@@ -23,13 +35,16 @@ export default function ElementPropertiesPanel() {
           <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center">
             <FiTarget className="w-8 h-8 text-gray-400" />
           </div>
-          <p className="text-sm font-medium text-gray-500 mb-2">No Element Selected</p>
+          <p className="text-sm font-medium text-gray-500 mb-2">
+            No Element Selected
+          </p>
           <p className="text-xs text-gray-400 leading-relaxed">
-            Click on any element in your design to start customizing its properties with our modern controls
+            Click on any element in your design to start customizing its
+            properties with our modern controls
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -65,37 +80,49 @@ export default function ElementPropertiesPanel() {
           elementId={selectedElementId}
         />
 
-        {/* Spacing */}
-        <Spacing
-          selectedElement={selectedElement}
-          updateElement={updateElement}
-          parentId={selectedParentId}
-          boxId={selectedBoxId}
-          elementId={selectedElementId}
-        />
-
-        {/* Typography */}
-        {(selectedElement.type === "text" ||
-          selectedElement.type === "button" ||
-          selectedElement.type === "paragraph") && (
-          <Typography
+        {selectedElement.type === 'line' ? (
+          <LineElementProperties
             selectedElement={selectedElement}
             updateElement={updateElement}
             parentId={selectedParentId}
             boxId={selectedBoxId}
             elementId={selectedElementId}
           />
-        )}
+        ) : (
+          <>
+            {/* Spacing */}
+            <Spacing
+              selectedElement={selectedElement}
+              updateElement={updateElement}
+              parentId={selectedParentId}
+              boxId={selectedBoxId}
+              elementId={selectedElementId}
+            />
 
-        {/* Border & Effects */}
-        <BorderEffects
-          selectedElement={selectedElement}
-          updateElement={updateElement}
-          parentId={selectedParentId}
-          boxId={selectedBoxId}
-          elementId={selectedElementId}
-        />
+            {/* Typography */}
+            {(selectedElement.type === 'text' ||
+              selectedElement.type === 'button' ||
+              selectedElement.type === 'paragraph') && (
+              <Typography
+                selectedElement={selectedElement}
+                updateElement={updateElement}
+                parentId={selectedParentId}
+                boxId={selectedBoxId}
+                elementId={selectedElementId}
+              />
+            )}
+
+            {/* Border & Effects */}
+            <BorderEffects
+              selectedElement={selectedElement}
+              updateElement={updateElement}
+              parentId={selectedParentId}
+              boxId={selectedBoxId}
+              elementId={selectedElementId}
+            />
+          </>
+        )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import React from "react";
-import { FaTimes, FaPlus } from "react-icons/fa";
-import Link from "next/link";
+import React from 'react';
+import { FaTimes, FaPlus } from 'react-icons/fa';
+import Link from 'next/link';
 
 export default function TemplateHeader({ onClose }) {
   return (

@@ -1,21 +1,24 @@
-"use client";
-import React, { useState, useRef } from "react";
-import { Rnd } from "react-rnd";
-import useDivStore from "@/store/UseDivStore";
+'use client';
+import React, { useState, useRef } from 'react';
+import { Rnd } from 'react-rnd';
+import useDivStore from '@/store/UseDivStore';
 
 // Sub-components
-import TextElement from "./DraggableElementSection/TextElement";
-import ParagraphElement from "./DraggableElementSection/ParagraphElement";
-import ButtonElement from "./DraggableElementSection/ButtonElement";
-import ImageElement from "./DraggableElementSection/ImageElement";
-import UnknownElement from "./DraggableElementSection/UnknownElement";
+import TextElement from './DraggableElementSection/TextElement';
+import ParagraphElement from './DraggableElementSection/ParagraphElement';
+import ButtonElement from './DraggableElementSection/ButtonElement';
+import ImageElement from './DraggableElementSection/ImageElement';
+import UnknownElement from './DraggableElementSection/UnknownElement';
+import CardElement from './DraggableElementSection/CardElement';
+import LineElement from './DraggableElementSection/LineElement';
+import DivElement from './DraggableElementSection/DivElement';
 
-export default function DraggableElement({ 
-  element, 
-  parentId, 
-  boxId, 
-  isSelected, 
-  onSelect 
+export default function DraggableElement({
+  element,
+  parentId,
+  boxId,
+  isSelected,
+  onSelect,
 }) {
   const { updateElement } = useDivStore();
   const [isEditingText, setIsEditingText] = useState(false);
@@ -23,7 +26,7 @@ export default function DraggableElement({
 
   const renderElementContent = () => {
     switch (element.type) {
-      case "text":
+      case 'text':
         return (
           <TextElement
             element={element}
@@ -34,7 +37,7 @@ export default function DraggableElement({
             updateElement={updateElement}
           />
         );
-      case "paragraph":
+      case 'paragraph':
         return (
           <ParagraphElement
             element={element}
@@ -43,7 +46,7 @@ export default function DraggableElement({
             updateElement={updateElement}
           />
         );
-      case "button":
+      case 'button':
         return (
           <ButtonElement
             element={element}
@@ -52,7 +55,7 @@ export default function DraggableElement({
             updateElement={updateElement}
           />
         );
-      case "image":
+      case 'image':
         return (
           <ImageElement
             element={element}
@@ -62,6 +65,18 @@ export default function DraggableElement({
             fileInputRef={fileInputRef}
           />
         );
+      case 'card':
+        return (
+          <CardElement
+            id={element.id}
+            style={element.style}
+            children={element.children}
+          />
+        );
+      case 'line':
+        return <LineElement id={element.id} style={element.style} />;
+      case 'div':
+        return <DivElement id={element.id} style={element.style} />;
       default:
         return <UnknownElement element={element} />;
     }
@@ -88,11 +103,13 @@ export default function DraggableElement({
         onSelect(element.id);
       }}
       style={{
-        border: isSelected ? "2px solid #007bff" : "1px solid transparent",
-        borderRadius: "2px",
+        border: isSelected ? '2px solid #007bff' : '1px solid transparent',
+        borderRadius: '2px',
         zIndex: isSelected ? 10 : 1,
       }}
       className="element-rnd"
+      minHeight={1}
+      minWidth={1}
     >
       {renderElementContent()}
     </Rnd>

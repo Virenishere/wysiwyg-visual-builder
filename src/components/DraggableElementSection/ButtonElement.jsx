@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function ButtonElement({
   element,
@@ -19,14 +19,14 @@ export default function ButtonElement({
   } = element;
 
   const buttonStyle = {
-    width: "100%",
-    height: "100%",
-    cursor: "pointer",
-    fontWeight: "600",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.3s ease",
+    width: '100%',
+    height: '100%',
+    cursor: 'pointer',
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease',
     fontSize: `${fontSize}px`,
     fontFamily,
     color,
@@ -43,10 +43,10 @@ export default function ButtonElement({
       className="hover:opacity-80 hover:scale-105 active:scale-95"
       onClick={(e) => {
         e.stopPropagation();
-        console.log("Button clicked:", content);
+        console.log('Button clicked:', content);
       }}
       onDoubleClick={() => {
-        const newContent = prompt("Edit button text:", content);
+        const newContent = prompt('Edit button text:', content);
         if (newContent !== null) {
           updateElement(parentId, boxId, element.id, { content: newContent });
         }

@@ -1,6 +1,6 @@
-import React from "react";
-import { FaTrashAlt } from "react-icons/fa";
-import useDivStore from "@/store/UseDivStore";
+import React from 'react';
+import { FaTrashAlt } from 'react-icons/fa';
+import useDivStore from '@/store/UseDivStore';
 
 export default function ElementProperties({ parentId }) {
   const {

@@ -10,12 +10,14 @@ A powerful, intuitive drag-and-drop visual website builder built with React, fea
 ## ✨ Features
 
 ### 🎯 Core Functionality
+
 - **Drag & Drop Interface**: Intuitive visual builder with real-time editing
 - **Nested Elements**: Create complex layouts with elements inside resizable containers
 - **Multi-Level Hierarchy**: Parent containers → RND boxes → Interactive elements
 - **Real-time Preview**: See changes instantly as you build
 
 ### 🧱 Element Types
+
 - **📝 Text Elements**: Inline editable text with typography controls
 - **📄 Rich Text/Paragraphs**: Full WYSIWYG editor powered by TinyMCE
 - **🔘 Interactive Buttons**: Customizable buttons with click handlers
@@ -23,6 +25,7 @@ A powerful, intuitive drag-and-drop visual website builder built with React, fea
 - **📦 Container Boxes**: Resizable containers for organizing elements
 
 ### 🎨 Advanced Styling
+
 - **Spacing Controls**: Individual margin and padding adjustments for all 4 sides
 - **Typography System**: Font family, size, color, and weight controls
 - **Color Management**: Background colors, gradients, and transparency options
@@ -30,6 +33,7 @@ A powerful, intuitive drag-and-drop visual website builder built with React, fea
 - **Responsive Design**: Elements adapt and maintain proportions
 
 ### 🛠️ Professional Tools
+
 - **Visual Properties Panel**: Comprehensive styling controls
 - **Element Inspector**: Select and edit any element's properties
 - **Size Indicators**: Real-time size tooltips during resizing
@@ -39,7 +43,8 @@ A powerful, intuitive drag-and-drop visual website builder built with React, fea
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
+
+- Node.js 16+
 - npm or yarn
 - React 18+
 - Nextjs 15+
@@ -78,35 +83,43 @@ npm run dev
 ## 🏗️ Architecture
 
 ### State Management
+
 The application uses **Zustand** for lightweight, scalable state management:
 
 ```javascript
 // Store Structure
 {
-  parents: [           // Top-level containers
+  parents: [
+    // Top-level containers
     {
       id: 1,
-      size: { height: 300, background: "#ffffff" },
-      rnds: [          // Resizable & draggable boxes
+      size: { height: 300, background: '#ffffff' },
+      rnds: [
+        // Resizable & draggable boxes
         {
           id: 1,
-          width: 150, height: 150, x: 0, y: 0,
-          elements: [  // Interactive elements inside boxes
+          width: 150,
+          height: 150,
+          x: 0,
+          y: 0,
+          elements: [
+            // Interactive elements inside boxes
             {
               id: 1,
               type: 'text',
               content: 'Sample Text',
-              styling: { fontSize: 16, color: '#000000' }
-            }
-          ]
-        }
-      ]
-    }
-  ]
+              styling: { fontSize: 16, color: '#000000' },
+            },
+          ],
+        },
+      ],
+    },
+  ];
 }
 ```
 
 ### Component Structure
+
 ```
 src/
 ├── components/
@@ -131,15 +144,15 @@ src/
 
 ```javascript
 // 1. Add a parent container
-addParent()
+addParent();
 
 // 2. Add a resizable box inside the container
-addRnd(parentId)
+addRnd(parentId);
 
 // 3. Add elements inside the box
-addElement(parentId, boxId, 'text')     // Add text
-addElement(parentId, boxId, 'image')    // Add image
-addElement(parentId, boxId, 'button')   // Add button
+addElement(parentId, boxId, 'text'); // Add text
+addElement(parentId, boxId, 'image'); // Add image
+addElement(parentId, boxId, 'button'); // Add button
 ```
 
 ### Styling Elements
@@ -150,8 +163,8 @@ updateElement(parentId, boxId, elementId, {
   fontSize: 18,
   color: '#ff0000',
   margin: { top: 10, right: 5, bottom: 10, left: 5 },
-  padding: { top: 8, right: 12, bottom: 8, left: 12 }
-})
+  padding: { top: 8, right: 12, bottom: 8, left: 12 },
+});
 ```
 
 ## 🤝 Contributing
@@ -159,12 +172,14 @@ updateElement(parentId, boxId, elementId, {
 We welcome contributions from the community! Here's how you can help:
 
 ### 🐛 Bug Reports
+
 - Use the issue tracker to report bugs
 - Include steps to reproduce
 - Provide browser/OS information
 - Add screenshots if applicable
 
 ### 💡 Feature Requests
+
 - Check existing issues first
 - Provide detailed use cases
 - Explain the expected behavior
@@ -194,24 +209,28 @@ We welcome contributions from the community! Here's how you can help:
 ### 🎯 Areas for Contribution
 
 #### 🚀 High Priority
+
 - [ ] **Undo/Redo System** - Implement command pattern for action history
 - [ ] **Export Functionality** - Export designs as HTML/CSS/React components
 - [ ] **Template System** - Pre-built templates and component library
 - [ ] **Mobile Responsiveness** - Better mobile editing experience
 
 #### 🔥 Medium Priority
+
 - [ ] **Advanced Styling** - Box shadows, gradients, animations
 - [ ] **Grid System** - Snap-to-grid and alignment guides
 - [ ] **Layer Management** - Z-index controls and layer panels
 - [ ] **Component Nesting** - Nested RND boxes within elements
 
 #### 💡 Nice to Have
+
 - [ ] **Keyboard Shortcuts** - Power user keyboard navigation
 - [ ] **Dark Mode** - Dark theme for the builder interface
 - [ ] **Collaboration** - Real-time collaborative editing
 - [ ] **Version History** - Save and restore different versions
 
 #### 🧩 Element Types to Add
+
 - [ ] **Form Elements** - Input fields, selectors, checkboxes
 - [ ] **Media Elements** - Video players, audio players
 - [ ] **Chart Elements** - Basic charts and graphs
@@ -219,6 +238,7 @@ We welcome contributions from the community! Here's how you can help:
 - [ ] **Navigation Elements** - Menus, breadcrumbs, pagination
 
 #### 🏗️ Architecture Improvements
+
 - [ ] **TypeScript Migration** - Convert codebase to TypeScript
 - [ ] **Testing Suite** - Unit and integration tests
 - [ ] **Performance Optimization** - Virtualization for large canvases
@@ -227,23 +247,27 @@ We welcome contributions from the community! Here's how you can help:
 ### 📋 Development Guidelines
 
 #### Code Style
+
 - Use functional components with hooks
 - Follow ESLint configuration
 - Use descriptive variable names
 - Add JSDoc comments for complex functions
 
 #### State Management
+
 - Keep Zustand actions pure and simple
 - Use immutable updates
 - Separate business logic from UI logic
 
 #### Component Guidelines
+
 - Keep components focused and single-purpose
 - Use prop-types or TypeScript for type safety
 - Handle loading and error states appropriately
 - Make components accessible (WCAG guidelines)
 
 #### Performance
+
 - Use React.memo for expensive renders
 - Implement proper key props for lists
 - Avoid inline functions in render methods
@@ -254,31 +278,35 @@ We welcome contributions from the community! Here's how you can help:
 ### Store Actions
 
 #### Parent Management
+
 ```javascript
-addParent()                           // Add new parent container
-updateParentSize(parentId, size)      // Update container dimensions
-setSelectedParent(parentId)           // Select active parent
+addParent(); // Add new parent container
+updateParentSize(parentId, size); // Update container dimensions
+setSelectedParent(parentId); // Select active parent
 ```
 
 #### RND Box Management
+
 ```javascript
-addRnd(parentId)                      // Add resizable box
-updateRnd(parentId, boxId, updates)   // Update box properties
-removeRnd(parentId, boxId)            // Delete box
-setSelectedBox(boxId)                 // Select active box
+addRnd(parentId); // Add resizable box
+updateRnd(parentId, boxId, updates); // Update box properties
+removeRnd(parentId, boxId); // Delete box
+setSelectedBox(boxId); // Select active box
 ```
 
 #### Element Management
+
 ```javascript
-addElement(parentId, boxId, type)               // Add new element
-updateElement(parentId, boxId, elementId, props) // Update element
-removeElement(parentId, boxId, elementId)       // Delete element
-setSelectedElement(elementId)                   // Select active element
+addElement(parentId, boxId, type); // Add new element
+updateElement(parentId, boxId, elementId, props); // Update element
+removeElement(parentId, boxId, elementId); // Delete element
+setSelectedElement(elementId); // Select active element
 ```
 
 ## 🔧 Configuration
 
 ### TinyMCE Setup
+
 For production use, obtain a TinyMCE API key:
 
 ```javascript
@@ -290,6 +318,7 @@ init={{
 ```
 
 ### Custom Styling
+
 Modify `utils/styles.js` for global styling:
 
 ```javascript
@@ -298,7 +327,7 @@ export const parentBoundary = {
   borderRadius: '8px',
   margin: '10px',
   // Add your custom styles
-}
+};
 ```
 
 ## 📄 License
@@ -323,18 +352,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🗺️ Roadmap
 
 ### v1.1.0 - Enhanced Editing
+
 - [ ] Undo/Redo system
 - [ ] Copy/paste elements
 - [ ] Multi-select elements
 - [ ] Alignment tools
 
 ### v1.2.0 - Export & Templates
+
 - [ ] HTML/CSS export
 - [ ] React component export
 - [ ] Template library
 - [ ] Save/load projects
 
 ### v2.0.0 - Advanced Features
+
 - [ ] Plugin system
 - [ ] Real-time collaboration
 - [ ] Mobile app companion

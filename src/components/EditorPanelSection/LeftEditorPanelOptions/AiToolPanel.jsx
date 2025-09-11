@@ -1,5 +1,5 @@
-import { RxCross1 } from "react-icons/rx";
-import { MdConstruction } from "react-icons/md";
+import { RxCross1 } from 'react-icons/rx';
+import { MdConstruction } from 'react-icons/md';
 
 export default function AiToolPanel({ onClose }) {
   return (

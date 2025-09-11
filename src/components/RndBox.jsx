@@ -1,9 +1,9 @@
-"use client";
-import React from "react";
-import { Rnd } from "react-rnd";
-import useDivStore from "@/store/UseDivStore";
-import DraggableElement from "./DraggableElement";
-import { FaPlus } from "react-icons/fa";
+'use client';
+import React from 'react';
+import { Rnd } from 'react-rnd';
+import useDivStore from '@/store/UseDivStore';
+import DraggableElement from './DraggableElement';
+import { FaPlus } from 'react-icons/fa';
 
 export default function RndBox({ box, parentId }) {
   const {
@@ -44,11 +44,11 @@ export default function RndBox({ box, parentId }) {
         setSelectedElement(null);
       }}
       style={{
-        border: isSelected ? "3px solid #3b82f6" : "2px dashed #d1d5db",
-        borderRadius: "4px",
+        border: isSelected ? '3px solid #3b82f6' : '2px dashed #d1d5db',
+        borderRadius: '4px',
         backgroundColor: isSelected
-          ? "rgba(59, 130, 246, 0.05)"
-          : "rgba(0, 0, 0, 0.02)",
+          ? 'rgba(59, 130, 246, 0.05)'
+          : 'rgba(0, 0, 0, 0.02)',
         zIndex: isSelected ? 5 : 1,
       }}
       className="rnd-box"
@@ -63,7 +63,7 @@ export default function RndBox({ box, parentId }) {
       {/* Add element button */}
       {isSelected && (
         <button
-          onClick={() => setLeftPanel("AddElementPanel")}
+          onClick={() => setLeftPanel('AddElementPanel')}
           className="absolute -top-6 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
           aria-label="Add element"
         >
@@ -84,7 +84,7 @@ export default function RndBox({ box, parentId }) {
           parentId={parentId}
           boxId={box.id}
           isSelected={selectedElementId === element.id}
-          onSelect={handleElementSelect}
+          onSelect={() => handleElementSelect(element.id)}
         />
       ))}
     </Rnd>

@@ -1,15 +1,15 @@
-"use client";
-import { useEffect, useState } from "react";
-import * as templates from "@/templates";
-import GlobalLoader from "@/components/GlobalLoader";
-import PreviewComponent from "@/components/PreviewComponent";
+'use client';
+import { useEffect, useState } from 'react';
+import * as templates from '@/templates';
+import GlobalLoader from '@/components/GlobalLoader';
+import PreviewComponent from '@/components/PreviewComponent';
 
 const PreviewPage = ({ params }) => {
   const messages = [
-    "Loading template...",
-    "Preparing the editor...",
-    "Fetching components...",
-    "Applying template styles...",
+    'Loading template...',
+    'Preparing the editor...',
+    'Fetching components...',
+    'Applying template styles...',
   ];
 
   const { templateName } = params;
@@ -25,7 +25,9 @@ const PreviewPage = ({ params }) => {
       let templateData = templates.templateRegistry[templateKey];
 
       if (!templateData) {
-        const savedTemplates = JSON.parse(localStorage.getItem('savedTemplates') || '{}');
+        const savedTemplates = JSON.parse(
+          localStorage.getItem('savedTemplates') || '{}'
+        );
         if (savedTemplates[templateName]) {
           templateData = savedTemplates[templateName];
         }

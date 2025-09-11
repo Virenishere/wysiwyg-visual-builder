@@ -1,9 +1,9 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { getAllTemplates } from "@/templates";
-import useDivStore from "@/store/UseDivStore";
-import TemplateGrid from "@/components/TemplateSelectorSection/TemplateGrid";
-import TemplateSidebar from "@/components/TemplateSelectorSection/TemplateSidebar";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { getAllTemplates } from '@/templates';
+import useDivStore from '@/store/UseDivStore';
+import TemplateGrid from '@/components/TemplateSelectorSection/TemplateGrid';
+import TemplateSidebar from '@/components/TemplateSelectorSection/TemplateSidebar';
 import { useRouter } from 'next/navigation';
 
 export default function TemplatePreview() {
@@ -13,7 +13,9 @@ export default function TemplatePreview() {
   const router = useRouter();
 
   useEffect(() => {
-    const savedTemplates = JSON.parse(localStorage.getItem('savedTemplates') || '{}');
+    const savedTemplates = JSON.parse(
+      localStorage.getItem('savedTemplates') || '{}'
+    );
     const customTemplates = Object.values(savedTemplates);
     const defaultTemplates = getAllTemplates();
     setTemplates([...defaultTemplates, ...customTemplates]);
@@ -31,8 +33,8 @@ export default function TemplatePreview() {
 
   return (
     <div className="flex flex-col min-h-screen w-full justify-center items-center">
-       <div className="w-full flex justify-end px-16 pt-4">
-        <button 
+      <div className="w-full flex justify-end px-16 pt-4">
+        <button
           onClick={handleCreateNew}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
         >

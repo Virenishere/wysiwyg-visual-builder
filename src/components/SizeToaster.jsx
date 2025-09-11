@@ -1,8 +1,9 @@
-"use client";
-import useDivStore from "@/store/UseDivStore";
+'use client';
+import useDivStore from '@/store/UseDivStore';
 
 export default function SizeToaster() {
-  const { parents, selectedParentId, selectedBoxId, isResizing } = useDivStore();
+  const { parents, selectedParentId, selectedBoxId, isResizing } =
+    useDivStore();
 
   if (!isResizing || !selectedBoxId || !selectedParentId) return null;
 
@@ -18,7 +19,7 @@ export default function SizeToaster() {
       style={{
         left: box.x + box.width + 8,
         top: box.y + box.height - 20,
-        pointerEvents: "none",
+        pointerEvents: 'none',
       }}
     >
       <span className="mr-1">w:{box.width}</span>

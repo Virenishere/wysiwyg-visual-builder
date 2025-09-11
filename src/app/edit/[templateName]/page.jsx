@@ -1,25 +1,30 @@
-"use client";
-import { useEffect, useState, use } from "react";
-import * as templates from "@/templates";
-import GlobalLoader from "@/components/GlobalLoader";
-import DivComponent from "@/components/DivComponent";
-import useDivStore from "@/store/UseDivStore";
-import LeftEditorPanel from "@/components/EditorPanelSection/LeftEditorPanel";
-import { RxCross1 } from "react-icons/rx";
+'use client';
+import { useEffect, useState, use } from 'react';
+import * as templates from '@/templates';
+import GlobalLoader from '@/components/GlobalLoader';
+import DivComponent from '@/components/DivComponent';
+import useDivStore from '@/store/UseDivStore';
+import LeftEditorPanel from '@/components/EditorPanelSection/LeftEditorPanel';
+import { RxCross1 } from 'react-icons/rx';
 
 const TemplatePage = ({ params }) => {
   const messages = [
-    "Loading template...",
-    "Preparing the editor...",
-    "Fetching components...",
-    "Applying template styles...",
+    'Loading template...',
+    'Preparing the editor...',
+    'Fetching components...',
+    'Applying template styles...',
   ];
 
   const resolvedParams = use(params);
   const { templateName } = resolvedParams;
 
-  const { loadTemplate, importData, previewingImage, setPreviewingImage, resetToDefault } =
-    useDivStore();
+  const {
+    loadTemplate,
+    importData,
+    previewingImage,
+    setPreviewingImage,
+    resetToDefault,
+  } = useDivStore();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
 

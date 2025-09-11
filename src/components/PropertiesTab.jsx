@@ -1,14 +1,14 @@
-"use client";
-import React, { useState } from "react";
-import useDivStore from "@/store/UseDivStore";
-import DivBoxMaker from "./DivBoxMaker";
-import ElementPropertiesPanel from "./ElementPropertiesPanel";
-import TemplateSelector from "./TemplateSelector";
-import { FaGear } from "react-icons/fa6";
-import ActionButtons from "./PropertiesTabSection/ActionButtons";
-import TemplatesPanel from "./PropertiesTabSection/TemplatesPanel";
-import SectionsPanel from "./PropertiesTabSection/SectionsPanel";
-import QuickGuide from "./PropertiesTabSection/QuickGuide";
+'use client';
+import React, { useState } from 'react';
+import useDivStore from '@/store/UseDivStore';
+import DivBoxMaker from './DivBoxMaker';
+import ElementPropertiesPanel from './ElementPropertiesPanel';
+import TemplateSelector from './TemplateSelector';
+import { FaGear } from 'react-icons/fa6';
+import ActionButtons from './PropertiesTabSection/ActionButtons';
+import TemplatesPanel from './PropertiesTabSection/TemplatesPanel';
+import SectionsPanel from './PropertiesTabSection/SectionsPanel';
+import QuickGuide from './PropertiesTabSection/QuickGuide';
 
 export default function PropertiesTab() {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -32,10 +32,10 @@ export default function PropertiesTab() {
   const handleExport = () => {
     const data = exportData();
     const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: "application/json" });
+    const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
     link.download = `website-export-${new Date()
       .toISOString()
@@ -55,10 +55,10 @@ export default function PropertiesTab() {
       try {
         const data = JSON.parse(e.target.result);
         importData(data);
-        alert("Import successful!");
+        alert('Import successful!');
       } catch (error) {
-        alert("Error importing file. Please check the file format.");
-        console.error("Import error:", error);
+        alert('Error importing file. Please check the file format.');
+        console.error('Import error:', error);
       }
     };
     reader.readAsText(file);

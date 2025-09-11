@@ -1,5 +1,5 @@
-"use client";
-import { FiSquare, FiCircle } from "react-icons/fi";
+'use client';
+import { FiSquare, FiCircle } from 'react-icons/fi';
 
 export default function BorderEffects({
   selectedElement,
@@ -67,6 +67,53 @@ export default function BorderEffects({
             <option value="1px dashed #000">┅ 1px Dashed</option>
             <option value="2px dashed #000">┅ 2px Dashed</option>
             <option value="1px dotted #000">⋯ 1px Dotted</option>
+          </select>
+        </div>
+
+        {/* Background Color */}
+        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+          <label className="text-sm font-medium text-gray-700 mb-3 block">
+            Background Color
+          </label>
+          <input
+            type="color"
+            value={selectedElement.backgroundColor}
+            onChange={(e) =>
+              updateElement(parentId, boxId, elementId, {
+                backgroundColor: e.target.value,
+              })
+            }
+            className="w-full h-10 px-1 py-1 bg-white border-2 border-gray-200 rounded-xl cursor-pointer focus:outline-none focus:ring-4 focus:ring-emerald-100"
+          />
+        </div>
+
+        {/* Box Shadow */}
+        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+          <label className="text-sm font-medium text-gray-700 mb-3 block">
+            Box Shadow
+          </label>
+          <select
+            value={selectedElement.boxShadow}
+            onChange={(e) =>
+              updateElement(parentId, boxId, elementId, {
+                boxShadow: e.target.value,
+              })
+            }
+            className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none hover:border-gray-300 cursor-pointer"
+          >
+            <option value="none">✨ None</option>
+            <option value="0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)">
+              Small
+            </option>
+            <option value="0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)">
+              Medium
+            </option>
+            <option value="0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)">
+              Large
+            </option>
+            <option value="0 25px 50px -12px rgba(0, 0, 0, 0.25)">
+              Extra Large
+            </option>
           </select>
         </div>
       </div>

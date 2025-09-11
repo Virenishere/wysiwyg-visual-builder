@@ -1,6 +1,6 @@
-"use client";
-import { FiPlus, FiImage } from "react-icons/fi";
-import { RiImageAddFill } from "react-icons/ri";
+'use client';
+import { FiPlus, FiImage } from 'react-icons/fi';
+import { RiImageAddFill } from 'react-icons/ri';
 
 export default function ImageElement({
   element,
@@ -39,7 +39,7 @@ export default function ImageElement({
           fileInputRef.current?.click();
         }}
         className="absolute -top-2 -right-2 z-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
-        title={element.imageUrl ? "Change image" : "Add image"}
+        title={element.imageUrl ? 'Change image' : 'Add image'}
       >
         {element.imageUrl ? (
           <FiImage className="w-4 h-4" />
@@ -52,7 +52,7 @@ export default function ImageElement({
         /* removed all hover effects, scaling, and preview button from image display */
         <div className="w-full h-full overflow-hidden">
           <img
-            src={element.imageUrl || "/placeholder.svg"}
+            src={element.imageUrl || '/placeholder.svg'}
             alt={element.content}
             className="w-full h-full object-cover pointer-events-none select-none"
             style={{

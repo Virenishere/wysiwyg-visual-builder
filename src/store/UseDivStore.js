@@ -1,9 +1,9 @@
 // store/UseDivStore.js
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { getTemplateById } from "@/templates";
-import { generateUniqueIds, deepClone } from "./storeUtils";
-import toast from "react-hot-toast";
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { getTemplateById } from '@/templates';
+import { generateUniqueIds, deepClone } from './storeUtils';
+import toast from 'react-hot-toast';
 
 let nextParentId = 1;
 let nextBoxId = 1;
@@ -16,7 +16,7 @@ const useDivStore = create(
       parents: [
         {
           id: nextParentId++,
-          size: { height: 300, background: "#ffffff" },
+          size: { height: 300, background: '#ffffff' },
           rnds: [
             {
               id: nextBoxId++,
@@ -45,41 +45,43 @@ const useDivStore = create(
             rnds: parent.rnds.map((rnd) => ({
               ...rnd,
               elements: rnd.elements.filter(
-                (element) => element.type !== "image"
+                (element) => element.type !== 'image'
               ),
             })),
           })),
         }));
-        toast.success("All image elements have been removed.", { icon: "🗑️" });
+        toast.success('All image elements have been removed.', { icon: '🗑️' });
       },
 
       // Template Actions
       loadTemplate: (templateId) => {
         let template = getTemplateById(templateId);
-    
+
         if (!template) {
           // Try loading from localStorage
-          const savedTemplates = JSON.parse(localStorage.getItem('savedTemplates') || '{}');
+          const savedTemplates = JSON.parse(
+            localStorage.getItem('savedTemplates') || '{}'
+          );
           if (savedTemplates[templateId]) {
             template = savedTemplates[templateId];
           } else {
-            console.error("Template not found:", templateId);
-            toast.error("Template not found!");
+            console.error('Template not found:', templateId);
+            toast.error('Template not found!');
             return;
           }
         }
-    
+
         const templateCopy = deepClone(template);
         const { parents: processedParents } = generateUniqueIds(templateCopy, {
           parentId: nextParentId,
           boxId: nextBoxId,
           elementId: nextElementId,
         });
-    
+
         let maxParentId = 0;
         let maxBoxId = 0;
         let maxElementId = 0;
-    
+
         processedParents.forEach((parent) => {
           maxParentId = Math.max(maxParentId, parent.id);
           parent.rnds.forEach((rnd) => {
@@ -89,11 +91,11 @@ const useDivStore = create(
             });
           });
         });
-    
+
         nextParentId = maxParentId + 1;
         nextBoxId = maxBoxId + 1;
         nextElementId = maxElementId + 1;
-    
+
         set({
           parents: processedParents,
           selectedParentId: null,
@@ -102,7 +104,7 @@ const useDivStore = create(
         });
         toast.success(`Template '${templateId}' loaded successfully!`);
       },
-    
+
       createNewTemplate: () => {
         nextParentId = 1;
         nextBoxId = 1;
@@ -112,7 +114,7 @@ const useDivStore = create(
           parents: [
             {
               id: newParentId,
-              size: { height: 400, background: "#ffffff" },
+              size: { height: 400, background: '#ffffff' },
               rnds: [],
             },
           ],
@@ -123,7 +125,7 @@ const useDivStore = create(
           selectedBoxId: null,
           selectedElementId: null,
         });
-        toast.success("New empty template created!");
+        toast.success('New empty template created!');
       },
 
       // Reset to default
@@ -136,7 +138,7 @@ const useDivStore = create(
           parents: [
             {
               id: nextParentId++,
-              size: { height: 300, background: "#ffffff" },
+              size: { height: 300, background: '#ffffff' },
               rnds: [
                 {
                   id: nextBoxId++,
@@ -153,7 +155,7 @@ const useDivStore = create(
           selectedBoxId: null,
           selectedElementId: null,
         });
-        toast.success("Canvas has been reset to default!");
+        toast.success('Canvas has been reset to default!');
       },
 
       // Parent actions
@@ -163,12 +165,12 @@ const useDivStore = create(
             ...state.parents,
             {
               id: nextParentId++,
-              size: { height: 300, background: "#f8f8f8" },
+              size: { height: 300, background: '#f8f8f8' },
               rnds: [],
             },
           ],
         }));
-        toast.success("New section added!");
+        toast.success('New section added!');
       },
 
       removeParent: (parentId) => {
@@ -179,7 +181,7 @@ const useDivStore = create(
           selectedBoxId: null,
           selectedElementId: null,
         }));
-        toast.success("Section removed.", { icon: "🗑️" });
+        toast.success('Section removed.', { icon: '🗑️' });
       },
 
       updateParentSize: (parentId, size) =>
@@ -214,7 +216,7 @@ const useDivStore = create(
           selectedBoxId: newBoxId,
           leftPanel: null,
         }));
-        toast.success("New div box added!");
+        toast.success('New div box added!');
       },
 
       updateRnd: (parentId, boxId, updates) =>
@@ -242,78 +244,106 @@ const useDivStore = create(
             state.selectedBoxId === boxId ? null : state.selectedBoxId,
           selectedElementId: null,
         }));
-        toast.success("Div box removed.", { icon: "🗑️" });
+        toast.success('Div box removed.', { icon: '🗑️' });
       },
 
       // Element actions inside RND boxes
       addElement: (parentId, boxId, elementType) => {
-        set((state) => ({
-          parents: state.parents.map((p) =>
-            p.id === parentId
-              ? {
-                  ...p,
-                  rnds: p.rnds.map((box) =>
-                    box.id === boxId
-                      ? {
-                          ...box,
-                          elements: [
-                            ...box.elements,
-                            {
-                              id: nextElementId++,
-                              type: elementType,
-                              x: 10,
-                              y: 10,
-                              width:
-                                elementType === "text"
-                                  ? 100
-                                  : elementType === "image"
-                                  ? 80
-                                  : 120,
-                              height:
-                                elementType === "text"
-                                  ? 30
-                                  : elementType === "image"
-                                  ? 80
-                                  : elementType === "paragraph"
-                                  ? 60
-                                  : 35,
-                              content:
-                                elementType === "text"
-                                  ? "Sample Text"
-                                  : elementType === "paragraph"
-                                  ? "<p>Sample paragraph content</p>"
-                                  : elementType === "button"
-                                  ? "Click Me"
-                                  : "",
-                              fontSize: elementType === "text" ? 16 : 14,
-                              fontFamily: "Arial, sans-serif",
-                              color:
-                                elementType === "button"
-                                  ? "#ffffff"
-                                  : "#000000",
-                              backgroundColor:
-                                elementType === "button"
-                                  ? "#007bff"
-                                  : "transparent",
-                              margin: { top: 0, right: 0, bottom: 0, left: 0 },
-                              padding: {
-                                top: 5,
-                                right: 10,
-                                bottom: 5,
-                                left: 10,
-                              },
-                              borderRadius: elementType === "button" ? 5 : 0,
-                              border: "none",
-                              imageUrl: null,
-                            },
-                          ],
-                        }
-                      : box
-                  ),
-                }
-              : p
-          ),
-        }));
+        set((state) => {
+          const { selectedElementId } = get();
+
+          let x = 10;
+          let y = 10;
+
+          if (selectedElementId) {
+            const parent = state.parents.find((p) => p.id === parentId);
+            const box = parent?.rnds.find((b) => b.id === boxId);
+            if (box) {
+              const selectedElement = box.elements.find(
+                (el) => el.id === selectedElementId
+              );
+              if (
+                selectedElement &&
+                (selectedElement.type === 'card' ||
+                  selectedElement.type === 'div')
+              ) {
+                x = selectedElement.x + 10;
+                y = selectedElement.y + 10;
+              }
+            }
+          }
+
+          const newElement = {
+            id: nextElementId++,
+            type: elementType,
+            x,
+            y,
+            width:
+              elementType === 'text'
+                ? 100
+                : elementType === 'image'
+                  ? 80
+                  : elementType === 'card'
+                    ? 200
+                    : elementType === 'line'
+                      ? 200
+                      : 120,
+            height:
+              elementType === 'text'
+                ? 30
+                : elementType === 'image'
+                  ? 80
+                  : elementType === 'paragraph'
+                    ? 60
+                    : elementType === 'card'
+                      ? 150
+                      : elementType === 'line'
+                        ? 2
+                        : 35,
+            content:
+              elementType === 'text'
+                ? 'Sample Text'
+                : elementType === 'paragraph'
+                  ? '<p>Sample paragraph content</p>'
+                  : elementType === 'button'
+                    ? 'Click Me'
+                    : '',
+            fontSize: elementType === 'text' ? 16 : 14,
+            fontFamily: 'Arial, sans-serif',
+            color: elementType === 'button' ? '#ffffff' : '#000000',
+            backgroundColor:
+              elementType === 'button' ? '#007bff' : 'transparent',
+            margin: { top: 0, right: 0, bottom: 0, left: 0 },
+            padding: { top: 5, right: 10, bottom: 5, left: 10 },
+            borderRadius: elementType === 'button' ? 5 : 0,
+            border: 'none',
+            imageUrl: null,
+            style:
+              elementType === 'card'
+                ? { backgroundColor: '#f0f0f0', borderRadius: '8px' }
+                : elementType === 'line'
+                  ? { backgroundColor: '#000000' }
+                  : {},
+          };
+
+          return {
+            parents: state.parents.map((p) =>
+              p.id === parentId
+                ? {
+                    ...p,
+                    rnds: p.rnds.map((box) =>
+                      box.id === boxId
+                        ? {
+                            ...box,
+                            elements: [...box.elements, newElement],
+                          }
+                        : box
+                    ),
+                  }
+                : p
+            ),
+          };
+        });
         toast.success(`'${elementType}' element added!`);
       },
 
@@ -364,7 +394,7 @@ const useDivStore = create(
               ? null
               : state.selectedElementId,
         }));
-        toast.success("Element removed.", { icon: "🗑️" });
+        toast.success('Element removed.', { icon: '🗑️' });
       },
 
       // Duplicate actions
@@ -392,7 +422,7 @@ const useDivStore = create(
             parents: [...state.parents, duplicatedParent],
           };
         });
-        toast.success("Section duplicated!");
+        toast.success('Section duplicated!');
       },
 
       duplicateRnd: (parentId, boxId) => {
@@ -421,7 +451,7 @@ const useDivStore = create(
               : p
           ),
         }));
-        toast.success("Div box duplicated!");
+        toast.success('Div box duplicated!');
       },
 
       duplicateElement: (parentId, boxId, elementId) => {
@@ -453,7 +483,7 @@ const useDivStore = create(
               : p
           ),
         }));
-        toast.success("Element duplicated!");
+        toast.success('Element duplicated!');
       },
 
       // Selection actions
@@ -468,17 +498,17 @@ const useDivStore = create(
         const state = get();
         const data = {
           parents: state.parents,
-          version: "1.0.0",
+          version: '1.0.0',
           exportDate: new Date().toISOString(),
         };
-        toast.success("Data exported successfully!");
+        toast.success('Data exported successfully!');
         return data;
       },
 
       importData: (data) => {
         if (!data || !data.parents) {
-          console.error("Invalid import data");
-          toast.error("Invalid import data!");
+          console.error('Invalid import data');
+          toast.error('Invalid import data!');
           return;
         }
 
@@ -513,7 +543,7 @@ const useDivStore = create(
           selectedBoxId: null,
           selectedElementId: null,
         });
-        toast.success("Data imported successfully!");
+        toast.success('Data imported successfully!');
       },
 
       // Get computed values
@@ -548,7 +578,7 @@ const useDivStore = create(
       },
     }),
     {
-      name: "div-store",
+      name: 'div-store',
       storage: createJSONStorage(() => localStorage),
       // Exclude some values from persistence for performance
       partialize: (state) => ({
@@ -571,4 +601,3 @@ export const findElementLocation = (parents, elementId) => {
   }
   return null;
 };
-

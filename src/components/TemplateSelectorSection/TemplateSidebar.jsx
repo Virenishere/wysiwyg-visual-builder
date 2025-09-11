@@ -1,5 +1,5 @@
-import React from "react";
-import { FaDownload } from "react-icons/fa";
+import React from 'react';
+import { FaDownload } from 'react-icons/fa';
 
 export default function TemplateSidebar({
   selectedTemplate,
@@ -15,7 +15,7 @@ export default function TemplateSidebar({
           className="w-full h-40 object-cover rounded-lg mb-4"
           onError={(e) => {
             e.target.src =
-              "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop";
+              'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop';
           }}
         />
         <h3 className="text-xl font-bold text-gray-800 mb-2">
@@ -42,7 +42,7 @@ export default function TemplateSidebar({
                 Height: {parent.size?.height}px
               </div>
               <div className="text-xs text-gray-500">
-                Elements:{" "}
+                Elements:{' '}
                 {parent.rnds?.reduce(
                   (total, rnd) => total + (rnd.elements?.length || 0),
                   0

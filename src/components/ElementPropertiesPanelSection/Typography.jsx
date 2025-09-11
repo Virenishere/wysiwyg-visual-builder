@@ -1,5 +1,5 @@
-"use client";
-import { FiType, FiDroplet, FiEdit3 } from "react-icons/fi";
+'use client';
+import { FiType, FiDroplet, FiEdit3 } from 'react-icons/fi';
 
 export default function Typography({
   selectedElement,
@@ -113,9 +113,9 @@ export default function Typography({
                 <input
                   type="color"
                   value={
-                    selectedElement.backgroundColor !== "transparent"
+                    selectedElement.backgroundColor !== 'transparent'
                       ? selectedElement.backgroundColor
-                      : "#ffffff"
+                      : '#ffffff'
                   }
                   onChange={(e) =>
                     updateElement(parentId, boxId, elementId, {
@@ -129,7 +129,7 @@ export default function Typography({
               <button
                 onClick={() =>
                   updateElement(parentId, boxId, elementId, {
-                    backgroundColor: "transparent",
+                    backgroundColor: 'transparent',
                   })
                 }
                 className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 active:scale-95"

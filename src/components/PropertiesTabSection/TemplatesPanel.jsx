@@ -1,7 +1,7 @@
-"use client";
-import React from "react";
-import { FaFileExport, FaFileImport, FaTrash } from "react-icons/fa";
-import TemplateSelector from "../TemplateSelector";
+'use client';
+import React from 'react';
+import { FaFileExport, FaFileImport, FaTrash } from 'react-icons/fa';
+import TemplateSelector from '../TemplateSelector';
 
 export default function TemplatesPanel({
   setIsTemplateModalOpen,
@@ -46,7 +46,7 @@ export default function TemplatesPanel({
           onClick={() => {
             if (
               confirm(
-                "Are you sure you want to reset? This will delete all current content."
+                'Are you sure you want to reset? This will delete all current content.'
               )
             ) {
               resetToDefault();

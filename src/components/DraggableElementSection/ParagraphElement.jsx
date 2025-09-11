@@ -1,5 +1,5 @@
-import React from "react";
-import RichTextEditor from "../RichTextEditor";
+import React from 'react';
+import RichTextEditor from '../RichTextEditor';
 
 export default function ParagraphElement({
   element,
@@ -8,7 +8,7 @@ export default function ParagraphElement({
   updateElement,
 }) {
   return (
-    <div style={{ padding: "5px", width: "100%", height: "100%" }}>
+    <div style={{ padding: '5px', width: '100%', height: '100%' }}>
       <RichTextEditor
         value={element.content}
         onChange={(content) =>

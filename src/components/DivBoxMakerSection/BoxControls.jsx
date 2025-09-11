@@ -1,5 +1,5 @@
-import React from "react";
-import useDivStore from "@/store/UseDivStore";
+import React from 'react';
+import useDivStore from '@/store/UseDivStore';
 
 export default function BoxControls({ parentId, box }) {
   const { updateRnd } = useDivStore();
@@ -10,7 +10,7 @@ export default function BoxControls({ parentId, box }) {
 
   return (
     <div className="grid grid-cols-2 gap-3 mb-3">
-      {["width", "height", "x", "y"].map((prop) => (
+      {['width', 'height', 'x', 'y'].map((prop) => (
         <div className="flex flex-col" key={prop}>
           <label className="text-xs font-medium text-gray-600 mb-1">
             {prop.charAt(0).toUpperCase() + prop.slice(1)}

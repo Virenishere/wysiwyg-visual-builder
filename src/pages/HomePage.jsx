@@ -1,7 +1,7 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import TemplatePreview from "@/components/TemplateSelectorSection/TemplatePreview";
-import GlobalLoader from "@/components/GlobalLoader";
+'use client';
+import React, { useState, useEffect } from 'react';
+import TemplatePreview from '@/components/TemplateSelectorSection/TemplatePreview';
+import GlobalLoader from '@/components/GlobalLoader';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);

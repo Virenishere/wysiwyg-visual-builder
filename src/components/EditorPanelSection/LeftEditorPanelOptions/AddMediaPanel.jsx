@@ -1,7 +1,7 @@
-import { useMemo } from "react";
-import { RxCross1 } from "react-icons/rx";
-import { FaTrashAlt, FaEye } from "react-icons/fa";
-import useDivStore from "@/store/UseDivStore";
+import { useMemo } from 'react';
+import { RxCross1 } from 'react-icons/rx';
+import { FaTrashAlt, FaEye } from 'react-icons/fa';
+import useDivStore from '@/store/UseDivStore';
 
 export default function AddMediaPanel({ onClose }) {
   const { parents, removeAllImageElements, removeElement, setPreviewingImage } =
@@ -12,7 +12,7 @@ export default function AddMediaPanel({ onClose }) {
     parents.forEach((parent) => {
       parent.rnds.forEach((rnd) => {
         rnd.elements.forEach((element) => {
-          if (element.type === "image" && element.imageUrl) {
+          if (element.type === 'image' && element.imageUrl) {
             images.push({
               ...element,
               parentId: parent.id,
@@ -39,7 +39,7 @@ export default function AddMediaPanel({ onClose }) {
           onClick={() => {
             if (
               window.confirm(
-                "Are you sure you want to delete all image elements? This action cannot be undone."
+                'Are you sure you want to delete all image elements? This action cannot be undone.'
               )
             ) {
               removeAllImageElements();
@@ -72,7 +72,7 @@ export default function AddMediaPanel({ onClose }) {
                     onClick={() => {
                       if (
                         window.confirm(
-                          "Are you sure you want to remove this image element?"
+                          'Are you sure you want to remove this image element?'
                         )
                       ) {
                         removeElement(

@@ -1,6 +1,6 @@
-import React from "react";
-import { FaPlusSquare } from "react-icons/fa";
-import useDivStore from "@/store/UseDivStore";
+import React from 'react';
+import { FaPlusSquare } from 'react-icons/fa';
+import useDivStore from '@/store/UseDivStore';
 
 export default function AddDivButton({ parentId }) {
   const { addRnd } = useDivStore();

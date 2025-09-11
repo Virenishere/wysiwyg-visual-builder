@@ -1,9 +1,9 @@
-import React from "react";
-import { FaTrashAlt } from "react-icons/fa";
-import useDivStore from "@/store/UseDivStore";
-import BoxControls from "./BoxControls";
-import ElementAdder from "./ElementAdder";
-import ElementList from "./ElementList";
+import React from 'react';
+import { FaTrashAlt } from 'react-icons/fa';
+import useDivStore from '@/store/UseDivStore';
+import BoxControls from './BoxControls';
+import ElementAdder from './ElementAdder';
+import ElementList from './ElementList';
 
 export default function BoxCard({ parentId, box }) {
   const { selectedBoxId, removeRnd } = useDivStore();
@@ -12,14 +12,14 @@ export default function BoxCard({ parentId, box }) {
     <div
       className={`p-4 mb-4 rounded-xl border shadow-sm bg-gradient-to-br transition-all duration-300 hover:shadow-md ${
         selectedBoxId === box.id
-          ? "border-blue-300 from-blue-50 to-white"
-          : "border-gray-200 from-gray-50 to-white"
+          ? 'border-blue-300 from-blue-50 to-white'
+          : 'border-gray-200 from-gray-50 to-white'
       }`}
     >
       {/* Header */}
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-semibold text-gray-600">
-          Div Box {box.id}{" "}
+          Div Box {box.id}{' '}
           {box.elements?.length > 0 && `(${box.elements.length} elements)`}
         </h3>
         <button

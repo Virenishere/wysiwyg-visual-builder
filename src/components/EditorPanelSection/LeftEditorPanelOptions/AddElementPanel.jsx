@@ -1,10 +1,10 @@
-import AddDivButton from "@/components/DivBoxMakerSection/AddDivButton";
-import ElementAdder from "@/components/DivBoxMakerSection/ElementAdder";
-import ElementList from "@/components/DivBoxMakerSection/ElementList";
-import useDivStore from "@/store/UseDivStore";
-import { RxCross1 } from "react-icons/rx";
-import ElementPropertiesPanel from "@/components/ElementPropertiesPanel";
-import { IoArrowBack } from "react-icons/io5";
+import AddDivButton from '@/components/DivBoxMakerSection/AddDivButton';
+import ElementAdder from '@/components/DivBoxMakerSection/ElementAdder';
+import ElementList from '@/components/DivBoxMakerSection/ElementList';
+import useDivStore from '@/store/UseDivStore';
+import { RxCross1 } from 'react-icons/rx';
+import ElementPropertiesPanel from '@/components/ElementPropertiesPanel';
+import { IoArrowBack } from 'react-icons/io5';
 
 export default function AddElementPanel({ onClose }) {
   const {
@@ -60,7 +60,8 @@ export default function AddElementPanel({ onClose }) {
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-center text-gray-500">
             <p className="text-base text-gray-500 italic mt-3 text-center">
-              Please select a section in the editor and click anywhere inside <b>dashed box </b>
+              Please select a section in the editor and click anywhere inside{' '}
+              <b>dashed box </b>
               to add elements.
             </p>
           </div>

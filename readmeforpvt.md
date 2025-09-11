@@ -1,23 +1,23 @@
-  return (
-    <div
-      key={template.id}
-      className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-lg ${
+return (
+
+<div
+key={template.id}
+className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-lg ${
         isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
       }`}
-      onClick={() => onSelect(template)}
-    >
-      {/* Thumbnail */}
-      <div className="mb-4">
-        <img
-          src={template.thumbnail}
-          alt={template.name}
-          className="w-full h-32 object-cover rounded-lg"
-          onError={(e) => {
-            e.target.src =
-              "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop";
-          }}
-        />
-      </div>
+onClick={() => onSelect(template)} >
+{/_ Thumbnail _/}
+<div className="mb-4">
+<img
+src={template.thumbnail}
+alt={template.name}
+className="w-full h-32 object-cover rounded-lg"
+onError={(e) => {
+e.target.src =
+"https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop";
+}}
+/>
+</div>
 
       {/* Info */}
       <h3 className="font-semibold text-lg text-gray-800 mb-2">
@@ -63,4 +63,5 @@
         </button>
       </div>
     </div>
-  );
+
+);

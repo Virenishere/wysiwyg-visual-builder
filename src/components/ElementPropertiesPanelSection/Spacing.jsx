@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   FiBox,
   FiArrowUp,
@@ -7,7 +7,7 @@ import {
   FiArrowLeft,
   FiPackage,
   FiTarget,
-} from "react-icons/fi";
+} from 'react-icons/fi';
 
 export default function Spacing({
   selectedElement,
@@ -17,10 +17,10 @@ export default function Spacing({
   elementId,
 }) {
   const sides = [
-    { key: "top", label: "T", icon: <FiArrowUp className="w-3 h-3" /> },
-    { key: "right", label: "R", icon: <FiArrowRight className="w-3 h-3" /> },
-    { key: "bottom", label: "B", icon: <FiArrowDown className="w-3 h-3" /> },
-    { key: "left", label: "L", icon: <FiArrowLeft className="w-3 h-3" /> },
+    { key: 'top', label: 'T', icon: <FiArrowUp className="w-3 h-3" /> },
+    { key: 'right', label: 'R', icon: <FiArrowRight className="w-3 h-3" /> },
+    { key: 'bottom', label: 'B', icon: <FiArrowDown className="w-3 h-3" /> },
+    { key: 'left', label: 'L', icon: <FiArrowLeft className="w-3 h-3" /> },
   ];
 
   const handleChange = (type, side, value) => {

@@ -1,25 +1,28 @@
-"use client";
-import { useState } from "react";
-import { RxCross1 } from "react-icons/rx";
-import useDivStore from "@/store/UseDivStore";
-import toast from "react-hot-toast";
+'use client';
+import { useState } from 'react';
+import { RxCross1 } from 'react-icons/rx';
+import useDivStore from '@/store/UseDivStore';
+import toast from 'react-hot-toast';
 
 export default function SaveTemplateModal({ onClose }) {
-  const [templateName, setTemplateName] = useState("");
+  const [templateName, setTemplateName] = useState('');
   const { parents } = useDivStore();
 
   const handleSave = () => {
-    if (templateName.trim() === "") {
-      toast.error("Please enter a template name.");
+    if (templateName.trim() === '') {
+      toast.error('Please enter a template name.');
       return;
     }
 
-    const savedTemplates = JSON.parse(localStorage.getItem('savedTemplates') || '{}');
+    const savedTemplates = JSON.parse(
+      localStorage.getItem('savedTemplates') || '{}'
+    );
     savedTemplates[templateName] = {
       id: templateName,
       name: templateName,
-      description: "A custom saved template.",
-      thumbnail: "https://images.unsplash.com/photo-1621155346337-7d1947ea715d?w=200&h=150&fit=crop",
+      description: 'A custom saved template.',
+      thumbnail:
+        'https://images.unsplash.com/photo-1621155346337-7d1947ea715d?w=200&h=150&fit=crop',
       parents: parents,
     };
     localStorage.setItem('savedTemplates', JSON.stringify(savedTemplates));
@@ -32,12 +35,18 @@ export default function SaveTemplateModal({ onClose }) {
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Save Template</h2>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200">
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-gray-200"
+          >
             <RxCross1 size={20} />
           </button>
         </div>
         <div className="space-y-4">
-          <label htmlFor="templateName" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="templateName"
+            className="block text-sm font-medium text-gray-700"
+          >
             Template Name
           </label>
           <input

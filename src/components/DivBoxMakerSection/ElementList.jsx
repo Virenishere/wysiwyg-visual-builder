@@ -1,6 +1,6 @@
-import React from "react";
-import { RiEdit2Line, RiDeleteBin6Line } from "react-icons/ri";
-import useDivStore from "@/store/UseDivStore";
+import React from 'react';
+import { RiEdit2Line, RiDeleteBin6Line } from 'react-icons/ri';
+import useDivStore from '@/store/UseDivStore';
 
 export default function ElementList({ parentId, box }) {
   const { selectedElementId, removeElement, setSelectedElement } =
@@ -29,8 +29,8 @@ export default function ElementList({ parentId, box }) {
                 className={`flex justify-between items-center p-3 rounded-lg border shadow-sm cursor-pointer transition-colors
                   ${
                     isSelected
-                      ? "bg-purple-50 border-purple-300"
-                      : "bg-white border-gray-200 hover:bg-gray-50"
+                      ? 'bg-purple-50 border-purple-300'
+                      : 'bg-white border-gray-200 hover:bg-gray-50'
                   }`}
                 onClick={() => {
                   setSelectedElement(el.id);

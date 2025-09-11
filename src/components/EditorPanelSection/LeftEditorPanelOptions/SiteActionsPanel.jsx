@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { RxCross1 } from "react-icons/rx";
-import { IoEyeSharp } from "react-icons/io5";
-import { MdSave } from "react-icons/md";
-import { FaGlobe } from "react-icons/fa";
-import Link from "next/link";
-import SaveTemplateModal from "../SaveTemplateModal";
+import { useState } from 'react';
+import { RxCross1 } from 'react-icons/rx';
+import { IoEyeSharp } from 'react-icons/io5';
+import { MdSave } from 'react-icons/md';
+import { FaGlobe } from 'react-icons/fa';
+import Link from 'next/link';
+import SaveTemplateModal from '../SaveTemplateModal';
 
 export default function SiteActionsPanel({ onClose }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,7 +27,9 @@ export default function SiteActionsPanel({ onClose }) {
           <Link href="/preview">
             <button className="flex items-center gap-3 w-full px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer">
               <IoEyeSharp className="text-blue-500" size={20} />
-              <span className="text-gray-800 font-medium">Preview This Site</span>
+              <span className="text-gray-800 font-medium">
+                Preview This Site
+              </span>
             </button>
           </Link>
 
@@ -51,7 +53,9 @@ export default function SiteActionsPanel({ onClose }) {
           </Link>
         </div>
       </div>
-      {isModalOpen && <SaveTemplateModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <SaveTemplateModal onClose={() => setIsModalOpen(false)} />
+      )}
     </>
   );
 }

@@ -1,6 +1,6 @@
-"use client";
-import { FaTrashAlt } from "react-icons/fa";
-import { FiSettings, FiZap } from "react-icons/fi";
+'use client';
+import { FaTrashAlt } from 'react-icons/fa';
+import { FiSettings, FiZap } from 'react-icons/fi';
 
 export default function Header({
   selectedElement,
@@ -18,7 +18,7 @@ export default function Header({
         <div>
           <h3 className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             {selectedElement.type.charAt(0).toUpperCase() +
-              selectedElement.type.slice(1)}{" "}
+              selectedElement.type.slice(1)}{' '}
             Properties
           </h3>
           <p className="text-xs text-gray-500 flex items-center gap-1">

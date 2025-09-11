@@ -1,7 +1,7 @@
-import React from "react";
-import { FaDownload, FaEye } from "react-icons/fa";
-import { GoDotFill } from "react-icons/go";
-import Link from "next/link";
+import React from 'react';
+import { FaDownload, FaEye } from 'react-icons/fa';
+import { GoDotFill } from 'react-icons/go';
+import Link from 'next/link';
 
 export default function TemplateCard({
   template,
@@ -14,8 +14,8 @@ export default function TemplateCard({
       key={template.id}
       className={`cursor-pointer transition-all duration-200 hover-shadow-lg ${
         isSelected
-          ? "border-blue-500 bg-blue-50"
-          : "border-gray-200 hover:border-gray-300"
+          ? 'border-blue-500 bg-blue-50'
+          : 'border-gray-200 hover:border-gray-300'
       }`}
     >
       <div className="mb-4">
@@ -41,7 +41,7 @@ export default function TemplateCard({
             className="w-full h-52 object-cover"
             onError={(e) => {
               e.target.src =
-                "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop";
+                'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop';
             }}
           />
 

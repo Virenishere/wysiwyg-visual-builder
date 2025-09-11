@@ -1,7 +1,7 @@
-import { RxCross1 } from "react-icons/rx";
-import { GoPlus } from "react-icons/go";
-import SectionsPanel from "@/components/PropertiesTabSection/SectionsPanel";
-import useDivStore from "@/store/UseDivStore";
+import { RxCross1 } from 'react-icons/rx';
+import { GoPlus } from 'react-icons/go';
+import SectionsPanel from '@/components/PropertiesTabSection/SectionsPanel';
+import useDivStore from '@/store/UseDivStore';
 
 export default function AddSectionPanel({ onClose }) {
   const {
