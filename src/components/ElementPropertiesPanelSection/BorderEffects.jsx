@@ -93,7 +93,11 @@ export default function BorderEffects({
             Box Shadow
           </label>
           <select
-            value={selectedElement.boxShadow}
+            value={
+              selectedElement.boxShadow ||
+              selectedElement.style?.boxShadow ||
+              'none'
+            }
             onChange={(e) =>
               updateElement(parentId, boxId, elementId, {
                 boxShadow: e.target.value,

@@ -248,6 +248,7 @@ const useDivStore = create(
       },
 
       // Element actions inside RND boxes
+
       addElement: (parentId, boxId, elementType) => {
         set((state) => {
           const { selectedElementId } = get();
@@ -273,58 +274,123 @@ const useDivStore = create(
             }
           }
 
-          const newElement = {
+          // Create element based on type with proper defaults
+          let newElement = {
             id: nextElementId++,
             type: elementType,
             x,
             y,
-            width:
-              elementType === 'text'
-                ? 100
-                : elementType === 'image'
-                  ? 80
-                  : elementType === 'card'
-                    ? 200
-                    : elementType === 'line'
-                      ? 200
-                      : 120,
-            height:
-              elementType === 'text'
-                ? 30
-                : elementType === 'image'
-                  ? 80
-                  : elementType === 'paragraph'
-                    ? 60
-                    : elementType === 'card'
-                      ? 150
-                      : elementType === 'line'
-                        ? 2
-                        : 35,
-            content:
-              elementType === 'text'
-                ? 'Sample Text'
-                : elementType === 'paragraph'
-                  ? '<p>Sample paragraph content</p>'
-                  : elementType === 'button'
-                    ? 'Click Me'
-                    : '',
+            zIndex: 0,
+            customStyles: {},
             fontSize: elementType === 'text' ? 16 : 14,
             fontFamily: 'Arial, sans-serif',
             color: elementType === 'button' ? '#ffffff' : '#000000',
-            backgroundColor:
-              elementType === 'button' ? '#007bff' : 'transparent',
+            backgroundColor: 'transparent',
             margin: { top: 0, right: 0, bottom: 0, left: 0 },
             padding: { top: 5, right: 10, bottom: 5, left: 10 },
-            borderRadius: elementType === 'button' ? 5 : 0,
+            borderRadius: 0,
             border: 'none',
             imageUrl: null,
-            style:
-              elementType === 'card'
-                ? { backgroundColor: '#f0f0f0', borderRadius: '8px' }
-                : elementType === 'line'
-                  ? { backgroundColor: '#000000' }
-                  : {},
           };
+
+          // Set type-specific properties
+          switch (elementType) {
+            case 'text':
+              newElement = {
+                ...newElement,
+                width: 100,
+                height: 30,
+                content: 'Sample Text',
+              };
+              break;
+
+            case 'paragraph':
+              newElement = {
+                ...newElement,
+                width: 200,
+                height: 60,
+                content: '<p>Sample paragraph content</p>',
+              };
+              break;
+
+            case 'button':
+              newElement = {
+                ...newElement,
+                width: 120,
+                height: 35,
+                content: 'Click Me',
+                backgroundColor: '#007bff',
+                borderRadius: 5,
+              };
+              break;
+
+            case 'image':
+              newElement = {
+                ...newElement,
+                width: 80,
+                height: 80,
+                content: '',
+                padding: { top: 0, right: 0, bottom: 0, left: 0 },
+              };
+              break;
+
+            case 'card':
+              newElement = {
+                ...newElement,
+                width: 200,
+                height: 150,
+                // content: 'Card Content',
+                backgroundColor: '#f8f9fa',
+                // border: '1px solid #e9ecef',
+                borderRadius: 8,
+                padding: { top: 15, right: 15, bottom: 15, left: 15 },
+                style: {
+                  backgroundColor: '#f8f9fa',
+                  // border: '1px solid #e9ecef',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                },
+              };
+              break;
+
+            case 'line':
+              newElement = {
+                ...newElement,
+                width: 200,
+                height: 2,
+                content: '',
+                backgroundColor: '#000000',
+                padding: { top: 0, right: 0, bottom: 0, left: 0 },
+                style: {
+                  backgroundColor: '#000000',
+                  minHeight: '2px',
+                },
+              };
+              break;
+
+            case 'div':
+              newElement = {
+                ...newElement,
+                width: 150,
+                height: 100,
+                content: 'Div Element',
+                border: '1px solid #ddd',
+                style: {
+                  backgroundColor: 'transparent',
+                  border: '1px solid #ddd',
+                },
+              };
+              break;
+
+            default:
+              newElement = {
+                ...newElement,
+                width: 120,
+                height: 35,
+                content: '',
+              };
+              break;
+          }
 
           return {
             parents: state.parents.map((p) =>

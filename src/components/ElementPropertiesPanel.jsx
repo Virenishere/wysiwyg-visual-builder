@@ -8,6 +8,7 @@ import Typography from './ElementPropertiesPanelSection/Typography';
 import BorderEffects from './ElementPropertiesPanelSection/BorderEffects';
 import ContentInput from './ElementPropertiesPanelSection/ContentInput';
 import LineElementProperties from './ElementPropertiesPanelSection/LineElementProperties';
+import CustomizationPanel from './ElementPropertiesPanelSection/CustomizationPanel';
 
 export default function ElementPropertiesPanel() {
   const {
@@ -73,6 +74,14 @@ export default function ElementPropertiesPanel() {
 
         {/* Position & Size */}
         <PositionSize
+          selectedElement={selectedElement}
+          updateElement={updateElement}
+          parentId={selectedParentId}
+          boxId={selectedBoxId}
+          elementId={selectedElementId}
+        />
+
+        <CustomizationPanel
           selectedElement={selectedElement}
           updateElement={updateElement}
           parentId={selectedParentId}

@@ -17,6 +17,8 @@ export default function ElementRenderer({ element }) {
     borderRadius: `${element.borderRadius || 0}px`,
     border: element.border || 'none',
     boxSizing: 'border-box',
+    zIndex: element.zIndex || 0,
+    ...element.customStyles,
   };
 
   switch (element.type) {
@@ -111,12 +113,105 @@ export default function ElementRenderer({ element }) {
 
     case 'card':
       return (
-        <div key={element.id} style={{ ...baseStyle, ...element.style }} />
+        <div
+          key={element.id}
+          style={{
+            ...baseStyle,
+            ...element.style, // Apply custom styles first
+                        backgroundColor:
+              element.backgroundColor ||
+              element.style?.backgroundColor ||
+              '#f8f9fa',
+            border:
+              element.border || element.style?.border || '1px solid #e9ecef',
+            borderRadius: `${
+              element.borderRadius || element.style?.borderRadius || 8
+            }px`,
+            boxShadow:
+              element.boxShadow ||
+              element.style?.boxShadow ||
+              '0 2px 4px rgba(0,0,0,0.1)',
+          }}
+        >
+          {/* Add content indicator for cards */}
+          {element.content && (
+            <div
+              style={{
+                padding: '8px',
+                fontSize: '12px',
+                color: element.color || '#333',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {element.content}
+            </div>
+          )}
+          {/* Visual indicator for empty/small cards */}
+          {!element.content && element.height <= 30 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '10px',
+                color: '#999',
+                pointerEvents: 'none',
+              }}
+            >
+              Card
+            </div>
+          )}
+        </div>
       );
 
     case 'line':
       return (
-        <div key={element.id} style={{ ...baseStyle, ...element.style }} />
+        <div
+          key={element.id}
+          style={{
+            ...baseStyle,
+            // Ensure line is always visible
+            backgroundColor:
+              element.backgroundColor ||
+              element.style?.backgroundColor ||
+              '#000000',
+            // Set minimum height for visibility in editor
+            minHeight: element.height < 2 ? '2px' : `${element.height}px`,
+            // Remove padding for lines
+            padding: 0,
+            // Ensure proper line styling
+            border: element.border || 'none',
+            borderRadius: `${element.borderRadius || 0}px`,
+            // Apply any custom styles
+            ...element.style,
+            // Override height to ensure minimum visibility
+            height: element.height < 1 ? '1px' : `${element.height}px`,
+          }}
+        >
+          {/* Add visual indicator for very thin lines in editor */}
+          {element.height <= 2 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '-15px',
+                left: '0',
+                fontSize: '8px',
+                color: '#999',
+                pointerEvents: 'none',
+                whiteSpace: 'nowrap',
+                background: 'rgba(255,255,255,0.8)',
+                padding: '1px 3px',
+                borderRadius: '2px',
+                display: element.height < 2 ? 'block' : 'none',
+              }}
+            >
+              Line ({element.height}px)
+            </div>
+          )}
+        </div>
       );
 
     case 'div':
@@ -125,16 +220,31 @@ export default function ElementRenderer({ element }) {
           key={element.id}
           style={{
             ...baseStyle,
+            backgroundColor: element.backgroundColor || 'transparent',
+            border: element.border || '1px solid #ddd',
+            // Apply any custom styles
             ...element.style,
-            backgroundColor: element.backgroundColor,
           }}
-        />
+        >
+          {/* Add content if available */}
+          {element.content && (
+            <div
+              style={{
+                padding: '4px',
+                fontSize: element.fontSize || '12px',
+                color: element.color || '#333',
+              }}
+            >
+              {element.content}
+            </div>
+          )}
+        </div>
       );
 
     default:
       return (
         <div key={element.id} style={baseStyle}>
-          Unknown Element
+          Unknown Element: {element.type}
         </div>
       );
   }

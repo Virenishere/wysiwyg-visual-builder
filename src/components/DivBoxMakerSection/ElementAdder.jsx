@@ -1,7 +1,7 @@
 import React from 'react';
 import { IoText } from 'react-icons/io5';
-import { RxSlash } from 'react-icons/rx';
-import { FaRegCreditCard } from 'react-icons/fa';
+import { MdOutlineHorizontalRule } from "react-icons/md";
+import { TbRectangleFilled } from "react-icons/tb";
 import { FaParagraph, FaRectangleAd, FaRegImages } from 'react-icons/fa6';
 import useDivStore from '@/store/UseDivStore';
 
@@ -17,8 +17,8 @@ export default function ElementAdder({ parentId, boxId }) {
     { Icon: FaParagraph, label: 'Add Paragraph', type: 'paragraph' },
     { Icon: FaRectangleAd, label: 'Add Button', type: 'button' },
     { Icon: FaRegImages, label: 'Add Image', type: 'image' },
-    { Icon: FaRegCreditCard, label: 'Add Card', type: 'card' },
-    { Icon: RxSlash, label: 'Add Line', type: 'line' },
+    { Icon: TbRectangleFilled, label: 'Add Card', type: 'card' },
+    { Icon: MdOutlineHorizontalRule, label: 'Add Line', type: 'line' },
   ];
 
   return (
