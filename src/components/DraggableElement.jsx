@@ -20,7 +20,7 @@ export default function DraggableElement({
   isSelected,
   onSelect,
 }) {
-  const { updateElement } = useDivStore();
+  const { updateElement, setIsResizing } = useDivStore();
   const [isEditingText, setIsEditingText] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -91,7 +91,12 @@ export default function DraggableElement({
       onDragStop={(e, d) => {
         updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
       }}
+      onResizeStart={(e) => {
+        e.stopPropagation();
+        setIsResizing(true);
+      }}
       onResizeStop={(e, direction, ref, delta, pos) => {
+        setIsResizing(false);
         updateElement(parentId, boxId, element.id, {
           width: ref.offsetWidth,
           height: ref.offsetHeight,

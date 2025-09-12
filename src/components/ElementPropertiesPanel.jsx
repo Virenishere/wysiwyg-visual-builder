@@ -18,6 +18,7 @@ export default function ElementPropertiesPanel() {
     selectedElementId,
     updateElement,
     removeElement,
+    duplicateElement,
   } = useDivStore();
 
   const selectedParent = parents.find((p) => p.id === selectedParentId);
@@ -61,6 +62,7 @@ export default function ElementPropertiesPanel() {
           selectedBoxId={selectedBoxId}
           selectedElementId={selectedElementId}
           removeElement={removeElement}
+          duplicateElement={duplicateElement}
         />
 
         {/* Content Input */}

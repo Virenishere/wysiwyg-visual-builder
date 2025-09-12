@@ -1,10 +1,17 @@
 import React from 'react';
 import { RiEdit2Line, RiDeleteBin6Line } from 'react-icons/ri';
 import useDivStore from '@/store/UseDivStore';
+import { FaCopy } from 'react-icons/fa';
 
 export default function ElementList({ parentId, box }) {
-  const { selectedElementId, removeElement, setSelectedElement } =
-    useDivStore();
+  const {
+    selectedElementId,
+    removeElement,
+    selectedParentId,
+    selectedBoxId,
+    setSelectedElement,
+    duplicateElement,
+  } = useDivStore();
   const elements = box?.elements ?? [];
 
   return (
@@ -44,6 +51,23 @@ export default function ElementList({ parentId, box }) {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
+                  {/* copy element  */}
+                  <button
+                    type="button"
+                    aria-label="Copy element"
+                    title="Copy element"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateElement(
+                        selectedParentId,
+                        selectedBoxId,
+                        el.id 
+                      );
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                  >
+                    <FaCopy />
+                  </button>
                   {/* Edit Button */}
                   <button
                     type="button"

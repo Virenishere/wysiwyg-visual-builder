@@ -256,9 +256,10 @@ const useDivStore = create(
           let x = 10;
           let y = 10;
 
+          const parent = state.parents.find((p) => p.id === parentId);
+          const box = parent?.rnds.find((b) => b.id === boxId);
+
           if (selectedElementId) {
-            const parent = state.parents.find((p) => p.id === parentId);
-            const box = parent?.rnds.find((b) => b.id === boxId);
             if (box) {
               const selectedElement = box.elements.find(
                 (el) => el.id === selectedElementId
@@ -273,6 +274,9 @@ const useDivStore = create(
               }
             }
           }
+
+          const maxWidth = box ? box.width * 0.9 : 150;
+          const maxHeight = box ? box.height * 0.9 : 150;
 
           // Create element based on type with proper defaults
           let newElement = {
@@ -298,8 +302,8 @@ const useDivStore = create(
             case 'text':
               newElement = {
                 ...newElement,
-                width: 100,
-                height: 30,
+                width: Math.min(100, maxWidth),
+                height: Math.min(30, maxHeight),
                 content: 'Sample Text',
               };
               break;
@@ -307,8 +311,8 @@ const useDivStore = create(
             case 'paragraph':
               newElement = {
                 ...newElement,
-                width: 200,
-                height: 60,
+                width: Math.min(200, maxWidth),
+                height: Math.min(60, maxHeight),
                 content: '<p>Sample paragraph content</p>',
               };
               break;
@@ -316,8 +320,8 @@ const useDivStore = create(
             case 'button':
               newElement = {
                 ...newElement,
-                width: 120,
-                height: 35,
+                width: Math.min(120, maxWidth),
+                height: Math.min(35, maxHeight),
                 content: 'Click Me',
                 backgroundColor: '#007bff',
                 borderRadius: 5,
@@ -327,8 +331,8 @@ const useDivStore = create(
             case 'image':
               newElement = {
                 ...newElement,
-                width: 80,
-                height: 80,
+                width: Math.min(80, maxWidth),
+                height: Math.min(80, maxHeight),
                 content: '',
                 padding: { top: 0, right: 0, bottom: 0, left: 0 },
               };
@@ -337,8 +341,8 @@ const useDivStore = create(
             case 'card':
               newElement = {
                 ...newElement,
-                width: 200,
-                height: 150,
+                width: Math.min(200, maxWidth),
+                height: Math.min(150, maxHeight),
                 // content: 'Card Content',
                 backgroundColor: '#f8f9fa',
                 // border: '1px solid #e9ecef',
@@ -356,7 +360,7 @@ const useDivStore = create(
             case 'line':
               newElement = {
                 ...newElement,
-                width: 200,
+                width: Math.min(200, maxWidth),
                 height: 2,
                 content: '',
                 backgroundColor: '#000000',
@@ -371,8 +375,8 @@ const useDivStore = create(
             case 'div':
               newElement = {
                 ...newElement,
-                width: 150,
-                height: 100,
+                width: Math.min(150, maxWidth),
+                height: Math.min(100, maxHeight),
                 content: 'Div Element',
                 border: '1px solid #ddd',
                 style: {
@@ -385,8 +389,8 @@ const useDivStore = create(
             default:
               newElement = {
                 ...newElement,
-                width: 120,
-                height: 35,
+                width: Math.min(120, maxWidth),
+                height: Math.min(35, maxHeight),
                 content: '',
               };
               break;
@@ -423,11 +427,19 @@ const useDivStore = create(
                     box.id === boxId
                       ? {
                           ...box,
-                          elements: box.elements.map((element) =>
-                            element.id === elementId
-                              ? { ...element, ...updates }
-                              : element
-                          ),
+                          elements: box.elements.map((element) => {
+                            if (element.id === elementId) {
+                              const newElement = { ...element, ...updates };
+                              if (newElement.type === 'card') {
+                                newElement.style = {
+                                  ...newElement.style,
+                                  ...updates,
+                                };
+                              }
+                              return newElement;
+                            }
+                            return element;
+                          }),
                         }
                       : box
                   ),
@@ -536,8 +548,8 @@ const useDivStore = create(
                               acc.push({
                                 ...element,
                                 id: nextElementId++,
-                                x: element.x + 10,
-                                y: element.y + 10,
+                                x: element.x + 50,
+                                y: element.y + 50,
                               });
                             }
                             return acc;
