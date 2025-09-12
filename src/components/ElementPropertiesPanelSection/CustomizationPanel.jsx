@@ -80,7 +80,10 @@ export default function CustomizationPanel({
               isValid ? 'border-gray-200' : 'border-red-500'
             }`}
             rows="5"
-            placeholder='{ "animation": "spin 1s linear infinite" }'
+            placeholder={`{
+  "transform": "rotate(10deg)",
+  "boxShadow": "10px 10px 5px 0px rgba(0,0,0,0.75)"
+}`}
           />
           {!isValid && (
             <p className="text-xs text-red-500 mt-1">Invalid JSON format.</p>

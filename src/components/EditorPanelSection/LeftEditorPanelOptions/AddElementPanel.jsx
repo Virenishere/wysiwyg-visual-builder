@@ -26,12 +26,16 @@ export default function AddElementPanel({ onClose }) {
         <div className="flex justify-between items-center mb-4">
           <button
             onClick={() => setSelectedElement(null)}
-            className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-500 transition-colors"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-500 transition-colors cursor-pointer"
           >
             <IoArrowBack />
             Back
           </button>
-          <RxCross1 size={24} className="cursor-pointer" onClick={onClose} />
+          <RxCross1
+            size={24}
+            className="cursor-pointer hover:text-red-500"
+            onClick={onClose}
+          />
         </div>
         <ElementPropertiesPanel />
       </div>
@@ -42,7 +46,11 @@ export default function AddElementPanel({ onClose }) {
     <div className="w-96 bg-white h-full shadow-lg p-4 border-t-6 border-blue-700">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">Add Elements</h2>
-        <RxCross1 size={24} className="cursor-pointer" onClick={onClose} />
+        <RxCross1
+          size={24}
+          className="cursor-pointer hover:text-red-500"
+          onClick={onClose}
+        />
       </div>
 
       {/* Full-width divider */}

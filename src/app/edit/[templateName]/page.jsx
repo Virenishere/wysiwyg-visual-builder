@@ -6,6 +6,7 @@ import DivComponent from '@/components/DivComponent';
 import useDivStore from '@/store/UseDivStore';
 import LeftEditorPanel from '@/components/EditorPanelSection/LeftEditorPanel';
 import { RxCross1 } from 'react-icons/rx';
+import Image from 'next/image';
 
 const TemplatePage = ({ params }) => {
   const messages = [
@@ -77,14 +78,17 @@ const TemplatePage = ({ params }) => {
           onClick={() => setPreviewingImage(null)}
         >
           <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <img
+            <Image
               src={previewingImage}
               alt="preview"
+              width={800}
+              height={600}
               className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-xl"
             />
+
             <button
               onClick={() => setPreviewingImage(null)}
-              className="absolute -top-4 -right-4 bg-white text-black p-2 rounded-full shadow-lg hover:bg-gray-200 transition-colors"
+              className="absolute -top-4 -right-4 bg-white text-black p-2 rounded-full shadow-lg hover:bg-gray-200 transition-colors cursor-pointer hover:text-red-500"
             >
               <RxCross1 size={20} />
             </button>

@@ -67,11 +67,9 @@ export default function DraggableElement({
         );
       case 'card':
         return (
-          <CardElement
-            id={element.id}
-            style={element.style}
-            children={element.children}
-          />
+          <CardElement id={element.id} style={element.style}>
+            {element.children}
+          </CardElement>
         );
       case 'line':
         return <LineElement id={element.id} style={element.style} />;
@@ -94,6 +92,13 @@ export default function DraggableElement({
       onResizeStart={(e) => {
         e.stopPropagation();
         setIsResizing(true);
+      }}
+      onResize={(e, direction, ref, delta, pos) => {
+        updateElement(parentId, boxId, element.id, {
+          width: ref.offsetWidth,
+          height: ref.offsetHeight,
+          ...pos,
+        });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setIsResizing(false);

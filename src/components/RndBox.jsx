@@ -38,6 +38,13 @@ export default function RndBox({ box, parentId }) {
         e.stopPropagation();
         setIsResizing(true);
       }}
+      onResize={(e, direction, ref, delta, pos) => {
+        updateRnd(parentId, box.id, {
+          width: ref.offsetWidth,
+          height: ref.offsetHeight,
+          ...pos,
+        });
+      }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setIsResizing(false);
         updateRnd(parentId, box.id, {

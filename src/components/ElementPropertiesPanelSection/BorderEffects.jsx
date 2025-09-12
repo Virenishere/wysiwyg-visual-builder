@@ -87,6 +87,42 @@ export default function BorderEffects({
           />
         </div>
 
+        {/* Custom Border */}
+        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+          <label className="text-sm font-medium text-gray-700 mb-3 block">
+            Custom Border
+          </label>
+          <textarea
+            value={selectedElement.border || ''}
+            onChange={(e) =>
+              updateElement(parentId, boxId, elementId, {
+                border: e.target.value,
+              })
+            }
+            className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none hover:border-gray-300"
+            rows="2"
+            placeholder="e.g., 2px solid #ccc"
+          />
+        </div>
+
+        {/* Custom Background */}
+        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+          <label className="text-sm font-medium text-gray-700 mb-3 block">
+            Custom Background
+          </label>
+          <textarea
+            value={selectedElement.backgroundColor || ''}
+            onChange={(e) =>
+              updateElement(parentId, boxId, elementId, {
+                backgroundColor: e.target.value,
+              })
+            }
+            className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none hover:border-gray-300"
+            rows="2"
+            placeholder="e.g., linear-gradient(to right, #ff0000, #0000ff)"
+          />
+        </div>
+
         {/* Box Shadow */}
         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
           <label className="text-sm font-medium text-gray-700 mb-3 block">
