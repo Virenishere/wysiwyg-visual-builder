@@ -20,7 +20,7 @@ export default function DraggableElement({
   isSelected,
   onSelect,
 }) {
-  const { updateElement, setIsResizing } = useDivStore();
+  const { updateElement, setIsResizing, setActiveDragItem } = useDivStore();
   const [isEditingText, setIsEditingText] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -86,27 +86,27 @@ export default function DraggableElement({
       position={{ x: element.x, y: element.y }}
       bounds="parent"
       onDragStart={(e) => e.stopPropagation()}
+      onDrag={(e, d) => {
+        setActiveDragItem({ ...element, ...d });
+      }}
       onDragStop={(e, d) => {
         updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
+        setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
         e.stopPropagation();
         setIsResizing(true);
       }}
       onResize={(e, direction, ref, delta, pos) => {
-        updateElement(parentId, boxId, element.id, {
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-          ...pos,
-        });
+        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+        updateElement(parentId, boxId, element.id, { ...newSize, ...pos });
+        setActiveDragItem({ ...element, ...newSize, ...pos });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setIsResizing(false);
-        updateElement(parentId, boxId, element.id, {
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-          ...pos,
-        });
+        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+        updateElement(parentId, boxId, element.id, { ...newSize, ...pos });
+        setActiveDragItem(null);
       }}
       onClick={(e) => {
         e.stopPropagation();

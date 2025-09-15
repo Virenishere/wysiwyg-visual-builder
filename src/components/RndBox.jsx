@@ -16,6 +16,7 @@ export default function RndBox({ box, parentId }) {
     setLeftPanel,
     setIsResizing,
     duplicateElement,
+    setActiveDragItem,
   } = useDivStore();
 
   const isSelected = selectedBoxId === box.id;
@@ -31,27 +32,27 @@ export default function RndBox({ box, parentId }) {
       position={{ x: box.x, y: box.y }}
       bounds="parent"
       onDragStart={(e) => e.stopPropagation()}
+      onDrag={(e, d) => {
+        setActiveDragItem({ ...box, ...d });
+      }}
       onDragStop={(e, d) => {
         updateRnd(parentId, box.id, { x: d.x, y: d.y });
+        setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
         e.stopPropagation();
         setIsResizing(true);
       }}
       onResize={(e, direction, ref, delta, pos) => {
-        updateRnd(parentId, box.id, {
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-          ...pos,
-        });
+        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+        updateRnd(parentId, box.id, { ...newSize, ...pos });
+        setActiveDragItem({ ...box, ...newSize, ...pos });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setIsResizing(false);
-        updateRnd(parentId, box.id, {
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-          ...pos,
-        });
+        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+        updateRnd(parentId, box.id, { ...newSize, ...pos });
+        setActiveDragItem(null);
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -67,6 +68,7 @@ export default function RndBox({ box, parentId }) {
         zIndex: isSelected ? 5 : 1,
       }}
       className="rnd-box"
+      data-id={box.id}
     >
       {/* Box label */}
       {isSelected && (

@@ -37,6 +37,7 @@ const useDivStore = create(
       isResizing: false,
       previewingImage: null,
       leftPanel: null,
+      activeDragItem: null,
 
       // Image actions
       setPreviewingImage: (imageUrl) => set({ previewingImage: imageUrl }),
@@ -590,6 +591,7 @@ const useDivStore = create(
       setSelectedElement: (id) => set({ selectedElementId: id }),
       setIsResizing: (status) => set({ isResizing: status }),
       setLeftPanel: (panel) => set({ leftPanel: panel }),
+      setActiveDragItem: (item) => set({ activeDragItem: item }),
 
       // Utility actions
       exportData: () => {

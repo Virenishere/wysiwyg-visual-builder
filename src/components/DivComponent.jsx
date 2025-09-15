@@ -38,6 +38,7 @@ export default function DivComponent() {
         return (
           <div
             key={`parent-${parent.id}-${parentIndex}`} // More unique key
+            data-id={parent.id}
             style={{
               ...parentBoundary,
               height: parent.size?.height || 300,

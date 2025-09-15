@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useRef } from 'react';
 import * as templates from '@/templates';
 import GlobalLoader from '@/components/GlobalLoader';
 import DivComponent from '@/components/DivComponent';
@@ -7,6 +7,7 @@ import useDivStore from '@/store/UseDivStore';
 import LeftEditorPanel from '@/components/EditorPanelSection/LeftEditorPanel';
 import { RxCross1 } from 'react-icons/rx';
 import Image from 'next/image';
+import CenterDivIndicator from '@/components/CenterDivIndicator';
 
 const TemplatePage = ({ params }) => {
   const messages = [
@@ -25,9 +26,104 @@ const TemplatePage = ({ params }) => {
     previewingImage,
     setPreviewingImage,
     resetToDefault,
+    activeDragItem,
+    parents,
+    selectedBoxId,
+    selectedElementId,
   } = useDivStore();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
+  const mainContainerRef = useRef(null);
+  const [containerRect, setContainerRect] = useState(null);
+
+  useEffect(() => {
+    if (mainContainerRef.current) {
+      const container =
+        mainContainerRef.current.querySelector('.w-full.h-full');
+      if (container) {
+        setContainerRect(container.getBoundingClientRect());
+      }
+    }
+  }, []);
+
+  function getActiveItemAndParent(
+    parents,
+    selectedBoxId,
+    selectedElementId,
+    activeDragItem,
+    mainContainerRef
+  ) {
+    let activeItem = activeDragItem;
+    let parentDomNode = null;
+
+    if (activeItem) {
+      // Drag in progress
+      const parentData = parents.find((p) =>
+        p.rnds.some(
+          (rnd) =>
+            rnd.id === activeItem.id ||
+            (rnd.elements && rnd.elements.some((el) => el.id === activeItem.id))
+        )
+      );
+      if (parentData && mainContainerRef.current) {
+        if (activeItem.type) {
+          // Element
+          const box = parentData.rnds.find((r) =>
+            r.elements.some((el) => el.id === activeItem.id)
+          );
+          if (box)
+            parentDomNode = mainContainerRef.current.querySelector(
+              `.rnd-box[data-id="${box.id}"]`
+            );
+        } else {
+          // Box
+          parentDomNode = mainContainerRef.current.querySelector(
+            `.parent-container[data-id="${parentData.id}"]`
+          );
+        }
+      }
+    } else {
+      // No drag, check selection
+      if (selectedElementId) {
+        for (const p of parents) {
+          for (const r of p.rnds) {
+            const elem = r.elements.find((e) => e.id === selectedElementId);
+            if (elem) {
+              activeItem = elem;
+              if (mainContainerRef.current)
+                parentDomNode = mainContainerRef.current.querySelector(
+                  `.rnd-box[data-id="${r.id}"]`
+                );
+              break;
+            }
+          }
+          if (activeItem) break;
+        }
+      } else if (selectedBoxId) {
+        for (const p of parents) {
+          const box = p.rnds.find((r) => r.id === selectedBoxId);
+          if (box) {
+            activeItem = box;
+            if (mainContainerRef.current)
+              parentDomNode = mainContainerRef.current.querySelector(
+                `.parent-container[data-id="${p.id}"]`
+              );
+            break;
+          }
+        }
+      }
+    }
+
+    return { activeItem, parentDomNode };
+  }
+
+  const { activeItem, parentDomNode } = getActiveItemAndParent(
+    parents,
+    selectedBoxId,
+    selectedElementId,
+    activeDragItem,
+    mainContainerRef
+  );
 
   useEffect(() => {
     if (templateName && templateName !== 'new-template') {
@@ -66,9 +162,19 @@ const TemplatePage = ({ params }) => {
     <div className="flex h-screen bg-gray-100">
       <LeftEditorPanel />
 
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main
+        className="flex-1 flex items-center justify-center p-4"
+        ref={mainContainerRef}
+      >
         <div className="w-full h-full shadow-2xl  overflow-hidden bg-white">
           <DivComponent key={templateName} />
+          {parentDomNode && (
+            <CenterDivIndicator
+              activeBox={activeItem}
+              parentElement={parentDomNode}
+              containerRect={containerRect}
+            />
+          )}
         </div>
       </main>
 
