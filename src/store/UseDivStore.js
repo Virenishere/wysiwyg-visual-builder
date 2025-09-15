@@ -25,6 +25,8 @@ const useDivStore = create(
               x: 0,
               y: 0,
               elements: [],
+              customHtml: '',
+              customCss: '',
             },
           ],
         },
@@ -208,6 +210,8 @@ const useDivStore = create(
                       x: 50,
                       y: 50,
                       elements: [],
+                      customHtml: '',
+                      customCss: '',
                     },
                   ],
                 }
@@ -245,6 +249,22 @@ const useDivStore = create(
           selectedElementId: null,
         }));
         toast.success('Div box removed.', { icon: '🗑️' });
+      },
+
+      updateRndCustomCode: (parentId, boxId, customCode) => {
+        set((state) => ({
+          parents: state.parents.map((p) =>
+            p.id === parentId
+              ? {
+                  ...p,
+                  rnds: p.rnds.map((box) =>
+                    box.id === boxId ? { ...box, ...customCode } : box
+                  ),
+                }
+              : p
+          ),
+        }));
+        toast.success('Custom code updated!');
       },
 
       // Element actions inside RND boxes

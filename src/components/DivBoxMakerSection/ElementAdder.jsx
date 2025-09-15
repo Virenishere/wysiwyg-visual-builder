@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IoText } from 'react-icons/io5';
-import { MdOutlineHorizontalRule } from "react-icons/md";
-import { TbRectangleFilled } from "react-icons/tb";
-import { FaParagraph, FaRectangleAd, FaRegImages } from 'react-icons/fa6';
+import { MdOutlineHorizontalRule } from 'react-icons/md';
+import { TbRectangleFilled } from 'react-icons/tb';
+import {
+  FaParagraph,
+  FaRectangleAd,
+  FaRegImages,
+  FaCode,
+} from 'react-icons/fa6';
 import useDivStore from '@/store/UseDivStore';
+import CustomCodePanel from '@/components/CustomCodePanel';
 
 export default function ElementAdder({ parentId, boxId }) {
-  const { addElement, selectedBoxId } = useDivStore();
+  const { addElement, selectedBoxId, parents } = useDivStore();
+  const [showCodePanel, setShowCodePanel] = useState(false);
+
+  const selectedParent = parents.find((p) => p.id === parentId);
+  const selectedBox = selectedParent?.rnds.find((b) => b.id === boxId);
 
   const handleAdd = (type) => {
     if (boxId) addElement(parentId, boxId, type);
@@ -19,7 +29,18 @@ export default function ElementAdder({ parentId, boxId }) {
     { Icon: FaRegImages, label: 'Add Image', type: 'image' },
     { Icon: TbRectangleFilled, label: 'Add Card', type: 'card' },
     { Icon: MdOutlineHorizontalRule, label: 'Add Line', type: 'line' },
+    { Icon: FaCode, label: 'Add Custom Code', type: 'code' },
   ];
+
+  if (showCodePanel) {
+    return (
+      <CustomCodePanel
+        box={selectedBox}
+        parentId={parentId}
+        onBack={() => setShowCodePanel(false)}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col">
@@ -40,7 +61,9 @@ export default function ElementAdder({ parentId, boxId }) {
         {buttons.map(({ Icon, label, type }, i) => (
           <div key={i} className="relative group">
             <button
-              onClick={() => handleAdd(type)}
+              onClick={() =>
+                type === 'code' ? setShowCodePanel(true) : handleAdd(type)
+              }
               className="border-2 px-4 py-4 border-dashed border-gray-300 rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition-all duration-300 shadow-sm"
             >
               <Icon size={24} className="text-gray-600" />

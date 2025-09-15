@@ -112,6 +112,12 @@ export default function RndBox({ box, parentId }) {
         </button>
       )}
 
+      {/* Render custom HTML and CSS */}
+      {box.customCss && <style>{box.customCss}</style>}
+      {box.customHtml && (
+        <div dangerouslySetInnerHTML={{ __html: box.customHtml }} />
+      )}
+
       {/* Render elements inside this box */}
       {box.elements?.map((element) => (
         <DraggableElement

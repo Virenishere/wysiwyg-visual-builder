@@ -14,6 +14,10 @@ export default function BoxPreview({ box }) {
         height: `${box.height}px`,
       }}
     >
+      {box.customCss && <style>{box.customCss}</style>}
+      {box.customHtml && (
+        <div dangerouslySetInnerHTML={{ __html: box.customHtml }} />
+      )}
       {box.elements?.map((element) => (
         <ElementRenderer key={element.id} element={element} />
       ))}
