@@ -84,11 +84,9 @@ export default function DraggableElement({
     <Rnd
       size={{ width: element.width, height: element.height }}
       position={{ x: element.x, y: element.y }}
-      bounds="parent"
+      bounds={`.rnd-box[data-id="${boxId}"]`}
       onDragStart={(e) => e.stopPropagation()}
       onDrag={(e, d) => {
-        // Update position in the store on drag
-        updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
         // Set active drag item with element data for indicators
         setActiveDragItem({
           ...element,

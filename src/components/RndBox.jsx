@@ -50,7 +50,7 @@ export default function RndBox({ box, parentId }) {
     <Rnd
       size={{ width: box.width, height: box.height }}
       position={{ x: box.x, y: box.y }}
-      bounds="parent"
+      bounds={`.parent-container[data-id="${parentId}"]`}
       onDragStart={(e) => e.stopPropagation()}
       onDrag={(e, d) => {
         setActiveDragItem({ ...box, ...d });
@@ -86,7 +86,6 @@ export default function RndBox({ box, parentId }) {
           ? 'rgba(59, 130, 246, 0.05)'
           : 'rgba(0, 0, 0, 0.02)',
         zIndex: isSelected ? 5 : 1,
-        position: 'relative', // Ensure proper positioning for indicators
       }}
       className="rnd-box"
       data-id={box.id}
