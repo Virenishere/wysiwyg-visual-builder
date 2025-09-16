@@ -346,6 +346,7 @@ const useDivStore = create(
                 content: 'Click Me',
                 backgroundColor: '#007bff',
                 borderRadius: 5,
+                link: '',
               };
               break;
 

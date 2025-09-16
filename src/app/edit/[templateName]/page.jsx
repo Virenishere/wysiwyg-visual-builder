@@ -37,6 +37,11 @@ const TemplatePage = ({ params }) => {
   const mainContainerRef = useRef(null);
   const [containerRect, setContainerRect] = useState(null);
   const [allBoxes, setAllBoxes] = useState([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (mainContainerRef.current) {
@@ -100,7 +105,7 @@ const TemplatePage = ({ params }) => {
       <LeftEditorPanel />
 
       <main
-        className="flex-1 flex items-center justify-center p-4"
+        className="flex-1 flex items-center justify-center"
         ref={mainContainerRef}
       >
         <div className="w-full h-full shadow-2xl  overflow-hidden bg-white relative">

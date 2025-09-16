@@ -2,12 +2,32 @@ import { useState } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import { IoEyeSharp } from 'react-icons/io5';
 import { MdSave } from 'react-icons/md';
-import { FaGlobe } from 'react-icons/fa';
+import { FaDownload, FaGlobe } from 'react-icons/fa';
 import Link from 'next/link';
 import SaveTemplateModal from '../SaveTemplateModal';
+import DownloadCodeModal from '../DownloadCodeModal';
+import useDivStore from '@/store/UseDivStore';
+import {
+  generateHtmlCss,
+  generateReactCode,
+  downloadFile,
+} from '@/utils/export';
 
 export default function SiteActionsPanel({ onClose }) {
+  const { parents } = useDivStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+
+  const handleDownload = (format) => {
+    if (format === 'html') {
+      const { html } = generateHtmlCss(parents);
+      downloadFile('index.html', html);
+    } else if (format === 'react') {
+      const code = generateReactCode(parents);
+      downloadFile('MyComponent.jsx', code);
+    }
+    setIsDownloadModalOpen(false);
+  };
 
   return (
     <>
@@ -51,10 +71,25 @@ export default function SiteActionsPanel({ onClose }) {
               </span>
             </button>
           </Link>
+
+          {/* Download Code */}
+          <button
+            onClick={() => setIsDownloadModalOpen(true)}
+            className="flex items-center gap-3 w-full px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer"
+          >
+            <FaDownload className="text-red-600" size={20} />
+            <span className="text-gray-800 font-medium">Download Code</span>
+          </button>
         </div>
       </div>
       {isModalOpen && (
         <SaveTemplateModal onClose={() => setIsModalOpen(false)} />
+      )}
+      {isDownloadModalOpen && (
+        <DownloadCodeModal
+          onClose={() => setIsDownloadModalOpen(false)}
+          onDownload={handleDownload}
+        />
       )}
     </>
   );

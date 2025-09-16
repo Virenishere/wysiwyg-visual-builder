@@ -130,10 +130,11 @@ export default function DraggableElement({
         borderRadius: '2px',
         zIndex: isSelected ? 10 : element.zIndex || 1,
       }}
-      className="element-rnd"
+      className={`element-rnd ${element.customClassName || ''}`}
       minHeight={element.type === 'line' ? 1 : 10}
       minWidth={10}
     >
+      {element.customCss && <style>{element.customCss}</style>}
       {renderElementContent()}
     </Rnd>
   );

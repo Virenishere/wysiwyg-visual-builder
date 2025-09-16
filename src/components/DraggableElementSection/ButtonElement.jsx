@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function ButtonElement({
   element,
@@ -16,6 +17,7 @@ export default function ButtonElement({
     padding,
     borderRadius,
     border,
+    link,
   } = element;
 
   const buttonStyle = {
@@ -35,7 +37,20 @@ export default function ButtonElement({
     padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
     borderRadius: `${borderRadius}px`,
     border,
+    textDecoration: 'none', // to remove underline from link
   };
+
+  if (link) {
+    return (
+      <Link
+        href={link}
+        style={buttonStyle}
+        className="hover:opacity-80 hover:scale-105 active:scale-95"
+      >
+        {content}
+      </Link>
+    );
+  }
 
   return (
     <button
