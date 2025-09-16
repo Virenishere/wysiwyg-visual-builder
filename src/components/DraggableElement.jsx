@@ -87,6 +87,8 @@ export default function DraggableElement({
       bounds="parent"
       onDragStart={(e) => e.stopPropagation()}
       onDrag={(e, d) => {
+        // Update position in the store on drag
+        updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
         // Set active drag item with element data for indicators
         setActiveDragItem({
           ...element,
