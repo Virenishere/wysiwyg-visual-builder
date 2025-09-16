@@ -54,7 +54,7 @@ export default function ImageElement({
           <img
             src={element.imageUrl || '/placeholder.svg'}
             alt={element.content}
-            className="w-full h-full object-cover pointer-events-none select-none"
+            className="w-full h-full object-cover select-none"
             style={{
               borderRadius: `${element.borderRadius || 0}px`,
             }}

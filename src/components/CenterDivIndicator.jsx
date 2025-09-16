@@ -1,18 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function CenterDivIndicator({ activeBox }) {
+export default function CenterDivIndicator({ activeBox, containerBounds }) {
   const indicatorContainerRef = useRef(null);
-  const [parentElement, setParentElement] = useState(null);
+  const [containerElement, setContainerElement] = useState(null);
 
   useEffect(() => {
     if (indicatorContainerRef.current) {
-      setParentElement(indicatorContainerRef.current.parentElement);
+      setContainerElement(indicatorContainerRef.current.parentElement);
     }
   }, []);
 
-  if (!activeBox || !parentElement) {
+  if (!activeBox || (!containerElement && !containerBounds)) {
     return null;
   }
+
+  // use containerBounds if provide, otherwise use the container element
+  const bounds = containerBounds || {
+    width: containerElement.clientWidth,
+    height: containerElement.clientHeight,
+    x: 0,
+    y: 0,
+  };
 
   const boxRect = {
     width: activeBox.width,
@@ -21,9 +29,9 @@ export default function CenterDivIndicator({ activeBox }) {
     y: activeBox.y,
   };
 
-  const parentCenter = {
-    x: parentElement.clientWidth / 2,
-    y: parentElement.clientHeight / 2,
+  const containerCenter = {
+    x: bounds.width / 2,
+    y: bounds.height / 2,
   };
 
   const boxCenter = {
@@ -31,8 +39,12 @@ export default function CenterDivIndicator({ activeBox }) {
     y: boxRect.y + boxRect.height / 2,
   };
 
-  const isCenteredHorizontally = Math.abs(boxCenter.x - parentCenter.x) < 2;
-  const isCenteredVertically = Math.abs(boxCenter.y - parentCenter.y) < 2;
+  // tolerance for centering detection
+  const tolerance = 3;
+  const isCenteredHorizontally =
+    Math.abs(boxCenter.x - containerCenter.x) < tolerance;
+  const isCenteredVertically =
+    Math.abs(boxCenter.y - containerCenter.y) < tolerance;
 
   return (
     <div
@@ -40,16 +52,27 @@ export default function CenterDivIndicator({ activeBox }) {
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
       style={{ zIndex: 100 }}
     >
+      {/* Vertical center line */}
       {isCenteredHorizontally && (
         <div
-          className="absolute top-0 h-full border-l-2 border-dotted border-blue-500"
-          style={{ left: `${parentCenter.x}px` }}
+          className="absolute top-0 h-full border-l-2 border-dotted border-red-500"
+          style={{
+            left: `${containerCenter.x}px`,
+            top: '0px',
+            height: '100%',
+          }}
         />
       )}
+
+      {/* Horizontal center line */}
       {isCenteredVertically && (
         <div
-          className="absolute left-0 w-full border-t-2 border-dotted border-blue-500"
-          style={{ top: `${parentCenter.y}px` }}
+          className="absolute left-0 w-full border-t-2 border-dotted border-red-500"
+          style={{
+            top: `${containerCenter.y}px`,
+            left: '0px',
+            width: '100%',
+          }}
         />
       )}
     </div>

@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Rnd } from 'react-rnd';
 import useDivStore from '@/store/UseDivStore';
 
-// Sub-components
+// Sub-components (assuming these exist)
 import TextElement from './DraggableElementSection/TextElement';
 import ParagraphElement from './DraggableElementSection/ParagraphElement';
 import ButtonElement from './DraggableElementSection/ButtonElement';
@@ -87,7 +87,14 @@ export default function DraggableElement({
       bounds="parent"
       onDragStart={(e) => e.stopPropagation()}
       onDrag={(e, d) => {
-        setActiveDragItem({ ...element, ...d });
+        // Set active drag item with element data for indicators
+        setActiveDragItem({
+          ...element,
+          x: d.x,
+          y: d.y,
+          // Add a flag to identify this as an element
+          isElement: true,
+        });
       }}
       onDragStop={(e, d) => {
         updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
@@ -100,7 +107,13 @@ export default function DraggableElement({
       onResize={(e, direction, ref, delta, pos) => {
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
         updateElement(parentId, boxId, element.id, { ...newSize, ...pos });
-        setActiveDragItem({ ...element, ...newSize, ...pos });
+        // Set active drag item for resizing indicators
+        setActiveDragItem({
+          ...element,
+          ...newSize,
+          ...pos,
+          isElement: true,
+        });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setIsResizing(false);
@@ -115,11 +128,11 @@ export default function DraggableElement({
       style={{
         border: isSelected ? '2px solid #007bff' : '1px solid transparent',
         borderRadius: '2px',
-        zIndex: isSelected ? 10 : 1,
+        zIndex: isSelected ? 10 : element.zIndex || 1,
       }}
       className="element-rnd"
-      minHeight={1}
-      minWidth={1}
+      minHeight={element.type === 'line' ? 1 : 10}
+      minWidth={10}
     >
       {renderElementContent()}
     </Rnd>

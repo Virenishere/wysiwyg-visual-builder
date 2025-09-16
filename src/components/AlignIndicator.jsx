@@ -1,97 +1,206 @@
-import React, { useState } from 'react';
-import { Rnd } from 'react-rnd';
+import React, { useState, useRef, useEffect } from 'react';
 
-export default function AlignIndicator() {
-  const [box1, setBox1] = useState({ x: 50, y: 50, width: 100, height: 100 });
-  const [box2, setBox2] = useState({ x: 250, y: 150, width: 100, height: 100 });
+export default function AlignIndicator({
+  activeItem,
+  allItems = [],
+  containerBounds,
+  tolerance = 2,
+}) {
+  const indicatorContainerRef = useRef(null);
+  const [containerElement, setContainerElement] = useState(null);
 
-  const [guides, setGuides] = useState({ v: [], h: [] });
-
-  const checkAlignment = (moving, other) => {
-    const movingLeft = moving.x;
-    const movingRight = moving.x + moving.width;
-    const movingTop = moving.y;
-    const movingBottom = moving.y + moving.height;
-
-    const otherLeft = other.x;
-    const otherRight = other.x + other.width;
-    const otherTop = other.y;
-    const otherBottom = other.y + other.height;
-
-    let newGuides = { v: [], h: [] };
-
-    // vertical alignment (left/right)
-    if (Math.abs(movingLeft - otherLeft) < 1) {
-      newGuides.v.push({ x: movingLeft, type: 'left' });
+  useEffect(() => {
+    if (indicatorContainerRef.current) {
+      setContainerElement(indicatorContainerRef.current.parentElement);
     }
-    if (Math.abs(movingRight - otherRight) < 1) {
-      newGuides.v.push({ x: movingRight, type: 'right' });
-    }
+  }, []);
 
-    // horizontal alignment (top/bottom)
-    if (Math.abs(movingTop - otherTop) < 1) {
-      newGuides.h.push({ y: movingTop, type: 'top' });
-    }
-    if (Math.abs(movingBottom - otherBottom) < 1) {
-      newGuides.h.push({ y: movingBottom, type: 'bottom' });
-    }
+  if (
+    !activeItem ||
+    (!containerElement && !containerBounds) ||
+    allItems.length === 0
+  ) {
+    return null;
+  }
 
-    setGuides(newGuides);
+  // Use containerBounds if provided, otherwise use the container element
+  const bounds = containerBounds || {
+    width: containerElement.clientWidth,
+    height: containerElement.clientHeight,
+    x: 0,
+    y: 0,
   };
 
+  const generateAlignmentGuides = () => {
+    const guides = { vertical: [], horizontal: [] };
+
+    // Get active item bounds
+    const activeLeft = activeItem.x;
+    const activeRight = activeItem.x + activeItem.width;
+    const activeCenterX = activeItem.x + activeItem.width / 2;
+    const activeTop = activeItem.y;
+    const activeBottom = activeItem.y + activeItem.height;
+    const activeCenterY = activeItem.y + activeItem.height / 2;
+
+    // Check alignment against other items
+    allItems.forEach((item) => {
+      if (item.id === activeItem.id) return;
+
+      const itemLeft = item.x;
+      const itemRight = item.x + item.width;
+      const itemCenterX = item.x + item.width / 2;
+      const itemTop = item.y;
+      const itemBottom = item.y + item.height;
+      const itemCenterY = item.y + item.height / 2;
+
+      // Vertical alignment checks (left, right, center)
+      if (Math.abs(activeLeft - itemLeft) < tolerance) {
+        guides.vertical.push({
+          x: activeLeft,
+          type: 'left-left',
+          minY: Math.min(activeTop, itemTop),
+          maxY: Math.max(activeBottom, itemBottom),
+        });
+      }
+      if (Math.abs(activeRight - itemRight) < tolerance) {
+        guides.vertical.push({
+          x: activeRight,
+          type: 'right-right',
+          minY: Math.min(activeTop, itemTop),
+          maxY: Math.max(activeBottom, itemBottom),
+        });
+      }
+      if (Math.abs(activeLeft - itemRight) < tolerance) {
+        guides.vertical.push({
+          x: activeLeft,
+          type: 'left-right',
+          minY: Math.min(activeTop, itemTop),
+          maxY: Math.max(activeBottom, itemBottom),
+        });
+      }
+      if (Math.abs(activeRight - itemLeft) < tolerance) {
+        guides.vertical.push({
+          x: activeRight,
+          type: 'right-left',
+          minY: Math.min(activeTop, itemTop),
+          maxY: Math.max(activeBottom, itemBottom),
+        });
+      }
+      if (Math.abs(activeCenterX - itemCenterX) < tolerance) {
+        guides.vertical.push({
+          x: activeCenterX,
+          type: 'center-center',
+          minY: Math.min(activeTop, itemTop),
+          maxY: Math.max(activeBottom, itemBottom),
+        });
+      }
+
+      // Horizontal alignment checks (top, bottom, center)
+      if (Math.abs(activeTop - itemTop) < tolerance) {
+        guides.horizontal.push({
+          y: activeTop,
+          type: 'top-top',
+          minX: Math.min(activeLeft, itemLeft),
+          maxX: Math.max(activeRight, itemRight),
+        });
+      }
+      if (Math.abs(activeBottom - itemBottom) < tolerance) {
+        guides.horizontal.push({
+          y: activeBottom,
+          type: 'bottom-bottom',
+          minX: Math.min(activeLeft, itemLeft),
+          maxX: Math.max(activeRight, itemRight),
+        });
+      }
+      if (Math.abs(activeTop - itemBottom) < tolerance) {
+        guides.horizontal.push({
+          y: activeTop,
+          type: 'top-bottom',
+          minX: Math.min(activeLeft, itemLeft),
+          maxX: Math.max(activeRight, itemRight),
+        });
+      }
+      if (Math.abs(activeBottom - itemTop) < tolerance) {
+        guides.horizontal.push({
+          y: activeBottom,
+          type: 'bottom-top',
+          minX: Math.min(activeLeft, itemLeft),
+          maxX: Math.max(activeRight, itemRight),
+        });
+      }
+      if (Math.abs(activeCenterY - itemCenterY) < tolerance) {
+        guides.horizontal.push({
+          y: activeCenterY,
+          type: 'center-center',
+          minX: Math.min(activeLeft, itemLeft),
+          maxX: Math.max(activeRight, itemRight),
+        });
+      }
+    });
+
+    // Remove duplicates and ensure guides stay within bounds
+    guides.vertical = guides.vertical
+      .filter(
+        (guide, index, array) =>
+          array.findIndex((g) => g.x === guide.x) === index &&
+          guide.x >= bounds.x &&
+          guide.x <= bounds.x + bounds.width
+      )
+      .map((guide) => ({
+        ...guide,
+        minY: Math.max(guide.minY, bounds.y),
+        maxY: Math.min(guide.maxY, bounds.y + bounds.height),
+      }));
+
+    guides.horizontal = guides.horizontal
+      .filter(
+        (guide, index, array) =>
+          array.findIndex((g) => g.y === guide.y) === index &&
+          guide.y >= bounds.y &&
+          guide.y <= bounds.y + bounds.height
+      )
+      .map((guide) => ({
+        ...guide,
+        minX: Math.max(guide.minX, bounds.x),
+        maxX: Math.min(guide.maxX, bounds.x + bounds.width),
+      }));
+
+    return guides;
+  };
+
+  const guides = generateAlignmentGuides();
+
   return (
-    <div className="relative w-full h-full bg-gray-100">
-      {/* Vertical guides (left & right) */}
-      {guides.v.map((g, i) => (
+    <div
+      ref={indicatorContainerRef}
+      className="absolute inset-0 pointer-events-none"
+      style={{ zIndex: 99 }}
+    >
+      {/* Vertical guides */}
+      {guides.vertical.map((guide, index) => (
         <div
-          key={`v-${i}`}
-          className="absolute top-0 h-full border-l-2 border-dotted border-opacity-50 border-blue-500 pointer-events-none"
-          style={{ left: g.x }}
+          key={`v-${index}`}
+          className="absolute border-l-2 border-dotted border-red-500"
+          style={{
+            left: `${guide.x}px`,
+            top: `${guide.minY}px`,
+            height: `${guide.maxY - guide.minY}px`,
+          }}
         />
       ))}
 
-      {/* Horizontal guides (top & bottom) */}
-      {guides.h.map((g, i) => (
+      {/* Horizontal guides */}
+      {guides.horizontal.map((guide, index) => (
         <div
-          key={`h-${i}`}
-          className="absolute left-0 w-full border-t-2 border-dashed border-opacity-50 border-blue-500 pointer-events-none"
-          style={{ top: g.y }}
+          key={`h-${index}`}
+          className="absolute border-t-2 border-dotted border-red-500"
+          style={{
+            top: `${guide.y}px`,
+            left: `${guide.minX}px`,
+            width: `${guide.maxX - guide.minX}px`,
+          }}
         />
       ))}
-
-      {/* Box 1 */}
-      <Rnd
-        size={{ width: box1.width, height: box1.height }}
-        position={{ x: box1.x, y: box1.y }}
-        onDragStop={(e, d) => setBox1((prev) => ({ ...prev, x: d.x, y: d.y }))}
-        onDrag={(e, d) => checkAlignment({ ...box1, x: d.x, y: d.y }, box2)}
-        onResizeStop={(e, dir, ref, delta, pos) => {
-          setBox1({
-            x: pos.x,
-            y: pos.y,
-            width: parseInt(ref.style.width),
-            height: parseInt(ref.style.height),
-          });
-        }}
-        className="bg-white border border-gray-400 shadow-md"
-      />
-
-      {/* Box 2 */}
-      <Rnd
-        size={{ width: box2.width, height: box2.height }}
-        position={{ x: box2.x, y: box2.y }}
-        onDragStop={(e, d) => setBox2((prev) => ({ ...prev, x: d.x, y: d.y }))}
-        onDrag={(e, d) => checkAlignment({ ...box2, x: d.x, y: d.y }, box1)}
-        onResizeStop={(e, dir, ref, delta, pos) => {
-          setBox2({
-            x: pos.x,
-            y: pos.y,
-            width: parseInt(ref.style.width),
-            height: parseInt(ref.style.height),
-          });
-        }}
-        className="bg-white border border-gray-400 shadow-md"
-      />
     </div>
   );
 }

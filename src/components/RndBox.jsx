@@ -3,6 +3,8 @@ import React from 'react';
 import { Rnd } from 'react-rnd';
 import useDivStore from '@/store/UseDivStore';
 import DraggableElement from './DraggableElement';
+import CenterDivIndicator from './CenterDivIndicator';
+import AlignIndicator from './AlignIndicator';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
 export default function RndBox({ box, parentId }) {
@@ -17,6 +19,7 @@ export default function RndBox({ box, parentId }) {
     setIsResizing,
     duplicateElement,
     setActiveDragItem,
+    activeDragItem,
   } = useDivStore();
 
   const isSelected = selectedBoxId === box.id;
@@ -25,6 +28,23 @@ export default function RndBox({ box, parentId }) {
     setSelectedElement(elementId);
     setSelectedBox(box.id);
   };
+
+  //container bounds for this RND box (for element indicators)
+  const boxBounds = {
+    width: box.width,
+    height: box.height,
+    x: 0, //relative to the box
+    y: 0,
+  };
+
+  // get all element in this box for alignment
+  const boxElements = box.elements || [];
+
+  // Check if the active drag item is an element within this box
+  const isActiveDragElementInThisBox =
+    activeDragItem &&
+    activeDragItem.type && // elements have type, boxes don't
+    boxElements.some((element) => element.id === activeDragItem.id);
 
   return (
     <Rnd
@@ -66,6 +86,7 @@ export default function RndBox({ box, parentId }) {
           ? 'rgba(59, 130, 246, 0.05)'
           : 'rgba(0, 0, 0, 0.02)',
         zIndex: isSelected ? 5 : 1,
+        position: 'relative', // Ensure proper positioning for indicators
       }}
       className="rnd-box"
       data-id={box.id}
@@ -112,6 +133,24 @@ export default function RndBox({ box, parentId }) {
             Delete box
           </span>
         </button>
+      )}
+
+      {/* Centering indicator for elements within this box */}
+      {activeDragItem && isActiveDragElementInThisBox && (
+        <CenterDivIndicator
+          activeBox={activeDragItem}
+          containerBounds={boxBounds}
+        />
+      )}
+
+      {/* Alignment indicator for elements within this box */}
+      {activeDragItem && isActiveDragElementInThisBox && (
+        <AlignIndicator
+          activeItem={activeDragItem}
+          allItems={boxElements}
+          containerBounds={boxBounds}
+          tolerance={2}
+        />
       )}
 
       {/* Render custom HTML and CSS */}

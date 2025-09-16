@@ -5,6 +5,8 @@ import useDivStore from '@/store/UseDivStore';
 import SizeToaster from './SizeToaster';
 import React from 'react';
 import RndBox from './RndBox';
+import CenterDivIndicator from './CenterDivIndicator';
+import AlignIndicator from './AlignIndicator';
 
 export default function DivComponent() {
   const {
@@ -13,6 +15,7 @@ export default function DivComponent() {
     setSelectedParent,
     setSelectedElement,
     selectedParentId,
+    activeDragItem,
   } = useDivStore();
 
   // Handle empty parents array
@@ -35,16 +38,30 @@ export default function DivComponent() {
           return null;
         }
 
+        //calculate container bounds for this section
+        const sectionBounds = {
+          width: parentBoundary.width || 800,
+          height: parent.size?.height || 300,
+          x: 10, //accounting for padding
+          y: 0,
+        };
+
+        // get all RND boces in this section for alignment
+        const sectionRnds = parent.rnds || [];
+
+        // check if the active drag item belong to this section
+        const isActiveDragInThisSection =
+          activeDragItem &&
+          sectionRnds.some((rnd) => rnd.id === activeDragItem.id);
         return (
           <div
-            key={`parent-${parent.id}-${parentIndex}`} // More unique key
+            key={`parent-${parent.id}-${parentIndex}`}
             data-id={parent.id}
             style={{
               ...parentBoundary,
               height: parent.size?.height || 300,
               background: parent.size?.background || '#ffffff',
               position: 'relative',
-              // marginBottom: "20px",
               border: selectedParentId === parent.id ? '3px solid #6f56f9' : '',
               padding: '10px',
             }}
@@ -69,6 +86,24 @@ export default function DivComponent() {
               Section {parent.id}
             </div>
 
+            {/* Centering indicator for RND boxes within this section */}
+            {activeDragItem && isActiveDragInThisSection && (
+              <CenterDivIndicator
+                activeBox={activeDragItem}
+                containerBounds={sectionBounds}
+              />
+            )}
+
+            {/* Alignment indicator for RND boxes within this section */}
+            {activeDragItem && isActiveDragInThisSection && (
+              <AlignIndicator
+                activeItem={activeDragItem}
+                allItems={sectionRnds}
+                containerBounds={sectionBounds}
+                tolerance={3}
+              />
+            )}
+
             {/* Render RND boxes */}
             {parent.rnds && Array.isArray(parent.rnds) ? (
               parent.rnds.map((box, boxIndex) => {
@@ -83,7 +118,7 @@ export default function DivComponent() {
 
                 return (
                   <RndBox
-                    key={`box-${box.id}-${boxIndex}`} // More unique key
+                    key={`box-${box.id}-${boxIndex}`}
                     box={box}
                     parentId={parent.id}
                   />
