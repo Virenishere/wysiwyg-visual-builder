@@ -1,37 +1,84 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Toolbar from './Toolbar';
 
-const RichTextEditor = ({ value, onChange }) => {
+const RichTextEditor = ({
+  content,
+  onChange,
+  isEditing,
+  setIsEditing,
+  element,
+}) => {
   const editorRef = useRef(null);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [savedRange, setSavedRange] = useState(null);
 
   useEffect(() => {
-    if (editorRef.current && value !== editorRef.current.innerHTML) {
-      editorRef.current.innerHTML = value;
+    if (editorRef.current && content !== editorRef.current.innerHTML) {
+      editorRef.current.innerHTML = content;
     }
-  }, [value]);
+  }, [content]);
 
-  const saveToHistory = (content) => {
+  // Improved selection saving
+  const saveSelection = () => {
+    const selection = window.getSelection();
+    if (
+      selection.rangeCount > 0 &&
+      editorRef.current?.contains(selection.anchorNode)
+    ) {
+      const range = selection.getRangeAt(0);
+      setSavedRange(range.cloneRange());
+    }
+  };
+
+  // Improved selection restoration
+  const restoreSelection = () => {
+    if (savedRange && editorRef.current) {
+      try {
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(savedRange);
+        editorRef.current.focus();
+      } catch (error) {
+        console.warn('Could not restore selection:', error);
+        editorRef.current.focus();
+      }
+    }
+  };
+
+  const saveToHistory = (newContent) => {
     const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(content);
+    newHistory.push(newContent);
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   };
 
   const handleInput = () => {
     if (editorRef.current) {
-      const content = editorRef.current.innerHTML;
-      onChange(content);
-      saveToHistory(content);
+      const newContent = editorRef.current.innerHTML;
+      onChange(newContent);
+      saveToHistory(newContent);
+      saveSelection(); // Save selection after input
     }
   };
 
   const execCommand = (command, value) => {
-    document.execCommand(command, false, value);
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    if (savedRange) {
+      restoreSelection();
     }
+    setTimeout(() => {
+      try {
+        const success = document.execCommand(command, false, value);
+        if (success && editorRef.current) {
+          onChange(editorRef.current.innerHTML);
+          saveSelection();
+        }
+      } catch (error) {
+        console.warn('execCommand failed:', command, error);
+      }
+    }, 10);
   };
 
   const handleAction = (action) => {
@@ -70,9 +117,18 @@ const RichTextEditor = ({ value, onChange }) => {
         execCommand('cut');
         break;
       case 'paste':
-        navigator.clipboard.readText().then((text) => {
-          execCommand('insertText', text);
-        });
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          navigator.clipboard
+            .readText()
+            .then((text) => {
+              execCommand('insertText', text);
+            })
+            .catch(() => {
+              execCommand('paste');
+            });
+        } else {
+          execCommand('paste');
+        }
         break;
       case 'delete':
         execCommand('delete');
@@ -84,6 +140,7 @@ const RichTextEditor = ({ value, onChange }) => {
           if (editorRef.current) {
             editorRef.current.innerHTML = prevContent;
             onChange(prevContent);
+            editorRef.current.focus();
           }
         }
         break;
@@ -94,6 +151,7 @@ const RichTextEditor = ({ value, onChange }) => {
           if (editorRef.current) {
             editorRef.current.innerHTML = nextContent;
             onChange(nextContent);
+            editorRef.current.focus();
           }
         }
         break;
@@ -105,15 +163,12 @@ const RichTextEditor = ({ value, onChange }) => {
   const handleFontChange = (font) => {
     execCommand('fontName', font);
   };
-
   const handleHeadingChange = (heading) => {
     execCommand('formatBlock', heading);
   };
-
   const handleColorChange = (color) => {
     execCommand('foreColor', color);
   };
-
   const handleBackgroundColorChange = (color) => {
     execCommand('backColor', color);
   };
@@ -135,46 +190,99 @@ const RichTextEditor = ({ value, onChange }) => {
   const handleInsertTable = () => {
     const rows = prompt('Number of rows:');
     const cols = prompt('Number of columns:');
-
     if (rows && cols) {
       const numRows = parseInt(rows);
       const numCols = parseInt(cols);
-
       let tableHTML =
         '<table border="1" style="border-collapse: collapse; margin: 10px 0;">';
       for (let i = 0; i < numRows; i++) {
         tableHTML += '<tr>';
         for (let j = 0; j < numCols; j++) {
           tableHTML +=
-            '<td style="padding: 8px; border: 1px solid #ccc; min-width: 50px; min-height: 20px;"> </td>';
+            '<td style="padding: 8px; border: 1px solid #ccc; min-width: 50px; min-height: 20px;">&nbsp;</td>';
         }
         tableHTML += '</tr>';
       }
       tableHTML += '</table>';
-
       execCommand('insertHTML', tableHTML);
     }
   };
 
+  const handleFocus = (e) => {
+    setIsEditing(true);
+    e.stopPropagation();
+    saveSelection();
+  };
+
+  const handleBlur = (e) => {
+    const relatedTarget = e.relatedTarget;
+    const toolbar = document.querySelector('.toolbar-container');
+    if (relatedTarget && toolbar?.contains(relatedTarget)) {
+      setTimeout(() => {
+        if (editorRef.current) {
+          editorRef.current.focus();
+        }
+      }, 10);
+      return;
+    }
+    saveSelection();
+    setTimeout(() => setIsEditing(false), 100);
+  };
+
+  const handleMouseUp = () => {
+    saveSelection();
+  };
+  const handleKeyUp = () => {
+    saveSelection();
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-4">
-      <div>
-        <Toolbar
-          onAction={handleAction}
-          onFontChange={handleFontChange}
-          onHeadingChange={handleHeadingChange}
-          onColorChange={handleColorChange}
-          onBackgroundColorChange={handleBackgroundColorChange}
-          onInsertLink={handleInsertLink}
-          onInsertTable={handleInsertTable}
-        />
-      </div>
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      {isEditing && (
+        <div
+          className="absolute -top-36 left-0 w-full z-50 toolbar-container"
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          <Toolbar
+            onAction={handleAction}
+            onFontChange={handleFontChange}
+            onHeadingChange={handleHeadingChange}
+            onColorChange={handleColorChange}
+            onBackgroundColorChange={handleBackgroundColorChange}
+            onInsertLink={handleInsertLink}
+            onInsertTable={handleInsertTable}
+          />
+        </div>
+      )}
       <div
         ref={editorRef}
-        className="min-h-[400px] p-4 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-white"
-        contentEditable
+        contentEditable={true}
+        suppressContentEditableWarning={true}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         onInput={handleInput}
-        style={{ lineHeight: '1.6' }}
+        onMouseUp={handleMouseUp}
+        onKeyUp={handleKeyUp}
+        onMouseDown={(e) => {
+          if (isEditing) {
+            e.stopPropagation();
+          }
+        }}
+        style={{
+          width: '100%',
+          height: '100%',
+          outline: 'none',
+          fontSize: `${element.fontSize}px`,
+          fontFamily: element.fontFamily,
+          color: element.color,
+          backgroundColor: element.backgroundColor,
+          padding: '4px',
+          minHeight: '100%',
+          wordWrap: 'break-word',
+          whiteSpace: 'pre-wrap',
+          ...element.customStyles,
+        }}
+        dangerouslySetInnerHTML={{ __html: content }}
       />
     </div>
   );
