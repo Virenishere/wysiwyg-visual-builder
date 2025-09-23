@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+// Updated Toolbar.jsx
+import React, { useEffect } from 'react';
 import {
   FaBold,
   FaItalic,
@@ -20,48 +21,51 @@ import {
 import { MdOutlineFormatColorText, MdFormatColorFill } from 'react-icons/md';
 import { LuHeading } from 'react-icons/lu';
 import { BiUndo, BiRedo } from 'react-icons/bi';
+import { FONT_FAMILIES } from './FontFamilies';
+import { TEXT_FORMATS } from './FontFormat';
 
-const HOTKEYS = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-  'mod+c': 'copy',
-  'mod+v': 'paste',
-  'mod+x': 'cut',
-  delete: 'delete',
-  'mod+z': 'undo',
-  'mod+y': 'redo',
+const ToolbarButton = ({ onClick, title, children }) => (
+  <button
+    onClick={onClick}
+    onMouseDown={(e) => e.preventDefault()} // Prevents the editor from losing focus.
+    title={title}
+    className="p-2 rounded hover:bg-gray-200 cursor-pointer"
+    type="button"
+  >
+    {children}
+  </button>
+);
+
+// A reusable color picker button for the toolbar.
+const ColorPicker = ({ onChange, title, children }) => {
+  const colorRef = React.useRef(null);
+  return (
+    <div className="relative" title={title}>
+      <button
+        onClick={() => colorRef.current?.click()}
+        onMouseDown={(e) => e.preventDefault()} // Prevents focus loss.
+        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
+        type="button"
+      >
+        {children}
+      </button>
+      <input
+        ref={colorRef}
+        type="color"
+        className="absolute opacity-0 w-0 h-0"
+        onChange={(e) => onChange(e.target.value)}
+        tabIndex={-1} // Hide from keyboard navigation.
+      />
+    </div>
+  );
 };
 
-const FONTS = [
-  'Arial',
-  'Helvetica',
-  'Times New Roman',
-  'Georgia',
-  'Verdana',
-  'Courier New',
-  'Comic Sans MS',
-  'Impact',
-  'Trebuchet MS',
-  'Palatino',
-];
-
-const HEADINGS = [
-  { label: 'Normal', value: 'div' },
-  { label: 'Heading 1', value: 'h1' },
-  { label: 'Heading 2', value: 'h2' },
-  { label: 'Heading 3', value: 'h3' },
-  { label: 'Heading 4', value: 'h4' },
-  { label: 'Heading 5', value: 'h5' },
-  { label: 'Heading 6', value: 'h6' },
-];
-
 const Dropdown = ({ options, onSelect, placeholder, icon }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState(placeholder);
-  const dropdownRef = useRef(null);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [selected, setSelected] = React.useState(placeholder);
+  const dropdownRef = React.useRef(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -116,271 +120,151 @@ const Toolbar = ({
   onInsertLink,
   onInsertTable,
 }) => {
-  const textColorRef = useRef(null);
-  const bgColorRef = useRef(null);
-
-  const handleKeyDown = useCallback(
-    (e) => {
-      const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
-      const mod = isMac ? e.metaKey : e.ctrlKey;
-      const key = e.key.toLowerCase();
-
-      let action;
-
-      if (mod && HOTKEYS[`mod+${key}`]) {
-        action = HOTKEYS[`mod+${key}`];
-      } else if (key === 'delete') {
-        action = 'delete';
-      }
-
-      if (action) {
-        e.preventDefault();
-        onAction(action);
-      }
-    },
-    [onAction]
-  );
-
+  // This effect handles keyboard shortcuts for the editor.
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isMac = /Mac|iP(hone|ad)/.test(navigator.platform);
+      const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+      if (modKey) {
+        const key = e.key.toLowerCase();
+        const actions = {
+          b: 'bold',
+          i: 'italic',
+          u: 'underline',
+          z: 'undo',
+          y: 'redo',
+          c: 'copy',
+          x: 'cut',
+          v: 'paste',
+        };
+
+        if (actions[key]) {
+          e.preventDefault();
+          onAction(actions[key]);
+        }
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        onAction('delete');
+      }
+    };
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
-
-  // Prevent focus loss on all toolbar interactions
-  const handleButtonMouseDown = (e) => {
-    e.preventDefault();
-  };
+  }, [onAction]);
 
   return (
     <div className="bg-gray-100 rounded-md p-2 shadow-md flex flex-wrap gap-2 items-center">
+      {/* Action Buttons */}
+      <ToolbarButton onClick={() => onAction('undo')} title="Undo (Ctrl+Z)">
+        <BiUndo />
+      </ToolbarButton>
+      <ToolbarButton onClick={() => onAction('redo')} title="Redo (Ctrl+Y)">
+        <BiRedo />
+      </ToolbarButton>
+
+      <div className="w-px h-6 bg-gray-300 mx-2" />
+
+      {/* Formatting Dropdowns */}
       <Dropdown
-        options={FONTS.map((font) => ({ label: font, value: font }))}
+        options={FONT_FAMILIES}
         onSelect={onFontChange}
         placeholder="Font Style"
+        title="Font Style"
       />
-
       <Dropdown
-        options={HEADINGS}
+        options={TEXT_FORMATS}
         onSelect={onHeadingChange}
         placeholder="Normal"
         icon={<LuHeading />}
+        title="Headings"
       />
 
       <div className="w-px h-6 bg-gray-300 mx-2" />
 
-      <button
-        onClick={() => onAction('bold')}
-        onMouseDown={handleButtonMouseDown}
-        title="Bold (Ctrl+B)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      {/* Style Buttons */}
+      <ToolbarButton onClick={() => onAction('bold')} title="Bold (Ctrl+B)">
         <FaBold />
-      </button>
-
-      <button
-        onClick={() => onAction('italic')}
-        onMouseDown={handleButtonMouseDown}
-        title="Italic (Ctrl+I)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      </ToolbarButton>
+      <ToolbarButton onClick={() => onAction('italic')} title="Italic (Ctrl+I)">
         <FaItalic />
-      </button>
-
-      <button
+      </ToolbarButton>
+      <ToolbarButton
         onClick={() => onAction('underline')}
-        onMouseDown={handleButtonMouseDown}
         title="Underline (Ctrl+U)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
       >
         <FaUnderline />
-      </button>
+      </ToolbarButton>
+
+      {/* Color Pickers */}
+      <ColorPicker onChange={onColorChange} title="Text Color">
+        <MdOutlineFormatColorText />
+      </ColorPicker>
+      <ColorPicker onChange={onBackgroundColorChange} title="Background Color">
+        <MdFormatColorFill />
+      </ColorPicker>
 
       <div className="w-px h-6 bg-gray-300 mx-2" />
 
-      <div className="relative">
-        <button
-          onClick={() => textColorRef.current?.click()}
-          onMouseDown={handleButtonMouseDown}
-          title="Text Color"
-          className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-          type="button"
-        >
-          <MdOutlineFormatColorText />
-        </button>
-        <input
-          ref={textColorRef}
-          type="color"
-          className="absolute opacity-0 w-0 h-0"
-          onChange={(e) => onColorChange(e.target.value)}
-          tabIndex={-1}
-        />
-      </div>
-
-      <div className="relative">
-        <button
-          onClick={() => bgColorRef.current?.click()}
-          onMouseDown={handleButtonMouseDown}
-          title="Background Color"
-          className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-          type="button"
-        >
-          <MdFormatColorFill />
-        </button>
-        <input
-          ref={bgColorRef}
-          type="color"
-          className="absolute opacity-0 w-0 h-0"
-          onChange={(e) => onBackgroundColorChange(e.target.value)}
-          tabIndex={-1}
-        />
-      </div>
-
-      <div className="w-px h-6 bg-gray-300 mx-2" />
-
-      <button
-        onClick={() => onAction('alignLeft')}
-        onMouseDown={handleButtonMouseDown}
-        title="Align Left"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      {/* Alignment Buttons */}
+      <ToolbarButton onClick={() => onAction('justifyLeft')} title="Align Left">
         <FaAlignLeft />
-      </button>
-      <button
-        onClick={() => onAction('alignCenter')}
-        onMouseDown={handleButtonMouseDown}
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => onAction('justifyCenter')}
         title="Align Center"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
       >
         <FaAlignCenter />
-      </button>
-      <button
-        onClick={() => onAction('alignRight')}
-        onMouseDown={handleButtonMouseDown}
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => onAction('justifyRight')}
         title="Align Right"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
       >
         <FaAlignRight />
-      </button>
+      </ToolbarButton>
 
       <div className="w-px h-6 bg-gray-300 mx-2" />
 
-      <button
-        onClick={() => onAction('orderedList')}
-        onMouseDown={handleButtonMouseDown}
+      {/* List and Block Buttons */}
+      <ToolbarButton
+        onClick={() => onAction('insertOrderedList')}
         title="Numbered List"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
       >
         <FaListOl />
-      </button>
-      <button
-        onClick={() => onAction('unorderedList')}
-        onMouseDown={handleButtonMouseDown}
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => onAction('insertUnorderedList')}
         title="Bullet List"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
       >
         <FaListUl />
-      </button>
-
-      <button
-        onClick={() => onAction('quote')}
-        onMouseDown={handleButtonMouseDown}
-        title="Quote"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      </ToolbarButton>
+      <ToolbarButton onClick={() => onAction('quote')} title="Quote">
         <FaQuoteLeft />
-      </button>
+      </ToolbarButton>
 
-      <button
-        onClick={onInsertLink}
-        onMouseDown={handleButtonMouseDown}
-        title="Insert Link"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      {/* Insert Buttons */}
+      <ToolbarButton onClick={onInsertLink} title="Insert Link">
         <FaLink />
-      </button>
-
-      <button
-        onClick={onInsertTable}
-        onMouseDown={handleButtonMouseDown}
-        title="Insert Table"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      </ToolbarButton>
+      <ToolbarButton onClick={onInsertTable} title="Insert Table">
         <FaTable />
-      </button>
+      </ToolbarButton>
 
       <div className="w-px h-6 bg-gray-300 mx-2" />
 
-      <button
-        onClick={() => onAction('undo')}
-        onMouseDown={handleButtonMouseDown}
-        title="Undo (Ctrl+Z)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
-        <BiUndo />
-      </button>
-      <button
-        onClick={() => onAction('redo')}
-        onMouseDown={handleButtonMouseDown}
-        title="Redo (Ctrl+Y)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
-        <BiRedo />
-      </button>
-
-      <div className="w-px h-6 bg-gray-300 mx-2" />
-
-      <button
-        onClick={() => onAction('cut')}
-        onMouseDown={handleButtonMouseDown}
-        title="Cut (Ctrl+X)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      {/* Clipboard and Deletion */}
+      <ToolbarButton onClick={() => onAction('cut')} title="Cut (Ctrl+X)">
         <FaCut />
-      </button>
-
-      <button
-        onClick={() => onAction('copy')}
-        onMouseDown={handleButtonMouseDown}
-        title="Copy (Ctrl+C)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      </ToolbarButton>
+      <ToolbarButton onClick={() => onAction('copy')} title="Copy (Ctrl+C)">
         <FaCopy />
-      </button>
-
-      <button
-        onClick={() => onAction('paste')}
-        onMouseDown={handleButtonMouseDown}
-        title="Paste (Ctrl+V)"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      </ToolbarButton>
+      <ToolbarButton onClick={() => onAction('paste')} title="Paste (Ctrl+V)">
         <FaPaste />
-      </button>
-
-      <button
-        onClick={() => onAction('delete')}
-        onMouseDown={handleButtonMouseDown}
-        title="Delete"
-        className="p-2 rounded hover:bg-gray-200 cursor-pointer"
-        type="button"
-      >
+      </ToolbarButton>
+      <ToolbarButton onClick={() => onAction('delete')} title="Delete">
         <FaTrashAlt />
-      </button>
+      </ToolbarButton>
     </div>
   );
 };

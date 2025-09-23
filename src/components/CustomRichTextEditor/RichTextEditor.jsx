@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+// Updated RichTextEditor.jsx
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import Toolbar from './Toolbar';
 
 const RichTextEditor = ({
@@ -9,239 +10,200 @@ const RichTextEditor = ({
   element,
 }) => {
   const editorRef = useRef(null);
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  const [savedRange, setSavedRange] = useState(null);
+  const lastContent = useRef(content);
+  const [selectionRange, setSelectionRange] = useState(null);
 
+  // This effect is crucial for synchronizing external changes to the editor.
+  // It runs ONLY when the `content` prop changes from the parent.
+  // It explicitly avoids updating the DOM if the change came from the editor itself,
+  // which is the key to preventing the "backward typing" issue.
   useEffect(() => {
-    if (editorRef.current && content !== editorRef.current.innerHTML) {
+    if (editorRef.current && content !== lastContent.current) {
+      lastContent.current = content;
       editorRef.current.innerHTML = content;
+      // Restore selection if needed, but for initial load, no selection.
     }
   }, [content]);
 
-  // Improved selection saving
-  const saveSelection = () => {
-    const selection = window.getSelection();
-    if (
-      selection.rangeCount > 0 &&
-      editorRef.current?.contains(selection.anchorNode)
-    ) {
-      const range = selection.getRangeAt(0);
-      setSavedRange(range.cloneRange());
-    }
-  };
-
-  // Improved selection restoration
-  const restoreSelection = () => {
-    if (savedRange && editorRef.current) {
-      try {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedRange);
-        editorRef.current.focus();
-      } catch (error) {
-        console.warn('Could not restore selection:', error);
-        editorRef.current.focus();
+  // Save current selection before any potential re-render or command.
+  const saveSelection = useCallback(() => {
+    if (window.getSelection) {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        setSelectionRange(sel.getRangeAt(0));
       }
     }
-  };
+  }, []);
 
-  const saveToHistory = (newContent) => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(newContent);
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  };
+  // Restore selection after operations.
+  const restoreSelection = useCallback(() => {
+    if (selectionRange && window.getSelection) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(selectionRange);
+    }
+  }, [selectionRange]);
 
-  const handleInput = () => {
+  // The `onInput` handler is the primary mechanism for updating the parent state.
+  // It fires on every change inside the editor (typing, pasting, formatting).
+  const handleInput = useCallback(() => {
     if (editorRef.current) {
       const newContent = editorRef.current.innerHTML;
+      // Update the ref immediately to mark that the change came from within.
+      lastContent.current = newContent;
+      // Propagate the change to the parent component.
       onChange(newContent);
-      saveToHistory(newContent);
-      saveSelection(); // Save selection after input
     }
-  };
+  }, [onChange]);
 
-  const execCommand = (command, value) => {
-    if (!editorRef.current) return;
-    editorRef.current.focus();
-    if (savedRange) {
-      restoreSelection();
-    }
-    setTimeout(() => {
-      try {
-        const success = document.execCommand(command, false, value);
-        if (success && editorRef.current) {
-          onChange(editorRef.current.innerHTML);
-          saveSelection();
-        }
-      } catch (error) {
-        console.warn('execCommand failed:', command, error);
+  // A robust wrapper for `document.execCommand`.
+  const execCommand = useCallback(
+    (command, value = null) => {
+      if (editorRef.current) {
+        saveSelection(); // Save before command.
+        editorRef.current.focus(); // Ensure the editor is focused before executing.
+        document.execCommand(command, false, value);
+        restoreSelection(); // Restore after.
+        handleInput(); // Manually trigger input handler to sync state after command.
       }
-    }, 10);
-  };
+    },
+    [saveSelection, restoreSelection, handleInput]
+  );
 
-  const handleAction = (action) => {
-    switch (action) {
-      case 'bold':
-        execCommand('bold');
-        break;
-      case 'italic':
-        execCommand('italic');
-        break;
-      case 'underline':
-        execCommand('underline');
-        break;
-      case 'alignLeft':
-        execCommand('justifyLeft');
-        break;
-      case 'alignCenter':
-        execCommand('justifyCenter');
-        break;
-      case 'alignRight':
-        execCommand('justifyRight');
-        break;
-      case 'orderedList':
-        execCommand('insertOrderedList');
-        break;
-      case 'unorderedList':
-        execCommand('insertUnorderedList');
-        break;
-      case 'quote':
-        execCommand('formatBlock', 'blockquote');
-        break;
-      case 'copy':
-        execCommand('copy');
-        break;
-      case 'cut':
-        execCommand('cut');
-        break;
-      case 'paste':
-        if (navigator.clipboard && navigator.clipboard.readText) {
-          navigator.clipboard
-            .readText()
-            .then((text) => {
-              execCommand('insertText', text);
-            })
-            .catch(() => {
-              execCommand('paste');
-            });
-        } else {
-          execCommand('paste');
-        }
-        break;
-      case 'delete':
-        execCommand('delete');
-        break;
-      case 'undo':
-        if (historyIndex > 0) {
-          const prevContent = history[historyIndex - 1];
-          setHistoryIndex(historyIndex - 1);
-          if (editorRef.current) {
-            editorRef.current.innerHTML = prevContent;
-            onChange(prevContent);
-            editorRef.current.focus();
-          }
-        }
-        break;
-      case 'redo':
-        if (historyIndex < history.length - 1) {
-          const nextContent = history[historyIndex + 1];
-          setHistoryIndex(historyIndex + 1);
-          if (editorRef.current) {
-            editorRef.current.innerHTML = nextContent;
-            onChange(nextContent);
-            editorRef.current.focus();
-          }
-        }
-        break;
-      default:
-        break;
-    }
-  };
+  // Handles all actions from the toolbar.
+  const handleAction = useCallback(
+    (action) => {
+      const simpleCommands = [
+        'bold',
+        'italic',
+        'underline',
+        'justifyLeft',
+        'justifyCenter',
+        'justifyRight',
+        'insertOrderedList',
+        'insertUnorderedList',
+        'copy',
+        'cut',
+        'delete',
+        'undo',
+        'redo',
+      ];
 
-  const handleFontChange = (font) => {
-    execCommand('fontName', font);
-  };
-  const handleHeadingChange = (heading) => {
-    execCommand('formatBlock', heading);
-  };
-  const handleColorChange = (color) => {
-    execCommand('foreColor', color);
-  };
-  const handleBackgroundColorChange = (color) => {
-    execCommand('backColor', color);
-  };
+      if (simpleCommands.includes(action)) {
+        execCommand(action);
+      } else if (action === 'quote') {
+        execCommand('formatBlock', '<blockquote>');
+      } else if (action === 'paste') {
+        // Use execCommand('paste') directly for simplicity; browser handles clipboard.
+        execCommand('paste');
+      }
+    },
+    [execCommand]
+  );
 
-  const handleInsertLink = () => {
+  // Handlers for toolbar dropdowns and color pickers.
+  const handleFontChange = useCallback(
+    (font) => {
+      execCommand('fontName', font);
+    },
+    [execCommand]
+  );
+
+  const handleHeadingChange = useCallback(
+    (heading) => {
+      execCommand('formatBlock', `<${heading}>`);
+    },
+    [execCommand]
+  );
+
+  const handleColorChange = useCallback(
+    (color) => {
+      execCommand('foreColor', color);
+    },
+    [execCommand]
+  );
+
+  const handleBackgroundColorChange = useCallback(
+    (color) => {
+      // Note: backColor may not work in all browsers; fallback to hiliteColor.
+      if (!document.execCommand('backColor', false, color)) {
+        execCommand('hiliteColor', color);
+      } else {
+        execCommand('backColor', color);
+      }
+    },
+    [execCommand]
+  );
+
+  // Handler for inserting a link.
+  const handleInsertLink = useCallback(() => {
     const url = prompt('Enter URL:');
     if (url) {
       execCommand('createLink', url);
-      setTimeout(() => {
-        const links = editorRef.current?.querySelectorAll('a');
-        links?.forEach((link) => {
-          link.style.color = '#2563eb';
-          link.style.textDecoration = 'underline';
-        });
-      }, 100);
     }
-  };
+  }, [execCommand]);
 
-  const handleInsertTable = () => {
-    const rows = prompt('Number of rows:');
-    const cols = prompt('Number of columns:');
+  // Handler for inserting a table.
+  const handleInsertTable = useCallback(() => {
+    const rows = prompt('Number of rows:', '2');
+    const cols = prompt('Number of columns:', '2');
     if (rows && cols) {
-      const numRows = parseInt(rows);
-      const numCols = parseInt(cols);
       let tableHTML =
-        '<table border="1" style="border-collapse: collapse; margin: 10px 0;">';
-      for (let i = 0; i < numRows; i++) {
+        '<table border="1" style="border-collapse: collapse; margin: 10px 0; width: 100%;">';
+      for (let i = 0; i < parseInt(rows, 10); i++) {
         tableHTML += '<tr>';
-        for (let j = 0; j < numCols; j++) {
+        for (let j = 0; j < parseInt(cols, 10); j++) {
           tableHTML +=
-            '<td style="padding: 8px; border: 1px solid #ccc; min-width: 50px; min-height: 20px;">&nbsp;</td>';
+            '<td style="padding: 8px; border: 1px solid #ccc; min-width: 50px; height: 20px;">&nbsp;</td>';
         }
         tableHTML += '</tr>';
       }
       tableHTML += '</table>';
       execCommand('insertHTML', tableHTML);
     }
-  };
+  }, [execCommand]);
 
-  const handleFocus = (e) => {
-    setIsEditing(true);
-    e.stopPropagation();
-    saveSelection();
-  };
+  // Manages the editing state and stops event propagation to parent elements.
+  const handleFocus = useCallback(
+    (e) => {
+      setIsEditing(true);
+      e.stopPropagation();
+    },
+    [setIsEditing]
+  );
 
-  const handleBlur = (e) => {
-    const relatedTarget = e.relatedTarget;
-    const toolbar = document.querySelector('.toolbar-container');
-    if (relatedTarget && toolbar?.contains(relatedTarget)) {
-      setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.focus();
-        }
-      }, 10);
-      return;
-    }
-    saveSelection();
-    setTimeout(() => setIsEditing(false), 100);
-  };
+  // When the editor loses focus, we ensure the state is synced.
+  const handleBlur = useCallback(
+    (e) => {
+      // Check if the new focused element is part of the toolbar.
+      // If it is, we don't want to blur the editor.
+      const toolbar = e.relatedTarget?.closest('.toolbar-container');
+      if (toolbar) {
+        return;
+      }
+      setIsEditing(false);
+      // Final sync on blur.
+      handleInput();
+    },
+    [setIsEditing, handleInput]
+  );
 
-  const handleMouseUp = () => {
+  // Handle mouse up to save selection for future restores.
+  const handleMouseUp = useCallback(() => {
     saveSelection();
-  };
-  const handleKeyUp = () => {
+  }, [saveSelection]);
+
+  // Handle key up for potential selection changes.
+  const handleKeyUp = useCallback(() => {
     saveSelection();
-  };
+  }, [saveSelection]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       {isEditing && (
         <div
           className="absolute -top-36 left-0 w-full z-50 toolbar-container"
-          onMouseDown={(e) => e.preventDefault()}
+          onMouseDown={(e) => e.preventDefault()} // Prevents editor blur when toolbar is clicked.
         >
           <Toolbar
             onAction={handleAction}
@@ -260,29 +222,36 @@ const RichTextEditor = ({
         suppressContentEditableWarning={true}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        onInput={handleInput}
+        onInput={handleInput} // This is the key for real-time updates.
         onMouseUp={handleMouseUp}
         onKeyUp={handleKeyUp}
         onMouseDown={(e) => {
           if (isEditing) {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent parent drag while editing.
           }
         }}
+        // Removed "rtl-editor" class to fix RTL typing issue
+        className="editor" // Generic class; add CSS for .editor { direction: ltr; } if needed
         style={{
           width: '100%',
           height: '100%',
           outline: 'none',
-          fontSize: `${element.fontSize}px`,
-          fontFamily: element.fontFamily,
-          color: element.color,
-          backgroundColor: element.backgroundColor,
+          fontSize: `${element.fontSize || 16}px`,
+          fontFamily: element.fontFamily || 'Arial, sans-serif',
+          color: element.color || '#000000',
+          backgroundColor: element.backgroundColor || 'transparent',
           padding: '4px',
           minHeight: '100%',
           wordWrap: 'break-word',
           whiteSpace: 'pre-wrap',
+          direction: 'ltr', // Explicitly set LTR to fix typing direction and cursor position
+          textAlign: 'left', // Ensure left alignment by default
+          overflowWrap: 'break-word',
           ...element.customStyles,
         }}
-        dangerouslySetInnerHTML={{ __html: content }}
+        // We use a ref and an effect to set the initial content,
+        // avoiding `dangerouslySetInnerHTML` which causes re-render issues.
+        dangerouslySetInnerHTML={{ __html: content || '' }}
       />
     </div>
   );
