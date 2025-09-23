@@ -162,19 +162,26 @@ const useDivStore = create(
       },
 
       // Parent actions
-      addParent: () => {
+      addParent: (height) => {
         set((state) => ({
           parents: [
             ...state.parents,
             {
               id: nextParentId++,
-              size: { height: 300, background: '#f8f8f8' },
+              size: { height: height || 300, background: '#f8f8f8' },
               rnds: [],
             },
           ],
         }));
         toast.success('New section added!');
       },
+
+      updateParent: (parentId, updates) =>
+        set((state) => ({
+          parents: state.parents.map((p) =>
+            p.id === parentId ? { ...p, ...updates } : p
+          ),
+        })),
 
       removeParent: (parentId) => {
         set((state) => ({
@@ -590,6 +597,51 @@ const useDivStore = create(
       setSelectedParent: (id) => set({ selectedParentId: id }),
       setSelectedBox: (id) => set({ selectedBoxId: id }),
       setSelectedElement: (id) => set({ selectedElementId: id }),
+
+      updateElementContent: (elementId, content) => {
+        set((state) => ({
+          parents: state.parents.map((p) => ({
+            ...p,
+            rnds: p.rnds.map((box) => ({
+              ...box,
+              elements: box.elements.map((element) =>
+                element.id === elementId ? { ...element, content } : element
+              ),
+            })),
+          })),
+        }));
+      },
+
+      updateElementPosition: (elementId, x, y) => {
+        set((state) => ({
+          parents: state.parents.map((p) => ({
+            ...p,
+            rnds: p.rnds.map((box) => ({
+              ...box,
+              elements: box.elements.map((element) =>
+                element.id === elementId ? { ...element, x, y } : element
+              ),
+            })),
+          })),
+        }));
+      },
+
+      updateElementSize: (elementId, width, height) => {
+        set((state) => ({
+          parents: state.parents.map((p) => ({
+            ...p,
+            rnds: p.rnds.map((box) => ({
+              ...box,
+              elements: box.elements.map((element) =>
+                element.id === elementId
+                  ? { ...element, width, height }
+                  : element
+              ),
+            })),
+          })),
+        }));
+      },
+
       setIsResizing: (status) => set({ isResizing: status }),
       setLeftPanel: (panel) => set({ leftPanel: panel }),
       setActiveDragItem: (item) => set({ activeDragItem: item }),

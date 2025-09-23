@@ -4,8 +4,7 @@ import { Rnd } from 'react-rnd';
 import useDivStore from '@/store/UseDivStore';
 
 // Sub-components (assuming these exist)
-import TextElement from './DraggableElementSection/TextElement';
-import ParagraphElement from './DraggableElementSection/ParagraphElement';
+import EditableTextElement from './DraggableElementSection/EditableTextElement';
 import ButtonElement from './DraggableElementSection/ButtonElement';
 import ImageElement from './DraggableElementSection/ImageElement';
 import UnknownElement from './DraggableElementSection/UnknownElement';
@@ -27,23 +26,14 @@ export default function DraggableElement({
   const renderElementContent = () => {
     switch (element.type) {
       case 'text':
-        return (
-          <TextElement
-            element={element}
-            parentId={parentId}
-            boxId={boxId}
-            isEditingText={isEditingText}
-            setIsEditingText={setIsEditingText}
-            updateElement={updateElement}
-          />
-        );
       case 'paragraph':
         return (
-          <ParagraphElement
+          <EditableTextElement
             element={element}
-            parentId={parentId}
-            boxId={boxId}
-            updateElement={updateElement}
+            onSelect={onSelect}
+            isSelected={isSelected}
+            isEditing={isEditingText}
+            setIsEditing={setIsEditingText}
           />
         );
       case 'button':
@@ -80,13 +70,33 @@ export default function DraggableElement({
     }
   };
 
+  // Handle click to prevent interference with text editing
+  const handleClick = (e) => {
+    if (isEditingText) {
+      // Don't interfere with text editing
+      return;
+    }
+    e.stopPropagation();
+    onSelect(element.id);
+  };
+
   return (
     <Rnd
       size={{ width: element.width, height: element.height }}
       position={{ x: element.x, y: element.y }}
       bounds={`.rnd-box[data-id="${boxId}"]`}
-      onDragStart={(e) => e.stopPropagation()}
+      disableDragging={isEditingText} // Disable dragging when editing text
+      enableResizing={!isEditingText} // Disable resizing when editing text
+      onDragStart={(e) => {
+        if (isEditingText) {
+          e.preventDefault();
+          return;
+        }
+        e.stopPropagation();
+      }}
       onDrag={(e, d) => {
+        if (isEditingText) return;
+
         // Set active drag item with element data for indicators
         setActiveDragItem({
           ...element,
@@ -97,14 +107,22 @@ export default function DraggableElement({
         });
       }}
       onDragStop={(e, d) => {
+        if (isEditingText) return;
+
         updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
         setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
+        if (isEditingText) {
+          e.preventDefault();
+          return;
+        }
         e.stopPropagation();
         setIsResizing(true);
       }}
       onResize={(e, direction, ref, delta, pos) => {
+        if (isEditingText) return;
+
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
         updateElement(parentId, boxId, element.id, { ...newSize, ...pos });
         // Set active drag item for resizing indicators
@@ -116,26 +134,39 @@ export default function DraggableElement({
         });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
+        if (isEditingText) return;
+
         setIsResizing(false);
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
         updateElement(parentId, boxId, element.id, { ...newSize, ...pos });
         setActiveDragItem(null);
       }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect(element.id);
-      }}
+      onClick={handleClick}
       style={{
-        border: isSelected ? '2px solid #007bff' : '1px solid transparent',
+        border:
+          isSelected && !isEditingText
+            ? '2px solid #007bff'
+            : '1px solid transparent',
         borderRadius: '2px',
-        zIndex: isSelected ? 10 : element.zIndex || 1,
+        zIndex: isSelected || isEditingText ? 10 : element.zIndex || 1,
+        pointerEvents: isEditingText ? 'auto' : 'auto',
       }}
-      className={`element-rnd ${element.customClassName || ''}`}
+      className={`element-rnd ${element.customClassName || ''} ${isEditingText ? 'editing-text' : ''}`}
       minHeight={element.type === 'line' ? 1 : 10}
       minWidth={10}
     >
       {element.customCss && <style>{element.customCss}</style>}
       {renderElementContent()}
+
+      {/* Add a style tag to handle text editing mode */}
+      <style jsx>{`
+        .editing-text .react-resizable-handle {
+          display: none !important;
+        }
+        .editing-text {
+          cursor: text !important;
+        }
+      `}</style>
     </Rnd>
   );
 }

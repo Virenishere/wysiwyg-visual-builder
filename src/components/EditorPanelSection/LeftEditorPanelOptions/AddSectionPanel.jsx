@@ -2,6 +2,7 @@ import { RxCross1 } from 'react-icons/rx';
 import { GoPlus } from 'react-icons/go';
 import SectionsPanel from '@/components/PropertiesTabSection/SectionsPanel';
 import useDivStore from '@/store/UseDivStore';
+import { useState } from 'react';
 
 export default function AddSectionPanel({ onClose }) {
   const {
@@ -18,6 +19,8 @@ export default function AddSectionPanel({ onClose }) {
     duplicateParent,
   } = useDivStore();
 
+  const [height, setHeight] = useState(300);
+
   const selectedParent = parents.find((p) => p.id === selectedParentId);
 
   return (
@@ -29,21 +32,22 @@ export default function AddSectionPanel({ onClose }) {
       {/* Full-width divider */}
       <div className="-mx-4 border-b border-gray-300 mb-4"></div>
       <div>
-        <button
-          onClick={() => addParent()}
-          className="relative flex items-center justify-center gap-2 cursor-pointer group"
-        >
-          {/* ✅ Icon with hover color */}
-          <GoPlus className="text-blue-800 group-hover:text-blue-500" />
-
-          {/* ✅ Label text */}
-          <span className="text-blue-800">Blank Section</span>
-
-          {/* ✅ Tooltip */}
-          <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
-            Adds a new blank section to create page
-          </span>
-        </button>
+        <div className="flex items-center gap-4 mb-4">
+          <input
+            type="number"
+            value={height}
+            onChange={(e) => setHeight(e.target.value)}
+            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+            placeholder="Section Height (e.g., 300)"
+          />
+          <button
+            onClick={() => addParent(height)}
+            className="relative flex items-center justify-center gap-2 cursor-pointer group whitespace-nowrap bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+          >
+            <GoPlus className="text-white" />
+            <span className="text-white">Add Blank Section</span>
+          </button>
+        </div>
 
         <div className="my-4 w-full">
           <h2>Pick a section from the editor panel to start editing.</h2>

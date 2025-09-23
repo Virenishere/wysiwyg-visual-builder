@@ -7,25 +7,16 @@ import Link from 'next/link';
 import SaveTemplateModal from '../SaveTemplateModal';
 import DownloadCodeModal from '../DownloadCodeModal';
 import useDivStore from '@/store/UseDivStore';
-import {
-  generateHtmlCss,
-  generateReactCode,
-  downloadFile,
-} from '@/utils/export';
+import { generateHtmlCss, downloadFile } from '@/utils/export';
 
 export default function SiteActionsPanel({ onClose }) {
-  const { parents } = useDivStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
-  const handleDownload = (format) => {
-    if (format === 'html') {
-      const { html } = generateHtmlCss(parents);
-      downloadFile('index.html', html);
-    } else if (format === 'react') {
-      const code = generateReactCode(parents);
-      downloadFile('MyComponent.jsx', code);
-    }
+  const handleDownload = () => {
+    const { parents } = useDivStore.getState();
+    const { html } = generateHtmlCss(parents);
+    downloadFile('index.html', html);
     setIsDownloadModalOpen(false);
   };
 
