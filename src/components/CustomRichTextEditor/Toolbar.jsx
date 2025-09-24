@@ -21,15 +21,18 @@ import {
 import { MdOutlineFormatColorText, MdFormatColorFill } from 'react-icons/md';
 import { LuHeading } from 'react-icons/lu';
 import { BiUndo, BiRedo } from 'react-icons/bi';
-import { FONT_FAMILIES } from './FontFamilies';
-import { TEXT_FORMATS } from './FontFormat';
 
-const ToolbarButton = ({ onClick, title, children }) => (
+import { FONT_FAMILIES } from '@/utils/RichTextEditor/FontFamilies';
+import { TEXT_FORMATS } from '@/utils/RichTextEditor/FontFormat';
+
+const ToolbarButton = ({ onClick, title, children, isActive = false }) => (
   <button
     onClick={onClick}
     onMouseDown={(e) => e.preventDefault()} // Prevents the editor from losing focus.
     title={title}
-    className="p-2 rounded hover:bg-gray-200 cursor-pointer"
+    className={`p-2 rounded cursor-pointer transition-colors ${
+      isActive ? 'bg-blue-200 hover:bg-blue-300' : 'hover:bg-gray-200'
+    }`}
     type="button"
   >
     {children}
@@ -39,10 +42,24 @@ const ToolbarButton = ({ onClick, title, children }) => (
 // A reusable color picker button for the toolbar.
 const ColorPicker = ({ onChange, title, children }) => {
   const colorRef = React.useRef(null);
+
+  const handleColorChange = React.useCallback(
+    (e) => {
+      onChange(e.target.value);
+    },
+    [onChange]
+  );
+
+  const handleButtonClick = React.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    colorRef.current?.click();
+  }, []);
+
   return (
     <div className="relative" title={title}>
       <button
-        onClick={() => colorRef.current?.click()}
+        onClick={handleButtonClick}
         onMouseDown={(e) => e.preventDefault()} // Prevents focus loss.
         className="p-2 rounded hover:bg-gray-200 cursor-pointer"
         type="button"
@@ -53,7 +70,7 @@ const ColorPicker = ({ onChange, title, children }) => {
         ref={colorRef}
         type="color"
         className="absolute opacity-0 w-0 h-0"
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleColorChange}
         tabIndex={-1} // Hide from keyboard navigation.
       />
     </div>
@@ -76,12 +93,30 @@ const Dropdown = ({ options, onSelect, placeholder, icon }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleToggle = React.useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(!isOpen);
+    },
+    [isOpen]
+  );
+
+  const handleOptionSelect = React.useCallback(
+    (optionValue, optionLabel) => {
+      onSelect(optionValue);
+      setSelected(optionLabel);
+      setIsOpen(false);
+    },
+    [onSelect]
+  );
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         className="flex items-center gap-2 px-3 py-1 border rounded hover:bg-gray-50 cursor-pointer"
         onMouseDown={(e) => e.preventDefault()} // Prevent focus loss
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         type="button"
       >
         {icon}
@@ -95,11 +130,7 @@ const Dropdown = ({ options, onSelect, placeholder, icon }) => {
               key={option.value}
               className="block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm cursor-pointer"
               onMouseDown={(e) => e.preventDefault()} // Prevent focus loss
-              onClick={() => {
-                onSelect(option.value);
-                setSelected(option.label);
-                setIsOpen(false);
-              }}
+              onClick={() => handleOptionSelect(option.value, option.label)}
               type="button"
             >
               {option.label}
@@ -120,6 +151,37 @@ const Toolbar = ({
   onInsertLink,
   onInsertTable,
 }) => {
+  // Get current formatting state (optional - for visual feedback)
+  const [formatState, setFormatState] = React.useState({
+    bold: false,
+    italic: false,
+    underline: false,
+  });
+
+  // Update format state based on current selection
+  const updateFormatState = React.useCallback(() => {
+    try {
+      setFormatState({
+        bold: document.queryCommandState('bold'),
+        italic: document.queryCommandState('italic'),
+        underline: document.queryCommandState('underline'),
+      });
+    } catch (e) {
+      // Ignore errors - some browsers might not support queryCommandState
+    }
+  }, []);
+
+  // Update format state when selection changes
+  React.useEffect(() => {
+    const handleSelectionChange = () => {
+      updateFormatState();
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () =>
+      document.removeEventListener('selectionchange', handleSelectionChange);
+  }, [updateFormatState]);
+
   // This effect handles keyboard shortcuts for the editor.
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -144,8 +206,8 @@ const Toolbar = ({
           onAction(actions[key]);
         }
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        onAction('delete');
+        // Don't prevent default for delete/backspace - let them work normally
+        // Only call onAction for special delete functionality if needed
       }
     };
 
@@ -183,15 +245,24 @@ const Toolbar = ({
       <div className="w-px h-6 bg-gray-300 mx-2" />
 
       {/* Style Buttons */}
-      <ToolbarButton onClick={() => onAction('bold')} title="Bold (Ctrl+B)">
+      <ToolbarButton
+        onClick={() => onAction('bold')}
+        title="Bold (Ctrl+B)"
+        isActive={formatState.bold}
+      >
         <FaBold />
       </ToolbarButton>
-      <ToolbarButton onClick={() => onAction('italic')} title="Italic (Ctrl+I)">
+      <ToolbarButton
+        onClick={() => onAction('italic')}
+        title="Italic (Ctrl+I)"
+        isActive={formatState.italic}
+      >
         <FaItalic />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => onAction('underline')}
         title="Underline (Ctrl+U)"
+        isActive={formatState.underline}
       >
         <FaUnderline />
       </ToolbarButton>
