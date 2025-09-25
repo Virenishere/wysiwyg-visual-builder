@@ -5,7 +5,7 @@ import useDivStore from '@/store/UseDivStore';
 import DraggableElement from './DraggableElement';
 import CenterDivIndicator from './CenterDivIndicator';
 import AlignIndicator from './AlignIndicator';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaCopy } from 'react-icons/fa';
 
 export default function RndBox({ box, parentId }) {
   const {
@@ -18,6 +18,7 @@ export default function RndBox({ box, parentId }) {
     setLeftPanel,
     setIsResizing,
     duplicateElement,
+    duplicateRnd,
     setActiveDragItem,
     activeDragItem,
   } = useDivStore();
@@ -101,7 +102,7 @@ export default function RndBox({ box, parentId }) {
       {isSelected && (
         <button
           onClick={() => setLeftPanel('AddElementPanel')}
-          className="absolute -top-6 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          className="absolute -top-7 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
           aria-label="Add element"
         >
           <FaPlus />
@@ -122,7 +123,7 @@ export default function RndBox({ box, parentId }) {
               removeRnd(parentId, box.id);
             }
           }}
-          className="absolute -top-6 left-16 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          className="absolute -top-7 left-24 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all duration-200 z-20 cursor-pointer group relative"
           aria-label="Delete box"
         >
           <FaTrash />
@@ -130,6 +131,23 @@ export default function RndBox({ box, parentId }) {
           {/* Tooltip */}
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
             Delete box
+          </span>
+        </button>
+      )}
+
+      {/* Copy box button */}
+      {isSelected && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            duplicateRnd(parentId, box.id);
+          }}
+          className="absolute -top-7 left-32 bg-blue-500 text-white p-1 rounded-full hover:bg-blue-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          aria-label="Copy box"
+        >
+          <FaCopy />
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+            Copy box
           </span>
         </button>
       )}

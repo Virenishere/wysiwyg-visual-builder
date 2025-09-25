@@ -33,6 +33,7 @@ export default function SectionHeight({ selectedParent, updateParent }) {
             <div className="space-y-2">
               <input
                 type="number"
+                max={max}
                 placeholder="Enter height (e.g., 300)"
                 value={selectedParent?.size?.[key] || ''}
                 onChange={(e) =>

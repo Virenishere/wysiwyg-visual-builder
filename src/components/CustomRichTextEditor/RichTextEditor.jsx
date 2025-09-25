@@ -257,15 +257,18 @@ const RichTextEditor = ({
   // Handle focus
   const handleFocus = useCallback(
     (e) => {
-      setIsEditing(true);
       e.stopPropagation();
       // Save selection when editor gets focus
       setTimeout(() => {
         saveSelection();
       }, 0);
     },
-    [setIsEditing, saveSelection]
+    [saveSelection]
   );
+
+  const handleDoubleClick = useCallback(() => {
+    setIsEditing(true);
+  }, [setIsEditing]);
 
   // Handle blur with toolbar check
   const handleBlur = useCallback(
@@ -344,6 +347,7 @@ const RichTextEditor = ({
         onInput={handleInput}
         onMouseUp={saveSelection} // Save selection on mouse up
         onKeyUp={saveSelection} // Save selection on key up
+        onDoubleClick={handleDoubleClick} // Set editing mode on double click
         onMouseDown={(e) => {
           if (isEditing) {
             e.stopPropagation();

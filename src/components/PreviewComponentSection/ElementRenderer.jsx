@@ -33,9 +33,8 @@ export default function ElementRenderer({ element }) {
             justifyContent: 'flex-start',
             fontWeight: element.fontSize > 24 ? 'bold' : 'normal',
           }}
-        >
-          {element.content}
-        </div>
+          dangerouslySetInnerHTML={{ __html: element.content }}
+        />
       );
 
     case 'paragraph':
@@ -118,7 +117,7 @@ export default function ElementRenderer({ element }) {
           style={{
             ...baseStyle,
             ...element.style, // Apply custom styles first
-                        backgroundColor:
+            backgroundColor:
               element.backgroundColor ||
               element.style?.backgroundColor ||
               '#f8f9fa',
