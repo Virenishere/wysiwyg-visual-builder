@@ -4,6 +4,9 @@ import * as templates from '@/templates';
 import GlobalLoader from '@/components/GlobalLoader';
 import PreviewComponent from '@/components/PreviewComponent';
 
+import ResponsivenessSwitcher from '@/components/EditorPanelSection/ResponsivenessSwitcher';
+import { screenSizes } from '@/utils/screen';
+
 const PreviewPage = ({ params }) => {
   const messages = [
     'Loading template...',
@@ -16,6 +19,7 @@ const PreviewPage = ({ params }) => {
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
+  const [screenSize, setScreenSize] = useState('desktop');
 
   useEffect(() => {
     const loadTemplateData = () => {
@@ -83,7 +87,20 @@ const PreviewPage = ({ params }) => {
     );
   }
 
-  return <PreviewComponent parents={template.parents} />;
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div
+        className="shadow-2xl overflow-hidden bg-white relative transition-all duration-300 ease-in-out"
+        style={{ width: screenSizes[screenSize] }}
+      >
+        <PreviewComponent parents={template.parents} screenSize={screenSize} />
+      </div>
+      <ResponsivenessSwitcher
+        setScreenSize={setScreenSize}
+        screenSize={screenSize}
+      />
+    </div>
+  );
 };
 
 export default PreviewPage;

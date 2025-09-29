@@ -2,13 +2,17 @@
 import React from 'react';
 import BoxPreview from './BoxPreview';
 
-export default function ParentPreview({ parent, index, total }) {
+import { getResponsiveValue } from '@/utils/screen';
+
+export default function ParentPreview({ parent, index, total, screenSize }) {
+  const height = getResponsiveValue(parent.size.height, screenSize);
+
   return (
     <div
       key={parent.id}
       style={{
         width: '100%',
-        height: `${parent.size.height}px`,
+        height: `${height}px`,
         background: parent.size.background || '#fff',
         position: 'relative',
         overflow: 'hidden',
@@ -16,7 +20,7 @@ export default function ParentPreview({ parent, index, total }) {
       }}
     >
       {parent.rnds.map((box) => (
-        <BoxPreview key={box.id} box={box} />
+        <BoxPreview key={box.id} box={box} screenSize={screenSize} />
       ))}
     </div>
   );

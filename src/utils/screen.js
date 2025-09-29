@@ -1,22 +1,15 @@
-export const calculateResponsiveStyles = (
-  element,
-  editorDimensions,
-  previewDimensions
-) => {
-  if (!editorDimensions.width || !editorDimensions.height) {
-    return element.style;
+// utils/screen.js
+
+export const screenSizes = {
+  desktop: '100%',
+  laptop: '1366px',
+  tablet: '768px',
+  mobile: '375px',
+};
+
+export const getResponsiveValue = (value, screenSize) => {
+  if (typeof value === 'object' && value !== null) {
+    return value[screenSize] || value['desktop'];
   }
-
-  const widthRatio = previewDimensions.width / editorDimensions.width;
-  const heightRatio = previewDimensions.height / editorDimensions.height;
-
-  const newStyles = {
-    ...element.style,
-    left: `${element.x * widthRatio}px`,
-    top: `${element.y * heightRatio}px`,
-    width: `${element.width * widthRatio}px`,
-    height: `${element.height * heightRatio}px`,
-  };
-
-  return newStyles;
+  return value;
 };

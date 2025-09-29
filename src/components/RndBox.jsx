@@ -7,6 +7,8 @@ import CenterDivIndicator from './CenterDivIndicator';
 import AlignIndicator from './AlignIndicator';
 import { FaPlus, FaTrash, FaCopy } from 'react-icons/fa';
 
+import { getResponsiveValue } from '@/utils/screen';
+
 export default function RndBox({ box, parentId }) {
   const {
     updateRnd,
@@ -21,6 +23,7 @@ export default function RndBox({ box, parentId }) {
     duplicateRnd,
     setActiveDragItem,
     activeDragItem,
+    screenSize,
   } = useDivStore();
 
   const isSelected = selectedBoxId === box.id;
@@ -30,10 +33,15 @@ export default function RndBox({ box, parentId }) {
     setSelectedBox(box.id);
   };
 
+  const width = getResponsiveValue(box.width, screenSize);
+  const height = getResponsiveValue(box.height, screenSize);
+  const x = getResponsiveValue(box.x, screenSize);
+  const y = getResponsiveValue(box.y, screenSize);
+
   //container bounds for this RND box (for element indicators)
   const boxBounds = {
-    width: box.width,
-    height: box.height,
+    width: width,
+    height: height,
     x: 0, //relative to the box
     y: 0,
   };
@@ -49,15 +57,17 @@ export default function RndBox({ box, parentId }) {
 
   return (
     <Rnd
-      size={{ width: box.width, height: box.height }}
-      position={{ x: box.x, y: box.y }}
+      size={{ width: width, height: height }}
+      position={{ x: x, y: y }}
       bounds={`.parent-container[data-id="${parentId}"]`}
       onDragStart={(e) => e.stopPropagation()}
       onDrag={(e, d) => {
         setActiveDragItem({ ...box, ...d });
       }}
       onDragStop={(e, d) => {
-        updateRnd(parentId, box.id, { x: d.x, y: d.y });
+        const newX = { ...box.x, [screenSize]: d.x };
+        const newY = { ...box.y, [screenSize]: d.y };
+        updateRnd(parentId, box.id, { x: newX, y: newY });
         setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
@@ -66,13 +76,25 @@ export default function RndBox({ box, parentId }) {
       }}
       onResize={(e, direction, ref, delta, pos) => {
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        updateRnd(parentId, box.id, { ...newSize, ...pos });
+        const newWidth = { ...box.width, [screenSize]: newSize.width };
+        const newHeight = { ...box.height, [screenSize]: newSize.height };
+        updateRnd(parentId, box.id, {
+          width: newWidth,
+          height: newHeight,
+          ...pos,
+        });
         setActiveDragItem({ ...box, ...newSize, ...pos });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setIsResizing(false);
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        updateRnd(parentId, box.id, { ...newSize, ...pos });
+        const newWidth = { ...box.width, [screenSize]: newSize.width };
+        const newHeight = { ...box.height, [screenSize]: newSize.height };
+        updateRnd(parentId, box.id, {
+          width: newWidth,
+          height: newHeight,
+          ...pos,
+        });
         setActiveDragItem(null);
       }}
       onClick={(e) => {

@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import useDivStore from '@/store/UseDivStore';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function AlignIndicator({
   activeItem,
@@ -8,6 +10,7 @@ export default function AlignIndicator({
 }) {
   const indicatorContainerRef = useRef(null);
   const [containerElement, setContainerElement] = useState(null);
+  const screenSize = useDivStore((state) => state.screenSize);
 
   useEffect(() => {
     if (indicatorContainerRef.current) {
@@ -34,24 +37,27 @@ export default function AlignIndicator({
   const generateAlignmentGuides = () => {
     const guides = { vertical: [], horizontal: [] };
 
-    // Get active item bounds
-    const activeLeft = activeItem.x;
-    const activeRight = activeItem.x + activeItem.width;
-    const activeCenterX = activeItem.x + activeItem.width / 2;
-    const activeTop = activeItem.y;
-    const activeBottom = activeItem.y + activeItem.height;
-    const activeCenterY = activeItem.y + activeItem.height / 2;
+    const activeWidth = getResponsiveValue(activeItem.width, screenSize);
+    const activeHeight = getResponsiveValue(activeItem.height, screenSize);
+    const activeLeft = getResponsiveValue(activeItem.x, screenSize);
+    const activeRight = activeLeft + activeWidth;
+    const activeCenterX = activeLeft + activeWidth / 2;
+    const activeTop = getResponsiveValue(activeItem.y, screenSize);
+    const activeBottom = activeTop + activeHeight;
+    const activeCenterY = activeTop + activeHeight / 2;
 
     // Check alignment against other items
     allItems.forEach((item) => {
       if (item.id === activeItem.id) return;
 
-      const itemLeft = item.x;
-      const itemRight = item.x + item.width;
-      const itemCenterX = item.x + item.width / 2;
-      const itemTop = item.y;
-      const itemBottom = item.y + item.height;
-      const itemCenterY = item.y + item.height / 2;
+      const itemWidth = getResponsiveValue(item.width, screenSize);
+      const itemHeight = getResponsiveValue(item.height, screenSize);
+      const itemLeft = getResponsiveValue(item.x, screenSize);
+      const itemRight = itemLeft + itemWidth;
+      const itemCenterX = itemLeft + itemWidth / 2;
+      const itemTop = getResponsiveValue(item.y, screenSize);
+      const itemBottom = itemTop + itemHeight;
+      const itemCenterY = itemTop + itemHeight / 2;
 
       // Vertical alignment checks (left, right, center)
       if (Math.abs(activeLeft - itemLeft) < tolerance) {

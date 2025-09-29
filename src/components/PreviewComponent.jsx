@@ -3,7 +3,7 @@ import React from 'react';
 import useDivStore from '@/store/UseDivStore';
 import ParentPreview from './PreviewComponentSection/ParentPreview';
 
-export default function PreviewComponent({ parents: parentsProp }) {
+export default function PreviewComponent({ parents: parentsProp, screenSize }) {
   const { parents: parentsFromStore } = useDivStore();
   const parents = parentsProp || parentsFromStore;
 
@@ -30,6 +30,7 @@ export default function PreviewComponent({ parents: parentsProp }) {
           parent={parent}
           index={index}
           total={parents.length}
+          screenSize={screenSize}
         />
       ))}
     </div>

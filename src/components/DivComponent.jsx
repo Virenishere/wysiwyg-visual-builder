@@ -5,7 +5,7 @@ import React from 'react';
 import SectionComponent from './SectionComponent';
 
 export default function DivComponent() {
-  const { parents } = useDivStore();
+  const parents = useDivStore((state) => state.parents);
 
   if (!parents || parents.length === 0) {
     return (

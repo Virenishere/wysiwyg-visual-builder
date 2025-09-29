@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import useDivStore from '@/store/UseDivStore';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function CenterDivIndicator({ activeBox, containerBounds }) {
   const indicatorContainerRef = useRef(null);
   const [containerElement, setContainerElement] = useState(null);
+  const screenSize = useDivStore((state) => state.screenSize);
 
   useEffect(() => {
     if (indicatorContainerRef.current) {
@@ -23,10 +26,10 @@ export default function CenterDivIndicator({ activeBox, containerBounds }) {
   };
 
   const boxRect = {
-    width: activeBox.width,
-    height: activeBox.height,
-    x: activeBox.x,
-    y: activeBox.y,
+    width: getResponsiveValue(activeBox.width, screenSize),
+    height: getResponsiveValue(activeBox.height, screenSize),
+    x: getResponsiveValue(activeBox.x, screenSize),
+    y: getResponsiveValue(activeBox.y, screenSize),
   };
 
   const containerCenter = {

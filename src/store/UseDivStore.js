@@ -38,6 +38,10 @@ const useDivStore = create(
       previewingImage: null,
       leftPanel: null,
       activeDragItem: null,
+      screenSize: 'desktop', // Add screenSize state
+
+      // Action to set the screen size
+      setScreenSize: (screenSize) => set({ screenSize }),
 
       // Image actions
       setPreviewingImage: (imageUrl) => set({ previewingImage: imageUrl }),

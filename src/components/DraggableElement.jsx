@@ -12,6 +12,8 @@ import CardElement from './DraggableElementSection/CardElement';
 import LineElement from './DraggableElementSection/LineElement';
 import DivElement from './DraggableElementSection/DivElement';
 
+import { getResponsiveValue } from '@/utils/screen';
+
 export default function DraggableElement({
   element,
   parentId,
@@ -19,9 +21,15 @@ export default function DraggableElement({
   isSelected,
   onSelect,
 }) {
-  const { updateElement, setIsResizing, setActiveDragItem } = useDivStore();
+  const { updateElement, setIsResizing, setActiveDragItem, screenSize } =
+    useDivStore();
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef(null);
+
+  const width = getResponsiveValue(element.width, screenSize);
+  const height = getResponsiveValue(element.height, screenSize);
+  const x = getResponsiveValue(element.x, screenSize);
+  const y = getResponsiveValue(element.y, screenSize);
 
   const renderElementContent = () => {
     switch (element.type) {
@@ -82,8 +90,8 @@ export default function DraggableElement({
 
   return (
     <Rnd
-      size={{ width: element.width, height: element.height }}
-      position={{ x: element.x, y: element.y }}
+      size={{ width: width, height: height }}
+      position={{ x: x, y: y }}
       bounds={`.rnd-box[data-id="${boxId}"]`}
       disableDragging={isEditing} // Disable dragging when editing text
       enableResizing={!isEditing} // Disable resizing when editing text
@@ -109,7 +117,9 @@ export default function DraggableElement({
       onDragStop={(e, d) => {
         if (isEditing) return;
 
-        updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
+        const newX = { ...element.x, [screenSize]: d.x };
+        const newY = { ...element.y, [screenSize]: d.y };
+        updateElement(parentId, boxId, element.id, { x: newX, y: newY });
         setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
@@ -124,7 +134,13 @@ export default function DraggableElement({
         if (isEditing) return;
 
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        updateElement(parentId, boxId, element.id, { ...newSize, ...pos });
+        const newWidth = { ...element.width, [screenSize]: newSize.width };
+        const newHeight = { ...element.height, [screenSize]: newSize.height };
+        updateElement(parentId, boxId, element.id, {
+          width: newWidth,
+          height: newHeight,
+          ...pos,
+        });
         // Set active drag item for resizing indicators
         setActiveDragItem({
           ...element,
@@ -138,7 +154,13 @@ export default function DraggableElement({
 
         setIsResizing(false);
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        updateElement(parentId, boxId, element.id, { ...newSize, ...pos });
+        const newWidth = { ...element.width, [screenSize]: newSize.width };
+        const newHeight = { ...element.height, [screenSize]: newSize.height };
+        updateElement(parentId, boxId, element.id, {
+          width: newWidth,
+          height: newHeight,
+          ...pos,
+        });
         setActiveDragItem(null);
       }}
       onClick={handleClick}

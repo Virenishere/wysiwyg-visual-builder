@@ -9,8 +9,23 @@ import { RxCross1 } from 'react-icons/rx';
 import Image from 'next/image';
 import CenterDivIndicator from '@/components/CenterDivIndicator';
 import AlignIndicator from '@/components/AlignIndicator';
+import ResponsivenessSwitcher from '@/components/EditorPanelSection/ResponsivenessSwitcher';
+import { screenSizes } from '@/utils/screen';
 
 const TemplatePage = ({ params }) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const loadTemplate = useDivStore((state) => state.loadTemplate);
+  const previewingImage = useDivStore((state) => state.previewingImage);
+  const setPreviewingImage = useDivStore((state) => state.setPreviewingImage);
+  const activeDragItem = useDivStore((state) => state.activeDragItem);
+  const parents = useDivStore((state) => state.parents);
+  const screenSize = useDivStore((state) => state.screenSize);
+
   const messages = [
     'Loading template...',
     'Preparing the editor...',
@@ -21,27 +36,11 @@ const TemplatePage = ({ params }) => {
   const resolvedParams = use(params);
   const { templateName } = resolvedParams;
 
-  const {
-    loadTemplate,
-    importData,
-    previewingImage,
-    setPreviewingImage,
-    resetToDefault,
-    activeDragItem,
-    parents,
-    selectedBoxId,
-    selectedElementId,
-  } = useDivStore();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
   const mainContainerRef = useRef(null);
   const [containerRect, setContainerRect] = useState(null);
   const [allBoxes, setAllBoxes] = useState([]);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     if (mainContainerRef.current) {
@@ -89,7 +88,7 @@ const TemplatePage = ({ params }) => {
     return () => clearTimeout(timer);
   }, [step, loading, messages.length]);
 
-  if (loading) {
+  if (!isMounted || loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-6">
         <GlobalLoader />
@@ -108,7 +107,10 @@ const TemplatePage = ({ params }) => {
         className="flex-1 flex items-center justify-center"
         ref={mainContainerRef}
       >
-        <div className="w-full h-full shadow-2xl  overflow-hidden bg-white relative">
+        <div
+          className="h-full shadow-2xl overflow-hidden bg-white relative transition-all duration-300 ease-in-out"
+          style={{ width: screenSizes[screenSize] }}
+        >
           <DivComponent key={templateName} />
           {/* Show indicators only when dragging a box */}
           {activeDragItem && !activeDragItem.type && (
@@ -126,6 +128,8 @@ const TemplatePage = ({ params }) => {
           )}
         </div>
       </main>
+
+      <ResponsivenessSwitcher />
 
       {previewingImage && (
         <div

@@ -1,23 +1,27 @@
 'use client';
 import React from 'react';
 
-export default function ElementRenderer({ element }) {
+import { getResponsiveValue } from '@/utils/screen';
+
+export default function ElementRenderer({ element, screenSize }) {
   const baseStyle = {
     position: 'absolute',
-    left: `${element.x}px`,
-    top: `${element.y}px`,
-    width: `${element.width}px`,
-    height: `${element.height}px`,
-    margin: `${element.margin?.top || 0}px ${element.margin?.right || 0}px ${element.margin?.bottom || 0}px ${element.margin?.left || 0}px`,
-    padding: `${element.padding?.top || 5}px ${element.padding?.right || 10}px ${element.padding?.bottom || 5}px ${element.padding?.left || 10}px`,
-    fontSize: `${element.fontSize || 16}px`,
-    fontFamily: element.fontFamily || 'Arial, sans-serif',
-    color: element.color || '#000000',
-    backgroundColor: element.backgroundColor || 'transparent',
-    borderRadius: `${element.borderRadius || 0}px`,
-    border: element.border || 'none',
+    left: `${getResponsiveValue(element.x, screenSize)}px`,
+    top: `${getResponsiveValue(element.y, screenSize)}px`,
+    width: `${getResponsiveValue(element.width, screenSize)}px`,
+    height: `${getResponsiveValue(element.height, screenSize)}px`,
+    margin: `${getResponsiveValue(element.margin?.top, screenSize) || 0}px ${getResponsiveValue(element.margin?.right, screenSize) || 0}px ${getResponsiveValue(element.margin?.bottom, screenSize) || 0}px ${getResponsiveValue(element.margin?.left, screenSize) || 0}px`,
+    padding: `${getResponsiveValue(element.padding?.top, screenSize) || 5}px ${getResponsiveValue(element.padding?.right, screenSize) || 10}px ${getResponsiveValue(element.padding?.bottom, screenSize) || 5}px ${getResponsiveValue(element.padding?.left, screenSize) || 10}px`,
+    fontSize: `${getResponsiveValue(element.fontSize, screenSize) || 16}px`,
+    fontFamily:
+      getResponsiveValue(element.fontFamily, screenSize) || 'Arial, sans-serif',
+    color: getResponsiveValue(element.color, screenSize) || '#000000',
+    backgroundColor:
+      getResponsiveValue(element.backgroundColor, screenSize) || 'transparent',
+    borderRadius: `${getResponsiveValue(element.borderRadius, screenSize) || 0}px`,
+    border: getResponsiveValue(element.border, screenSize) || 'none',
     boxSizing: 'border-box',
-    zIndex: element.zIndex || 0,
+    zIndex: getResponsiveValue(element.zIndex, screenSize) || 0,
     ...element.customStyles,
   };
 

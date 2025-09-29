@@ -2,16 +2,23 @@
 import React from 'react';
 import ElementRenderer from './ElementRenderer';
 
-export default function BoxPreview({ box }) {
+import { getResponsiveValue } from '@/utils/screen';
+
+export default function BoxPreview({ box, screenSize }) {
+  const top = getResponsiveValue(box.y, screenSize);
+  const left = getResponsiveValue(box.x, screenSize);
+  const width = getResponsiveValue(box.width, screenSize);
+  const height = getResponsiveValue(box.height, screenSize);
+
   return (
     <div
       key={box.id}
       style={{
         position: 'absolute',
-        top: `${box.y}px`,
-        left: `${box.x}px`,
-        width: `${box.width}px`,
-        height: `${box.height}px`,
+        top: `${top}px`,
+        left: `${left}px`,
+        width: `${width}px`,
+        height: `${height}px`,
       }}
     >
       {box.customCss && <style>{box.customCss}</style>}
@@ -19,7 +26,11 @@ export default function BoxPreview({ box }) {
         <div dangerouslySetInnerHTML={{ __html: box.customHtml }} />
       )}
       {box.elements?.map((element) => (
-        <ElementRenderer key={element.id} element={element} />
+        <ElementRenderer
+          key={element.id}
+          element={element}
+          screenSize={screenSize}
+        />
       ))}
     </div>
   );

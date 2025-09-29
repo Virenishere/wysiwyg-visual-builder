@@ -1,34 +1,37 @@
-const getElementStyle = (element) => {
+import { getResponsiveValue } from './screen';
+
+const getElementStyle = (element, screenSize = 'desktop') => {
   let style = ``;
 
   // Base positioning and dimensions
   style += `  position: absolute;\n`;
-  style += `  left: ${element.x}px;\n`;
-  style += `  top: ${element.y}px;\n`;
-  style += `  width: ${element.width}px;\n`;
-  style += `  height: ${element.height}px;\n`;
+  style += `  left: ${getResponsiveValue(element.x, screenSize)}px;\n`;
+  style += `  top: ${getResponsiveValue(element.y, screenSize)}px;\n`;
+  style += `  width: ${getResponsiveValue(element.width, screenSize)}px;\n`;
+  style += `  height: ${getResponsiveValue(element.height, screenSize)}px;\n`;
   style += `  box-sizing: border-box;\n`;
 
   // Z-index
-  if (element.zIndex) style += `  z-index: ${element.zIndex};\n`;
+  if (element.zIndex)
+    style += `  z-index: ${getResponsiveValue(element.zIndex, screenSize)};\n`;
 
   // Typography
-  style += `  font-size: ${element.fontSize || 16}px;\n`;
-  style += `  font-family: ${element.fontFamily || 'Arial, sans-serif'};\n`;
-  style += `  color: ${element.color || '#000000'};\n`;
+  style += `  font-size: ${getResponsiveValue(element.fontSize, screenSize) || 16}px;\n`;
+  style += `  font-family: ${getResponsiveValue(element.fontFamily, screenSize) || 'Arial, sans-serif'};\n`;
+  style += `  color: ${getResponsiveValue(element.color, screenSize) || '#000000'};\n`;
 
   // Background and borders
-  style += `  background-color: ${element.backgroundColor || 'transparent'};\n`;
-  style += `  border-radius: ${element.borderRadius || 0}px;\n`;
-  style += `  border: ${element.border || 'none'};\n`;
+  style += `  background-color: ${getResponsiveValue(element.backgroundColor, screenSize) || 'transparent'};\n`;
+  style += `  border-radius: ${getResponsiveValue(element.borderRadius, screenSize) || 0}px;\n`;
+  style += `  border: ${getResponsiveValue(element.border, screenSize) || 'none'};\n`;
 
   // Margin and Padding
   if (element.margin) {
-    style += `  margin: ${element.margin.top || 0}px ${element.margin.right || 0}px ${element.margin.bottom || 0}px ${element.margin.left || 0}px;\n`;
+    style += `  margin: ${getResponsiveValue(element.margin.top, screenSize) || 0}px ${getResponsiveValue(element.margin.right, screenSize) || 0}px ${getResponsiveValue(element.margin.bottom, screenSize) || 0}px ${getResponsiveValue(element.margin.left, screenSize) || 0}px;\n`;
   }
 
   if (element.padding) {
-    style += `  padding: ${element.padding.top || 5}px ${element.padding.right || 10}px ${element.padding.bottom || 5}px ${element.padding.left || 10}px;\n`;
+    style += `  padding: ${getResponsiveValue(element.padding.top, screenSize) || 5}px ${getResponsiveValue(element.padding.right, screenSize) || 10}px ${getResponsiveValue(element.padding.bottom, screenSize) || 5}px ${getResponsiveValue(element.padding.left, screenSize) || 10}px;\n`;
   }
 
   // Type-specific styles
@@ -37,7 +40,7 @@ const getElementStyle = (element) => {
       style += `  display: flex;\n`;
       style += `  align-items: center;\n`;
       style += `  justify-content: flex-start;\n`;
-      if (element.fontSize > 24) {
+      if (getResponsiveValue(element.fontSize, screenSize) > 24) {
         style += `  font-weight: bold;\n`;
       }
       break;
@@ -57,33 +60,42 @@ const getElementStyle = (element) => {
 
     case 'card':
       // Apply card-specific defaults if not set
-      if (!element.backgroundColor && !element.style?.backgroundColor) {
+      if (
+        !getResponsiveValue(element.backgroundColor, screenSize) &&
+        !getResponsiveValue(element.style?.backgroundColor, screenSize)
+      ) {
         style += `  background-color: #f8f9fa;\n`;
       }
-      if (!element.border && !element.style?.border) {
+      if (
+        !getResponsiveValue(element.border, screenSize) &&
+        !getResponsiveValue(element.style?.border, screenSize)
+      ) {
         style += `  border: 1px solid #e9ecef;\n`;
       }
-      if (!element.style?.boxShadow) {
+      if (!getResponsiveValue(element.style?.boxShadow, screenSize)) {
         style += `  box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n`;
       }
       break;
 
     case 'line':
       style += `  padding: 0;\n`;
-      if (!element.backgroundColor && !element.style?.backgroundColor) {
+      if (
+        !getResponsiveValue(element.backgroundColor, screenSize) &&
+        !getResponsiveValue(element.style?.backgroundColor, screenSize)
+      ) {
         style += `  background-color: #000000;\n`;
       }
-      if (element.height < 2) {
+      if (getResponsiveValue(element.height, screenSize) < 2) {
         style += `  min-height: 2px;\n`;
         style += `  height: 2px;\n`;
       }
       break;
 
     case 'div':
-      if (!element.backgroundColor) {
+      if (!getResponsiveValue(element.backgroundColor, screenSize)) {
         style += `  background-color: transparent;\n`;
       }
-      if (!element.border) {
+      if (!getResponsiveValue(element.border, screenSize)) {
         style += `  border: 1px solid #ddd;\n`;
       }
       break;
@@ -93,14 +105,14 @@ const getElementStyle = (element) => {
   if (element.style) {
     for (const [key, value] of Object.entries(element.style)) {
       const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
-      style += `  ${cssKey}: ${value};\n`;
+      style += `  ${cssKey}: ${getResponsiveValue(value, screenSize)};\n`;
     }
   }
 
   // Custom styles from panel
   if (element.customStyles) {
     for (const [key, value] of Object.entries(element.customStyles)) {
-      style += `  ${key}: ${value};\n`;
+      style += `  ${key}: ${getResponsiveValue(value, screenSize)};\n`;
     }
   }
 
@@ -182,7 +194,7 @@ const generateStyleBlock = (parents) => {
   parents.forEach((parent) => {
     css += `#parent-${parent.id} {\n`;
     css += `  width: 100%;\n`;
-    css += `  height: ${parent.size.height}px;\n`;
+    css += `  height: ${getResponsiveValue(parent.size.height, 'desktop')}px;\n`;
     css += `  background: ${parent.size.background || '#fff'};\n`;
     css += `  position: relative;\n`;
     css += `  overflow: hidden;\n`;
@@ -191,10 +203,10 @@ const generateStyleBlock = (parents) => {
     parent.rnds.forEach((box) => {
       css += `#box-${box.id} {\n`;
       css += `  position: absolute;\n`;
-      css += `  left: ${box.x}px;\n`;
-      css += `  top: ${box.y}px;\n`;
-      css += `  width: ${box.width}px;\n`;
-      css += `  height: ${box.height}px;\n`;
+      css += `  left: ${getResponsiveValue(box.x, 'desktop')}px;\n`;
+      css += `  top: ${getResponsiveValue(box.y, 'desktop')}px;\n`;
+      css += `  width: ${getResponsiveValue(box.width, 'desktop')}px;\n`;
+      css += `  height: ${getResponsiveValue(box.height, 'desktop')}px;\n`;
       css += `}\n`;
 
       // Add custom CSS for boxes
@@ -209,7 +221,7 @@ const generateStyleBlock = (parents) => {
 
         // Base element styles
         css += `.${className} {\n`;
-        css += getElementStyle(element);
+        css += getElementStyle(element, 'desktop');
         css += `}\n`;
 
         // Add custom CSS for individual elements
@@ -262,9 +274,33 @@ const generateStyleBlock = (parents) => {
   });
 
   css += `\n/* Responsive Design */\n`;
-  css += `@media (max-width: 768px) {\n`;
-  css += `  [class*="parent-"] { overflow-x: auto; }\n`;
-  css += `}\n`;
+  const screenSizes = { laptop: 1366, tablet: 768, mobile: 480 };
+
+  for (const screenSize in screenSizes) {
+    css += `@media (max-width: ${screenSizes[screenSize]}px) {\n`;
+    parents.forEach((parent) => {
+      css += `  #parent-${parent.id} {\n`;
+      css += `    height: ${getResponsiveValue(parent.size.height, screenSize)}px;\n`;
+      css += `  }\n`;
+
+      parent.rnds.forEach((box) => {
+        css += `  #box-${box.id} {\n`;
+        css += `    left: ${getResponsiveValue(box.x, screenSize)}px;\n`;
+        css += `    top: ${getResponsiveValue(box.y, screenSize)}px;\n`;
+        css += `    width: ${getResponsiveValue(box.width, screenSize)}px;\n`;
+        css += `    height: ${getResponsiveValue(box.height, screenSize)}px;\n`;
+        css += `  }\n`;
+
+        box.elements.forEach((element) => {
+          const className = element.customClassName || `element-${element.id}`;
+          css += `  .${className} {\n`;
+          css += getElementStyle(element, screenSize);
+          css += `  }\n`;
+        });
+      });
+    });
+    css += `}\n`;
+  }
 
   css += `</style>`;
   return css;
