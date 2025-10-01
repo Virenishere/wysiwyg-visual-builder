@@ -46,8 +46,25 @@ export default function RndBox({ box, parentId }) {
     y: 0,
   };
 
-  // get all element in this box for alignment
   const boxElements = box.elements || [];
+
+  const minConstraints = box.elements.reduce(
+    (acc, el) => {
+      const elWidth = getResponsiveValue(el.width, screenSize);
+      const elHeight = getResponsiveValue(el.height, screenSize);
+      const elX = getResponsiveValue(el.x, screenSize);
+      const elY = getResponsiveValue(el.y, screenSize);
+
+      const right = elX + elWidth;
+      const bottom = elY + elHeight;
+
+      return {
+        minWidth: Math.max(acc.minWidth, right),
+        minHeight: Math.max(acc.minHeight, bottom),
+      };
+    },
+    { minWidth: 0, minHeight: 0 }
+  );
 
   // Check if the active drag item is an element within this box
   const isActiveDragElementInThisBox =
@@ -110,6 +127,8 @@ export default function RndBox({ box, parentId }) {
           : 'rgba(0, 0, 0, 0.02)',
         zIndex: isSelected ? 5 : 1,
       }}
+      minWidth={minConstraints.minWidth}
+      minHeight={minConstraints.minHeight}
       className="rnd-box"
       data-id={box.id}
     >

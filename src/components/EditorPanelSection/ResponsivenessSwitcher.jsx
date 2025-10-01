@@ -1,5 +1,11 @@
 import React from 'react';
-import { FaDesktop, FaLaptop, FaTabletAlt, FaMobileAlt } from 'react-icons/fa';
+import {
+  FaDesktop,
+  FaLaptop,
+  FaTabletAlt,
+  FaMobileAlt,
+  FaSave,
+} from 'react-icons/fa';
 import useDivStore from '@/store/UseDivStore';
 
 const screenSizes = {
@@ -12,9 +18,11 @@ const screenSizes = {
 const ResponsivenessSwitcher = ({
   screenSize: propScreenSize,
   setScreenSize: propSetScreenSize,
+  showSaveButton = true, // Default to true for editor
 }) => {
   const storeScreenSize = useDivStore((state) => state.screenSize);
   const storeSetScreenSize = useDivStore((state) => state.setScreenSize);
+  const saveState = useDivStore((state) => state.saveState);
 
   const screenSize =
     propScreenSize !== undefined ? propScreenSize : storeScreenSize;
@@ -66,6 +74,19 @@ const ResponsivenessSwitcher = ({
       >
         <FaMobileAlt size={20} />
       </button>
+
+      {showSaveButton && (
+        <>
+          <div className="w-px h-6 bg-gray-300 mx-2"></div>
+          <button
+            onClick={saveState}
+            className="p-2 rounded-md hover:bg-gray-100 text-green-500"
+            title="Save Work"
+          >
+            <FaSave size={20} />
+          </button>
+        </>
+      )}
     </div>
   );
 };

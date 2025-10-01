@@ -25,6 +25,7 @@ const TemplatePage = ({ params }) => {
   const activeDragItem = useDivStore((state) => state.activeDragItem);
   const parents = useDivStore((state) => state.parents);
   const screenSize = useDivStore((state) => state.screenSize);
+  const setScreenSize = useDivStore((state) => state.setScreenSize);
 
   const messages = [
     'Loading template...',
@@ -66,11 +67,16 @@ const TemplatePage = ({ params }) => {
     setAllBoxes(boxes);
   }, [parents]);
 
+  const setTemplateName = useDivStore((state) => state.setTemplateName);
+
   useEffect(() => {
+    if (templateName) {
+      setTemplateName(templateName);
+    }
     if (templateName && templateName !== 'new-template') {
       loadTemplate(templateName);
     }
-  }, [templateName, loadTemplate]);
+  }, [templateName, loadTemplate, setTemplateName]);
 
   useEffect(() => {
     let timer;
@@ -129,7 +135,11 @@ const TemplatePage = ({ params }) => {
         </div>
       </main>
 
-      <ResponsivenessSwitcher />
+      <ResponsivenessSwitcher
+        screenSize={screenSize}
+        setScreenSize={setScreenSize}
+        showSaveButton={true}
+      />
 
       {previewingImage && (
         <div

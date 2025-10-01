@@ -9,7 +9,9 @@ export const screenSizes = {
 
 export const getResponsiveValue = (value, screenSize) => {
   if (typeof value === 'object' && value !== null) {
-    return value[screenSize] || value['desktop'];
+    // Fallback chain: current screen size -> desktop -> 0
+    return value[screenSize] ?? value['desktop'] ?? 0;
   }
-  return value;
+  // Fallback for non-object values or null
+  return value ?? 0;
 };

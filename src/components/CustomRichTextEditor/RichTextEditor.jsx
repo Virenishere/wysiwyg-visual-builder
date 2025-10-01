@@ -86,7 +86,7 @@ const RichTextEditor = ({
         }
       }
     }
-  }, [content, isInitialized]);
+  }, [content, isInitialized, element.fontSize]);
 
   // Handle input changes
   const handleInput = useCallback(() => {
@@ -191,6 +191,14 @@ const RichTextEditor = ({
   const handleHeadingChange = useCallback(
     (heading) => {
       execCommand('formatBlock', heading);
+    },
+    [execCommand]
+  );
+
+  // Handle font size changes
+  const handleFontSizeChange = useCallback(
+    (size) => {
+      execCommand('fontSize', size);
     },
     [execCommand]
   );
@@ -330,6 +338,7 @@ const RichTextEditor = ({
           <Toolbar
             onAction={handleAction}
             onFontChange={handleFontChange}
+            onFontSizeChange={handleFontSizeChange}
             onHeadingChange={handleHeadingChange}
             onColorChange={handleColorChange}
             onBackgroundColorChange={handleBackgroundColorChange}
@@ -361,7 +370,11 @@ const RichTextEditor = ({
           fontFamily: element?.fontFamily || 'Arial, sans-serif',
           color: element?.color || '#000000',
           backgroundColor: element?.backgroundColor || 'transparent',
-          padding: '8px',
+          padding: `${element.padding?.top || 5}px ${
+            element.padding?.right || 10
+          }px ${element.padding?.bottom || 5}px ${
+            element.padding?.left || 10
+          }px`,
           minHeight: '100%',
           wordWrap: 'break-word',
           whiteSpace: 'pre-wrap',

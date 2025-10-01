@@ -35,7 +35,6 @@ export default function ElementRenderer({ element, screenSize }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
-            fontWeight: element.fontSize > 24 ? 'bold' : 'normal',
           }}
           dangerouslySetInnerHTML={{ __html: element.content }}
         />

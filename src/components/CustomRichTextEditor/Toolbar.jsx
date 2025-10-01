@@ -142,9 +142,13 @@ const Dropdown = ({ options, onSelect, placeholder, icon }) => {
   );
 };
 
+import { FONT_SIZES } from '@/utils/RichTextEditor/FontSize';
+import { FaTextHeight } from 'react-icons/fa';
+
 const Toolbar = ({
   onAction,
   onFontChange,
+  onFontSizeChange, // Add this prop
   onHeadingChange,
   onColorChange,
   onBackgroundColorChange,
@@ -240,6 +244,13 @@ const Toolbar = ({
         placeholder="Normal"
         icon={<LuHeading />}
         title="Headings"
+      />
+      <Dropdown
+        options={FONT_SIZES}
+        onSelect={onFontSizeChange} // Use the new prop
+        placeholder="Font Size"
+        icon={<FaTextHeight />}
+        title="Font Size"
       />
 
       <div className="w-px h-6 bg-gray-300 mx-2" />

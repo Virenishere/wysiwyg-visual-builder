@@ -70,7 +70,7 @@ export default function DraggableElement({
           </CardElement>
         );
       case 'line':
-        return <LineElement id={element.id} style={element.style} />;
+        return <LineElement element={element} />; // Pass the whole element
       case 'div':
         return <DivElement id={element.id} style={element.style} />;
       default:
@@ -127,6 +127,7 @@ export default function DraggableElement({
           e.preventDefault();
           return;
         }
+        setIsEditing(false); // Ensure not in editing mode
         e.stopPropagation();
         setIsResizing(true);
       }}

@@ -50,14 +50,17 @@ export default function ImageElement({
 
       {element.imageUrl ? (
         /* removed all hover effects, scaling, and preview button from image display */
-        <div className="w-full h-full overflow-hidden">
+        <div
+          className="w-full h-full overflow-hidden"
+          style={{
+            borderRadius: `${element.borderRadius || 0}px`,
+            border: element.border || 'none',
+          }}
+        >
           <img
             src={element.imageUrl || '/placeholder.svg'}
             alt={element.content}
             className="w-full h-full object-cover select-none"
-            style={{
-              borderRadius: `${element.borderRadius || 0}px`,
-            }}
             onContextMenu={(e) => e.preventDefault()}
             draggable={false}
           />

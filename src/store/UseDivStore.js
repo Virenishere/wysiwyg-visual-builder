@@ -9,28 +9,41 @@ let nextParentId = 1;
 let nextBoxId = 1;
 let nextElementId = 1;
 
+const initialLayout = {
+  parents: [
+    {
+      id: nextParentId++,
+      size: { height: 300, background: '#ffffff' },
+      rnds: [
+        {
+          id: nextBoxId++,
+          width: 150,
+          height: 150,
+          x: 0,
+          y: 0,
+          elements: [],
+          customHtml: '',
+          customCss: '',
+        },
+      ],
+    },
+  ],
+};
+
 const useDivStore = create(
   persist(
     (set, get) => ({
       // State
-      parents: [
-        {
-          id: nextParentId++,
-          size: { height: 300, background: '#ffffff' },
-          rnds: [
-            {
-              id: nextBoxId++,
-              width: 150,
-              height: 150,
-              x: 0,
-              y: 0,
-              elements: [],
-              customHtml: '',
-              customCss: '',
-            },
-          ],
-        },
-      ],
+      layouts: {
+        '4k': deepClone(initialLayout),
+        'l-laptop': deepClone(initialLayout),
+        laptop: deepClone(initialLayout),
+        tablet: deepClone(initialLayout),
+        mobile: deepClone(initialLayout),
+        'mobile-m': deepClone(initialLayout),
+        'mobile-s': deepClone(initialLayout),
+      },
+      parents: initialLayout.parents, // Current working layout
       selectedParentId: null,
       selectedBoxId: null,
       selectedElementId: null,
@@ -38,10 +51,33 @@ const useDivStore = create(
       previewingImage: null,
       leftPanel: null,
       activeDragItem: null,
-      screenSize: 'desktop', // Add screenSize state
+      screenSize: 'laptop', // Default screen size
+
+      templateName: '',
+      setTemplateName: (templateName) => set({ templateName }),
 
       // Action to set the screen size
-      setScreenSize: (screenSize) => set({ screenSize }),
+      setScreenSize: (screenSize) => {
+        const { layouts, parents, screenSize: oldScreenSize } = get();
+
+        // Save current work to the old screen size layout
+        const newLayouts = deepClone(layouts);
+        newLayouts[oldScreenSize] = { parents: deepClone(parents) };
+
+        // Load new screen size layout
+        const newParents = deepClone(
+          newLayouts[screenSize]?.parents || initialLayout.parents
+        );
+
+        set({
+          screenSize,
+          parents: newParents,
+          layouts: newLayouts,
+          selectedParentId: null,
+          selectedBoxId: null,
+          selectedElementId: null,
+        });
+      },
 
       // Image actions
       setPreviewingImage: (imageUrl) => set({ previewingImage: imageUrl }),
@@ -65,7 +101,6 @@ const useDivStore = create(
         let template = getTemplateById(templateId);
 
         if (!template) {
-          // Try loading from localStorage
           const savedTemplates = JSON.parse(
             localStorage.getItem('savedTemplates') || '{}'
           );
@@ -78,33 +113,41 @@ const useDivStore = create(
           }
         }
 
-        const templateCopy = deepClone(template);
-        const { parents: processedParents } = generateUniqueIds(templateCopy, {
-          parentId: nextParentId,
-          boxId: nextBoxId,
-          elementId: nextElementId,
-        });
-
+        const { layouts } = get();
+        const newLayouts = {};
         let maxParentId = 0;
         let maxBoxId = 0;
         let maxElementId = 0;
 
-        processedParents.forEach((parent) => {
-          maxParentId = Math.max(maxParentId, parent.id);
-          parent.rnds.forEach((rnd) => {
-            maxBoxId = Math.max(maxBoxId, rnd.id);
-            rnd.elements.forEach((element) => {
-              maxElementId = Math.max(maxElementId, element.id);
+        Object.keys(layouts).forEach((screen) => {
+          const templateCopy = deepClone(template);
+          const { parents: processedParents, nextIds } = generateUniqueIds(
+            templateCopy,
+            {
+              parentId: nextParentId,
+              boxId: nextBoxId,
+              elementId: nextElementId,
+            }
+          );
+          newLayouts[screen] = { parents: processedParents };
+
+          processedParents.forEach((parent) => {
+            maxParentId = Math.max(maxParentId, parent.id);
+            parent.rnds.forEach((rnd) => {
+              maxBoxId = Math.max(maxBoxId, rnd.id);
+              rnd.elements.forEach((element) => {
+                maxElementId = Math.max(maxElementId, element.id);
+              });
             });
           });
+          nextParentId = nextIds.parentId;
+          nextBoxId = nextIds.boxId;
+          nextElementId = nextIds.elementId;
         });
 
-        nextParentId = maxParentId + 1;
-        nextBoxId = maxBoxId + 1;
-        nextElementId = maxElementId + 1;
-
         set({
-          parents: processedParents,
+          layouts: newLayouts,
+          parents: newLayouts[get().screenSize].parents,
           selectedParentId: null,
           selectedBoxId: null,
           selectedElementId: null,
@@ -126,7 +169,13 @@ const useDivStore = create(
             },
           ],
         };
+        const newLayouts = {};
+        Object.keys(get().layouts).forEach((screen) => {
+          newLayouts[screen] = deepClone(newTemplate);
+        });
+
         set({
+          layouts: newLayouts,
           parents: newTemplate.parents,
           selectedParentId: newParentId,
           selectedBoxId: null,
@@ -140,24 +189,14 @@ const useDivStore = create(
         nextParentId = 1;
         nextBoxId = 1;
         nextElementId = 1;
+        const newLayouts = {};
+        Object.keys(get().layouts).forEach((screen) => {
+          newLayouts[screen] = deepClone(initialLayout);
+        });
 
         set({
-          parents: [
-            {
-              id: nextParentId++,
-              size: { height: 300, background: '#ffffff' },
-              rnds: [
-                {
-                  id: nextBoxId++,
-                  width: 150,
-                  height: 150,
-                  x: 0,
-                  y: 0,
-                  elements: [],
-                },
-              ],
-            },
-          ],
+          layouts: newLayouts,
+          parents: initialLayout.parents,
           selectedParentId: null,
           selectedBoxId: null,
           selectedElementId: null,
@@ -217,10 +256,10 @@ const useDivStore = create(
                     ...p.rnds,
                     {
                       id: newBoxId,
-                      width: 150,
-                      height: 150,
-                      x: 50,
-                      y: 50,
+                      width: { laptop: 150 },
+                      height: { laptop: 150 },
+                      x: { laptop: 50 },
+                      y: { laptop: 50 },
                       elements: [],
                       customHtml: '',
                       customCss: '',
@@ -280,47 +319,19 @@ const useDivStore = create(
       },
 
       // Element actions inside RND boxes
-
       addElement: (parentId, boxId, elementType) => {
         set((state) => {
-          const { selectedElementId } = get();
-
-          let x = 10;
-          let y = 10;
-
-          const parent = state.parents.find((p) => p.id === parentId);
-          const box = parent?.rnds.find((b) => b.id === boxId);
-
-          if (selectedElementId) {
-            if (box) {
-              const selectedElement = box.elements.find(
-                (el) => el.id === selectedElementId
-              );
-              if (
-                selectedElement &&
-                (selectedElement.type === 'card' ||
-                  selectedElement.type === 'div')
-              ) {
-                x = selectedElement.x + 10;
-                y = selectedElement.y + 10;
-              }
-            }
-          }
-
-          const maxWidth = box ? box.width * 0.9 : 150;
-          const maxHeight = box ? box.height * 0.9 : 150;
-
-          // Create element based on type with proper defaults
-          let newElement = {
-            id: nextElementId++,
+          const newElementId = nextElementId++;
+          const newElement = {
+            id: newElementId,
             type: elementType,
-            x,
-            y,
+            x: { laptop: 10 },
+            y: { laptop: 10 },
             zIndex: 0,
             customStyles: {},
-            fontSize: elementType === 'text' ? 16 : 14,
+            fontSize: 14,
             fontFamily: 'Arial, sans-serif',
-            color: elementType === 'button' ? '#ffffff' : '#000000',
+            color: '#000000',
             backgroundColor: 'transparent',
             margin: { top: 0, right: 0, bottom: 0, left: 0 },
             padding: { top: 5, right: 10, bottom: 5, left: 10 },
@@ -329,103 +340,84 @@ const useDivStore = create(
             imageUrl: null,
           };
 
-          // Set type-specific properties
+          // Type-specific properties
           switch (elementType) {
             case 'text':
-              newElement = {
-                ...newElement,
-                width: Math.min(100, maxWidth),
-                height: Math.min(30, maxHeight),
+              Object.assign(newElement, {
+                width: { laptop: 100 },
+                height: { laptop: 30 },
                 content: 'Sample Text',
-              };
+                fontSize: 16,
+              });
               break;
-
             case 'paragraph':
-              newElement = {
-                ...newElement,
-                width: Math.min(200, maxWidth),
-                height: Math.min(60, maxHeight),
+              Object.assign(newElement, {
+                width: { laptop: 200 },
+                height: { laptop: 60 },
                 content: '<p>Sample paragraph content</p>',
-              };
+              });
               break;
-
             case 'button':
-              newElement = {
-                ...newElement,
-                width: Math.min(120, maxWidth),
-                height: Math.min(35, maxHeight),
+              Object.assign(newElement, {
+                width: { laptop: 120 },
+                height: { laptop: 35 },
                 content: 'Click Me',
                 backgroundColor: '#007bff',
+                color: '#ffffff',
                 borderRadius: 5,
                 link: '',
-              };
+              });
               break;
-
             case 'image':
-              newElement = {
-                ...newElement,
-                width: Math.min(80, maxWidth),
-                height: Math.min(80, maxHeight),
+              Object.assign(newElement, {
+                width: { laptop: 80 },
+                height: { laptop: 80 },
                 content: '',
                 padding: { top: 0, right: 0, bottom: 0, left: 0 },
-              };
+              });
               break;
-
             case 'card':
-              newElement = {
-                ...newElement,
-                width: Math.min(200, maxWidth),
-                height: Math.min(150, maxHeight),
-                // content: 'Card Content',
+              Object.assign(newElement, {
+                width: { laptop: 200 },
+                height: { laptop: 150 },
                 backgroundColor: '#f8f9fa',
-                // border: '1px solid #e9ecef',
                 borderRadius: 8,
                 padding: { top: 15, right: 15, bottom: 15, left: 15 },
                 style: {
                   backgroundColor: '#f8f9fa',
-                  // border: '1px solid #e9ecef',
                   borderRadius: '8px',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 },
-              };
+              });
               break;
-
             case 'line':
-              newElement = {
-                ...newElement,
-                width: Math.min(200, maxWidth),
-                height: 2,
+              Object.assign(newElement, {
+                width: { laptop: 200 },
+                height: { laptop: 2 },
                 content: '',
                 backgroundColor: '#000000',
                 padding: { top: 0, right: 0, bottom: 0, left: 0 },
-                style: {
-                  backgroundColor: '#000000',
-                  minHeight: '2px',
-                },
-              };
+                style: { backgroundColor: '#000000', minHeight: '2px' },
+              });
               break;
-
             case 'div':
-              newElement = {
-                ...newElement,
-                width: Math.min(150, maxWidth),
-                height: Math.min(100, maxHeight),
+              Object.assign(newElement, {
+                width: { laptop: 150 },
+                height: { laptop: 100 },
                 content: 'Div Element',
                 border: '1px solid #ddd',
                 style: {
                   backgroundColor: 'transparent',
                   border: '1px solid #ddd',
                 },
-              };
+              });
               break;
-
             default:
-              newElement = {
-                ...newElement,
-                width: Math.min(120, maxWidth),
-                height: Math.min(35, maxHeight),
+              Object.assign(newElement, {
+                width: 120,
+                height: 35,
                 content: '',
-              };
+              });
               break;
           }
 
@@ -460,19 +452,11 @@ const useDivStore = create(
                     box.id === boxId
                       ? {
                           ...box,
-                          elements: box.elements.map((element) => {
-                            if (element.id === elementId) {
-                              const newElement = { ...element, ...updates };
-                              if (newElement.type === 'card') {
-                                newElement.style = {
-                                  ...newElement.style,
-                                  ...updates,
-                                };
-                              }
-                              return newElement;
-                            }
-                            return element;
-                          }),
+                          elements: box.elements.map((element) =>
+                            element.id === elementId
+                              ? { ...element, ...updates }
+                              : element
+                          ),
                         }
                       : box
                   ),
@@ -516,85 +500,98 @@ const useDivStore = create(
           );
           if (!parentToDuplicate) return state;
 
-          const duplicatedParent = {
-            ...parentToDuplicate,
-            id: nextParentId++,
-            rnds: parentToDuplicate.rnds.map((rnd) => ({
-              ...rnd,
-              id: nextBoxId++,
-              elements: rnd.elements.map((element) => ({
-                ...element,
-                id: nextElementId++,
-              })),
-            })),
-          };
+          const { parents: processedParents } = generateUniqueIds(
+            { parents: [parentToDuplicate] },
+            {
+              parentId: nextParentId,
+              boxId: nextBoxId,
+              elementId: nextElementId,
+            }
+          );
+          nextParentId += 1;
+          nextBoxId += parentToDuplicate.rnds.length;
+          parentToDuplicate.rnds.forEach(
+            (rnd) => (nextElementId += rnd.elements.length)
+          );
 
           return {
-            parents: [...state.parents, duplicatedParent],
+            parents: [...state.parents, ...processedParents],
           };
         });
         toast.success('Section duplicated!');
       },
 
       duplicateRnd: (parentId, boxId) => {
-        set((state) => ({
-          parents: state.parents.map((p) =>
-            p.id === parentId
-              ? {
-                  ...p,
-                  rnds: p.rnds.reduce((acc, box) => {
-                    acc.push(box);
-                    if (box.id === boxId) {
-                      acc.push({
-                        ...box,
-                        id: nextBoxId++,
-                        x: box.x + 20,
-                        y: box.y + 20,
-                        elements: box.elements.map((element) => ({
-                          ...element,
-                          id: nextElementId++,
-                        })),
-                      });
-                    }
-                    return acc;
-                  }, []),
-                }
-              : p
-          ),
-        }));
+        set((state) => {
+          const newBoxId = nextBoxId++;
+          let newRnd = null;
+          const parents = state.parents.map((p) => {
+            if (p.id === parentId) {
+              const rndToDuplicate = p.rnds.find((rnd) => rnd.id === boxId);
+              if (rndToDuplicate) {
+                newRnd = deepClone(rndToDuplicate);
+                newRnd.id = newBoxId;
+                newRnd.x += 20;
+                newRnd.y += 20;
+                const { elements, nextIds } = generateUniqueIds(
+                  { elements: newRnd.elements },
+                  { elementId: nextElementId }
+                );
+                newRnd.elements = elements;
+                nextElementId = nextIds.elementId;
+                return { ...p, rnds: [...p.rnds, newRnd] };
+              }
+            }
+            return p;
+          });
+          return { parents };
+        });
         toast.success('Div box duplicated!');
       },
 
       duplicateElement: (parentId, boxId, elementId) => {
-        set((state) => ({
-          parents: state.parents.map((p) =>
-            p.id === parentId
-              ? {
-                  ...p,
-                  rnds: p.rnds.map((box) =>
-                    box.id === boxId
-                      ? {
-                          ...box,
-                          elements: box.elements.reduce((acc, element) => {
-                            acc.push(element);
-                            if (element.id === elementId) {
-                              acc.push({
-                                ...element,
-                                id: nextElementId++,
-                                x: element.x + 50,
-                                y: element.y + 50,
-                              });
-                            }
-                            return acc;
-                          }, []),
-                        }
-                      : box
-                  ),
-                }
-              : p
-          ),
-        }));
+        set((state) => {
+          const newElementId = nextElementId++;
+          const parents = state.parents.map((p) => {
+            if (p.id === parentId) {
+              return {
+                ...p,
+                rnds: p.rnds.map((box) => {
+                  if (box.id === boxId) {
+                    const elementToDuplicate = box.elements.find(
+                      (el) => el.id === elementId
+                    );
+                    if (elementToDuplicate) {
+                      const newElement = deepClone(elementToDuplicate);
+                      newElement.id = newElementId;
+                      newElement.x += 20;
+                      newElement.y += 20;
+                      return {
+                        ...box,
+                        elements: [...box.elements, newElement],
+                      };
+                    }
+                  }
+                  return box;
+                }),
+              };
+            }
+            return p;
+          });
+          return { parents };
+        });
         toast.success('Element duplicated!');
+      },
+
+      // Save state action
+      saveState: () => {
+        set((state) => {
+          const { screenSize, parents, layouts } = state;
+          const newLayouts = deepClone(layouts);
+          newLayouts[screenSize] = { parents: deepClone(parents) };
+          return { layouts: newLayouts };
+        });
+        toast.success('Your work has been saved!');
       },
 
       // Selection actions
@@ -652,9 +649,9 @@ const useDivStore = create(
 
       // Utility actions
       exportData: () => {
-        const state = get();
+        const { layouts } = get();
         const data = {
-          parents: state.parents,
+          layouts,
           version: '1.0.0',
           exportDate: new Date().toISOString(),
         };
@@ -663,39 +660,45 @@ const useDivStore = create(
       },
 
       importData: (data) => {
-        if (!data || !data.parents) {
+        if (!data || !data.layouts) {
           console.error('Invalid import data');
           toast.error('Invalid import data!');
           return;
         }
 
-        const dataCopy = deepClone(data);
-        const { parents: processedParents } = generateUniqueIds(dataCopy, {
-          parentId: nextParentId,
-          boxId: nextBoxId,
-          elementId: nextElementId,
-        });
-
+        const newLayouts = {};
         let maxParentId = 0;
         let maxBoxId = 0;
         let maxElementId = 0;
 
-        processedParents.forEach((parent) => {
-          maxParentId = Math.max(maxParentId, parent.id);
-          parent.rnds.forEach((rnd) => {
-            maxBoxId = Math.max(maxBoxId, rnd.id);
-            rnd.elements.forEach((element) => {
-              maxElementId = Math.max(maxElementId, element.id);
+        Object.keys(data.layouts).forEach((screen) => {
+          const { parents: processedParents, nextIds } = generateUniqueIds(
+            data.layouts[screen],
+            {
+              parentId: nextParentId,
+              boxId: nextBoxId,
+              elementId: nextElementId,
+            }
+          );
+          newLayouts[screen] = { parents: processedParents };
+
+          processedParents.forEach((parent) => {
+            maxParentId = Math.max(maxParentId, parent.id);
+            parent.rnds.forEach((rnd) => {
+              maxBoxId = Math.max(maxBoxId, rnd.id);
+              rnd.elements.forEach((element) => {
+                maxElementId = Math.max(maxElementId, element.id);
+              });
             });
           });
+          nextParentId = nextIds.parentId;
+          nextBoxId = nextIds.boxId;
+          nextElementId = nextIds.elementId;
         });
 
-        nextParentId = maxParentId + 1;
-        nextBoxId = maxBoxId + 1;
-        nextElementId = maxElementId + 1;
-
         set({
-          parents: processedParents,
+          layouts: newLayouts,
+          parents: newLayouts[get().screenSize].parents,
           selectedParentId: null,
           selectedBoxId: null,
           selectedElementId: null,
@@ -737,9 +740,8 @@ const useDivStore = create(
     {
       name: 'div-store',
       storage: createJSONStorage(() => localStorage),
-      // Exclude some values from persistence for performance
       partialize: (state) => ({
-        parents: state.parents,
+        layouts: state.layouts,
       }),
     }
   )
@@ -747,7 +749,6 @@ const useDivStore = create(
 
 export default useDivStore;
 
-// Utility to find parent and box of a selected element
 export const findElementLocation = (parents, elementId) => {
   for (const parent of parents) {
     for (const box of parent.rnds) {

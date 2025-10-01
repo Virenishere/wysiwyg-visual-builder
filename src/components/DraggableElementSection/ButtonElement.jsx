@@ -33,8 +33,8 @@ export default function ButtonElement({
     fontFamily,
     color,
     backgroundColor,
-    margin: `${margin.top}px ${margin.right}px ${margin.bottom}px ${margin.left}px`,
-    padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
+    margin: `${margin?.top || 0}px ${margin?.right || 0}px ${margin?.bottom || 0}px ${margin?.left || 0}px`,
+    padding: `${padding?.top || 5}px ${padding?.right || 10}px ${padding?.bottom || 5}px ${padding?.left || 10}px`,
     borderRadius: `${borderRadius}px`,
     border,
     textDecoration: 'none', // to remove underline from link
