@@ -117,9 +117,7 @@ export default function DraggableElement({
       onDragStop={(e, d) => {
         if (isEditing) return;
 
-        const newX = { ...element.x, [screenSize]: d.x };
-        const newY = { ...element.y, [screenSize]: d.y };
-        updateElement(parentId, boxId, element.id, { x: newX, y: newY });
+        updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
         setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
@@ -135,12 +133,11 @@ export default function DraggableElement({
         if (isEditing) return;
 
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        const newWidth = { ...element.width, [screenSize]: newSize.width };
-        const newHeight = { ...element.height, [screenSize]: newSize.height };
         updateElement(parentId, boxId, element.id, {
-          width: newWidth,
-          height: newHeight,
-          ...pos,
+          width: newSize.width,
+          height: newSize.height,
+          x: pos.x,
+          y: pos.y,
         });
         // Set active drag item for resizing indicators
         setActiveDragItem({
@@ -155,12 +152,11 @@ export default function DraggableElement({
 
         setIsResizing(false);
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        const newWidth = { ...element.width, [screenSize]: newSize.width };
-        const newHeight = { ...element.height, [screenSize]: newSize.height };
         updateElement(parentId, boxId, element.id, {
-          width: newWidth,
-          height: newHeight,
-          ...pos,
+          width: newSize.width,
+          height: newSize.height,
+          x: pos.x,
+          y: pos.y,
         });
         setActiveDragItem(null);
       }}

@@ -82,9 +82,7 @@ export default function RndBox({ box, parentId }) {
         setActiveDragItem({ ...box, ...d });
       }}
       onDragStop={(e, d) => {
-        const newX = { ...box.x, [screenSize]: d.x };
-        const newY = { ...box.y, [screenSize]: d.y };
-        updateRnd(parentId, box.id, { x: newX, y: newY });
+        updateRnd(parentId, box.id, { x: d.x, y: d.y });
         setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
@@ -93,24 +91,22 @@ export default function RndBox({ box, parentId }) {
       }}
       onResize={(e, direction, ref, delta, pos) => {
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        const newWidth = { ...box.width, [screenSize]: newSize.width };
-        const newHeight = { ...box.height, [screenSize]: newSize.height };
         updateRnd(parentId, box.id, {
-          width: newWidth,
-          height: newHeight,
-          ...pos,
+          width: newSize.width,
+          height: newSize.height,
+          x: pos.x,
+          y: pos.y,
         });
         setActiveDragItem({ ...box, ...newSize, ...pos });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setIsResizing(false);
         const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        const newWidth = { ...box.width, [screenSize]: newSize.width };
-        const newHeight = { ...box.height, [screenSize]: newSize.height };
         updateRnd(parentId, box.id, {
-          width: newWidth,
-          height: newHeight,
-          ...pos,
+          width: newSize.width,
+          height: newSize.height,
+          x: pos.x,
+          y: pos.y,
         });
         setActiveDragItem(null);
       }}

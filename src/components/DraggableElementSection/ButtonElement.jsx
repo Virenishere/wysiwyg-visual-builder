@@ -1,5 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
+import { getResponsiveValue } from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
 export default function ButtonElement({
   element,
@@ -7,18 +9,20 @@ export default function ButtonElement({
   boxId,
   updateElement,
 }) {
-  const {
-    content,
-    fontSize,
-    fontFamily,
-    color,
-    backgroundColor,
-    margin,
-    padding,
-    borderRadius,
-    border,
-    link,
-  } = element;
+  const { screenSize } = useDivStore();
+  const { content, link } = element;
+
+  const fontSize = getResponsiveValue(element.fontSize, screenSize);
+  const fontFamily = getResponsiveValue(element.fontFamily, screenSize);
+  const color = getResponsiveValue(element.color, screenSize);
+  const backgroundColor = getResponsiveValue(
+    element.backgroundColor,
+    screenSize
+  );
+  const margin = getResponsiveValue(element.margin, screenSize);
+  const padding = getResponsiveValue(element.padding, screenSize);
+  const borderRadius = getResponsiveValue(element.borderRadius, screenSize);
+  const border = getResponsiveValue(element.border, screenSize);
 
   const buttonStyle = {
     width: '100%',

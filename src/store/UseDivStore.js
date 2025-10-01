@@ -30,6 +30,38 @@ const initialLayout = {
   ],
 };
 
+const responsiveUpdater = (obj, updates, screenSize) => {
+  const newObj = { ...obj };
+  for (const key in updates) {
+    const newValue = updates[key];
+    const currentValue = newObj[key];
+
+    if (screenSize === 'laptop') {
+      if (
+        typeof currentValue === 'object' &&
+        currentValue !== null &&
+        !Array.isArray(currentValue) &&
+        'laptop' in currentValue
+      ) {
+        newObj[key] = { ...currentValue, laptop: newValue };
+      } else {
+        newObj[key] = newValue;
+      }
+    } else {
+      if (
+        typeof currentValue !== 'object' ||
+        currentValue === null ||
+        Array.isArray(currentValue)
+      ) {
+        newObj[key] = { laptop: currentValue, [screenSize]: newValue };
+      } else {
+        newObj[key] = { ...currentValue, [screenSize]: newValue };
+      }
+    }
+  }
+  return newObj;
+};
+
 const useDivStore = create(
   persist(
     (set, get) => ({
@@ -66,7 +98,9 @@ const useDivStore = create(
 
         // Load new screen size layout
         const newParents = deepClone(
-          newLayouts[screenSize]?.parents || initialLayout.parents
+          newLayouts[screenSize]?.parents ||
+            newLayouts['laptop']?.parents ||
+            initialLayout.parents
         );
 
         set({
@@ -240,7 +274,12 @@ const useDivStore = create(
       updateParentSize: (parentId, size) =>
         set((state) => ({
           parents: state.parents.map((p) =>
-            p.id === parentId ? { ...p, size: { ...p.size, ...size } } : p
+            p.id === parentId
+              ? {
+                  ...p,
+                  size: responsiveUpdater(p.size, size, state.screenSize),
+                }
+              : p
           ),
         })),
 
@@ -281,7 +320,9 @@ const useDivStore = create(
               ? {
                   ...p,
                   rnds: p.rnds.map((box) =>
-                    box.id === boxId ? { ...box, ...updates } : box
+                    box.id === boxId
+                      ? responsiveUpdater(box, updates, state.screenSize)
+                      : box
                   ),
                 }
               : p
@@ -454,7 +495,11 @@ const useDivStore = create(
                           ...box,
                           elements: box.elements.map((element) =>
                             element.id === elementId
-                              ? { ...element, ...updates }
+                              ? responsiveUpdater(
+                                  element,
+                                  updates,
+                                  state.screenSize
+                                )
                               : element
                           ),
                         }

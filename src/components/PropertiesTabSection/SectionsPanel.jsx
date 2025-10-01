@@ -39,11 +39,28 @@ export default function SectionsPanel({
     }));
   };
 
-  const getBackgroundPreview = (background) => {
-    if (background.startsWith('linear') || background.startsWith('radial')) {
-      return { background };
+  const getBackgroundValue = (background) => {
+    // Handle responsive background objects
+    if (typeof background === 'object' && background !== null) {
+      return (
+        background.laptop ||
+        background['4k'] ||
+        background.tablet ||
+        background.mobile ||
+        '#ffffff'
+      );
     }
-    return { backgroundColor: background };
+    return background || '#ffffff';
+  };
+
+  const getBackgroundPreview = (background) => {
+    const bgValue = getBackgroundValue(background);
+    const bgString = String(bgValue);
+
+    if (bgString.startsWith('linear') || bgString.startsWith('radial')) {
+      return { background: bgString };
+    }
+    return { backgroundColor: bgString };
   };
 
   if (!parents || parents.length === 0) {
@@ -63,6 +80,13 @@ export default function SectionsPanel({
             {parents.map((parent, index) => {
               const isSelected = selectedParentId === parent.id;
               const isExpanded = expandedSettings[parent.id];
+              const backgroundValue = getBackgroundValue(
+                parent.size.background
+              );
+              const heightValue =
+                typeof parent.size.height === 'object'
+                  ? parent.size.height.laptop || 300
+                  : parent.size.height || 300;
 
               return (
                 <div
@@ -91,8 +115,7 @@ export default function SectionsPanel({
                           Section {index + 1}
                         </h3>
                         <p className="text-xs text-gray-500">
-                          {parent.size.height}px • {parent.rnds?.length || 0}{' '}
-                          boxes
+                          {heightValue}px • {parent.rnds?.length || 0} boxes
                         </p>
                       </div>
                     </div>
@@ -148,7 +171,7 @@ export default function SectionsPanel({
                             Height
                           </label>
                           <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                            {parent.size.height}px
+                            {heightValue}px
                           </span>
                         </div>
                         <div className="relative">
@@ -156,7 +179,7 @@ export default function SectionsPanel({
                             type="range"
                             min="100"
                             max={windowHeight}
-                            value={parent.size.height}
+                            value={heightValue}
                             onChange={(e) =>
                               updateParentSize(parent.id, {
                                 height: Number.parseInt(e.target.value),
@@ -165,12 +188,10 @@ export default function SectionsPanel({
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                             style={{
                               background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${
-                                ((parent.size.height - 100) /
-                                  (windowHeight - 100)) *
+                                ((heightValue - 100) / (windowHeight - 100)) *
                                 100
                               }%, #e5e7eb ${
-                                ((parent.size.height - 100) /
-                                  (windowHeight - 100)) *
+                                ((heightValue - 100) / (windowHeight - 100)) *
                                 100
                               }%, #e5e7eb 100%)`,
                             }}
@@ -194,10 +215,10 @@ export default function SectionsPanel({
                             <input
                               type="color"
                               value={
-                                parent.size.background.startsWith('linear') ||
-                                parent.size.background.startsWith('radial')
+                                backgroundValue.startsWith('linear') ||
+                                backgroundValue.startsWith('radial')
                                   ? '#3b82f6'
-                                  : parent.size.background
+                                  : backgroundValue
                               }
                               onChange={(e) =>
                                 updateParentSize(parent.id, {
@@ -249,7 +270,7 @@ export default function SectionsPanel({
                         </label>
                         <div className="relative">
                           <textarea
-                            value={parent.size.background}
+                            value={backgroundValue}
                             onChange={(e) =>
                               updateParentSize(parent.id, {
                                 background: e.target.value,
@@ -333,7 +354,11 @@ export default function SectionsPanel({
               </label>
               <input
                 type="number"
-                value={selectedParent.size.height}
+                value={
+                  typeof selectedParent.size.height === 'object'
+                    ? selectedParent.size.height.laptop || 300
+                    : selectedParent.size.height || 300
+                }
                 onChange={(e) =>
                   updateParentSize(selectedParent.id, {
                     height: parseInt(e.target.value) || 0,
@@ -349,7 +374,7 @@ export default function SectionsPanel({
                 Custom Background (CSS)
               </label>
               <textarea
-                value={selectedParent.size.background}
+                value={getBackgroundValue(selectedParent.size.background)}
                 onChange={(e) =>
                   updateParentSize(selectedParent.id, {
                     background: e.target.value,

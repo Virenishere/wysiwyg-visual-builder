@@ -1,7 +1,18 @@
 import React from 'react';
+import { getResponsiveValue } from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
 const LineElement = ({ element }) => {
-  const { id, backgroundColor, height, borderRadius, border, style } = element;
+  const { screenSize } = useDivStore();
+  const { id, style } = element;
+
+  const backgroundColor = getResponsiveValue(
+    element.backgroundColor,
+    screenSize
+  );
+  const height = getResponsiveValue(element.height, screenSize);
+  const borderRadius = getResponsiveValue(element.borderRadius, screenSize);
+  const border = getResponsiveValue(element.border, screenSize);
 
   const combinedStyle = {
     width: '100%',

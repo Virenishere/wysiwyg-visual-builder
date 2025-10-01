@@ -1,6 +1,7 @@
-// Fixed RichTextEditor.jsx
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import Toolbar from './Toolbar';
+import { getResponsiveValue } from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
 const RichTextEditor = ({
   content,
@@ -13,6 +14,16 @@ const RichTextEditor = ({
   const lastContent = useRef(content);
   const savedSelection = useRef(null); // Store selection when toolbar is clicked
   const [isInitialized, setIsInitialized] = useState(false);
+  const { screenSize } = useDivStore();
+
+  const fontSize = getResponsiveValue(element?.fontSize, screenSize);
+  const fontFamily = getResponsiveValue(element?.fontFamily, screenSize);
+  const color = getResponsiveValue(element?.color, screenSize);
+  const backgroundColor = getResponsiveValue(
+    element?.backgroundColor,
+    screenSize
+  );
+  const padding = getResponsiveValue(element?.padding, screenSize);
 
   // Save current selection
   const saveSelection = useCallback(() => {
@@ -86,7 +97,7 @@ const RichTextEditor = ({
         }
       }
     }
-  }, [content, isInitialized, element.fontSize]);
+  }, [content, isInitialized, fontSize]);
 
   // Handle input changes
   const handleInput = useCallback(() => {
@@ -233,27 +244,12 @@ const RichTextEditor = ({
     const cols = prompt('Number of columns:', '2');
     if (rows && cols && !isNaN(rows) && !isNaN(cols)) {
       let tableHTML = `
-        <table style="
-          border-collapse: collapse; 
-          margin: 10px 0; 
-          width: 100%; 
-          border: 2px solid #333;
-        ">`;
+        <table style="\n          border-collapse: collapse; \n          margin: 10px 0; \n          width: 100%; \n          border: 2px solid #333;\n        ">`;
 
       for (let i = 0; i < parseInt(rows, 10); i++) {
         tableHTML += '<tr>';
         for (let j = 0; j < parseInt(cols, 10); j++) {
-          tableHTML += `
-            <td style="
-              padding: 12px; 
-              border: 1px solid #666; 
-              min-width: 80px; 
-              min-height: 30px;
-              background-color: #f9f9f9;
-              vertical-align: top;
-            ">
-              &nbsp;
-            </td>`;
+          tableHTML += `\n            <td style="\n              padding: 12px; \n              border: 1px solid #666; \n              min-width: 80px; \n              min-height: 30px;\n              background-color: #f9f9f9;\n              vertical-align: top;\n            ">\n              &nbsp;\n            </td>`;
         }
         tableHTML += '</tr>';
       }
@@ -366,15 +362,13 @@ const RichTextEditor = ({
           width: '100%',
           height: '100%',
           outline: 'none',
-          fontSize: `${element?.fontSize || 16}px`,
-          fontFamily: element?.fontFamily || 'Arial, sans-serif',
-          color: element?.color || '#000000',
-          backgroundColor: element?.backgroundColor || 'transparent',
-          padding: `${element.padding?.top || 5}px ${
-            element.padding?.right || 10
-          }px ${element.padding?.bottom || 5}px ${
-            element.padding?.left || 10
-          }px`,
+          fontSize: `${fontSize || 16}px`,
+          fontFamily: fontFamily || 'Arial, sans-serif',
+          color: color || '#000000',
+          backgroundColor: backgroundColor || 'transparent',
+          padding: `${padding?.top || 5}px ${
+            padding?.right || 10
+          }px ${padding?.bottom || 5}px ${padding?.left || 10}px`,
           minHeight: '100%',
           wordWrap: 'break-word',
           whiteSpace: 'pre-wrap',

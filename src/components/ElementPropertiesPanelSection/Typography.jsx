@@ -91,7 +91,11 @@ export default function Typography({
             <div className="relative group">
               <input
                 type="color"
-                value={selectedElement.color}
+                value={
+                  selectedElement.color !== 'transparent'
+                    ? selectedElement.color
+                    : '#000000'
+                }
                 onChange={(e) =>
                   updateElement(parentId, boxId, elementId, {
                     color: e.target.value,

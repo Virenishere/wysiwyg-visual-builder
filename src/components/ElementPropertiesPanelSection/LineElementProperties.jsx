@@ -45,7 +45,11 @@ export default function LineElementProperties({
           </label>
           <input
             type="color"
-            value={selectedElement.style?.backgroundColor}
+            value={
+              selectedElement.style?.backgroundColor !== 'transparent'
+                ? selectedElement.style?.backgroundColor
+                : '#ffffff'
+            }
             onChange={(e) =>
               handleStyleChange('backgroundColor', e.target.value)
             }

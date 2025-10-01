@@ -1,6 +1,8 @@
 'use client';
 import { FiPlus, FiImage } from 'react-icons/fi';
 import { RiImageAddFill } from 'react-icons/ri';
+import { getResponsiveValue } from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
 export default function ImageElement({
   element,
@@ -9,6 +11,8 @@ export default function ImageElement({
   updateElement,
   fileInputRef,
 }) {
+  const { screenSize } = useDivStore();
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -22,6 +26,9 @@ export default function ImageElement({
       reader.readAsDataURL(file);
     }
   };
+
+  const borderRadius = getResponsiveValue(element.borderRadius, screenSize);
+  const border = getResponsiveValue(element.border, screenSize);
 
   return (
     <div className="relative w-full h-full">
@@ -53,8 +60,8 @@ export default function ImageElement({
         <div
           className="w-full h-full overflow-hidden"
           style={{
-            borderRadius: `${element.borderRadius || 0}px`,
-            border: element.border || 'none',
+            borderRadius: `${borderRadius || 0}px`,
+            border: border || 'none',
           }}
         >
           <img

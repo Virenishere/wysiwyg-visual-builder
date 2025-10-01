@@ -77,7 +77,11 @@ export default function BorderEffects({
           </label>
           <input
             type="color"
-            value={selectedElement.backgroundColor}
+            value={
+              selectedElement.backgroundColor !== 'transparent'
+                ? selectedElement.backgroundColor
+                : '#ffffff'
+            }
             onChange={(e) =>
               updateElement(parentId, boxId, elementId, {
                 backgroundColor: e.target.value,

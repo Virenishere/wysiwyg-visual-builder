@@ -5,6 +5,7 @@ import useDivStore from '@/store/UseDivStore';
 import RndBox from './RndBox';
 import CenterDivIndicator from './CenterDivIndicator';
 import AlignIndicator from './AlignIndicator';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function SectionComponent({ parent, parentIndex }) {
   const {
@@ -13,10 +14,15 @@ export default function SectionComponent({ parent, parentIndex }) {
     setSelectedElement,
     selectedParentId,
     activeDragItem,
+    screenSize,
   } = useDivStore();
 
   const sectionRef = useRef(null);
   const [sectionBounds, setSectionBounds] = useState(null);
+
+  const height = getResponsiveValue(parent.size?.height, screenSize) || 300;
+  const background =
+    getResponsiveValue(parent.size?.background, screenSize) || '#ffffff';
 
   useEffect(() => {
     if (sectionRef.current) {
@@ -27,7 +33,7 @@ export default function SectionComponent({ parent, parentIndex }) {
         y: 0,
       });
     }
-  }, [parent.size?.height]); // Recalculate if height changes
+  }, [height]); // Recalculate if height changes
 
   // get all RND boxes in this section for alignment
   const sectionRnds = parent.rnds || [];
@@ -44,8 +50,8 @@ export default function SectionComponent({ parent, parentIndex }) {
       data-id={parent.id}
       style={{
         ...parentBoundary,
-        height: parent.size?.height || 300,
-        background: parent.size?.background || '#ffffff',
+        height: height,
+        background: background,
         position: 'relative',
         border: selectedParentId === parent.id ? '3px solid #6f56f9' : '',
         padding: '10px',
