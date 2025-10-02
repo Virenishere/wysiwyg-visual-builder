@@ -33,10 +33,11 @@ export default function RndBox({ box, parentId }) {
     setSelectedBox(box.id);
   };
 
-  const width = getResponsiveValue(box.width, screenSize);
-  const height = getResponsiveValue(box.height, screenSize);
-  const x = getResponsiveValue(box.x, screenSize);
-  const y = getResponsiveValue(box.y, screenSize);
+  // Get responsive values with fallbacks
+  const width = getResponsiveValue(box.width, screenSize) || 150;
+  const height = getResponsiveValue(box.height, screenSize) || 150;
+  const x = getResponsiveValue(box.x, screenSize) || 0;
+  const y = getResponsiveValue(box.y, screenSize) || 0;
 
   //container bounds for this RND box (for element indicators)
   const boxBounds = {
@@ -50,20 +51,20 @@ export default function RndBox({ box, parentId }) {
 
   const minConstraints = box.elements.reduce(
     (acc, el) => {
-      const elWidth = getResponsiveValue(el.width, screenSize);
-      const elHeight = getResponsiveValue(el.height, screenSize);
-      const elX = getResponsiveValue(el.x, screenSize);
-      const elY = getResponsiveValue(el.y, screenSize);
+      const elWidth = getResponsiveValue(el.width, screenSize) || 100;
+      const elHeight = getResponsiveValue(el.height, screenSize) || 50;
+      const elX = getResponsiveValue(el.x, screenSize) || 0;
+      const elY = getResponsiveValue(el.y, screenSize) || 0;
 
       const right = elX + elWidth;
       const bottom = elY + elHeight;
 
       return {
-        minWidth: Math.max(acc.minWidth, right),
-        minHeight: Math.max(acc.minHeight, bottom),
+        minWidth: Math.max(acc.minWidth, right + 10), // Add padding
+        minHeight: Math.max(acc.minHeight, bottom + 10), // Add padding
       };
     },
-    { minWidth: 0, minHeight: 0 }
+    { minWidth: 50, minHeight: 50 } // Minimum box size
   );
 
   // Check if the active drag item is an element within this box
@@ -76,10 +77,23 @@ export default function RndBox({ box, parentId }) {
     <Rnd
       size={{ width: width, height: height }}
       position={{ x: x, y: y }}
-      bounds={`.parent-container[data-id="${parentId}"]`}
-      onDragStart={(e) => e.stopPropagation()}
+      bounds="parent"
+      enableResizing={{
+        top: true,
+        right: true,
+        bottom: true,
+        left: true,
+        topRight: true,
+        bottomRight: true,
+        bottomLeft: true,
+        topLeft: true,
+      }}
+      dragHandleClassName="rnd-drag-handle"
+      onDragStart={(e) => {
+        e.stopPropagation();
+      }}
       onDrag={(e, d) => {
-        setActiveDragItem({ ...box, ...d });
+        setActiveDragItem({ ...box, x: d.x, y: d.y, width, height });
       }}
       onDragStop={(e, d) => {
         updateRnd(parentId, box.id, { x: d.x, y: d.y });
@@ -90,25 +104,33 @@ export default function RndBox({ box, parentId }) {
         setIsResizing(true);
       }}
       onResize={(e, direction, ref, delta, pos) => {
-        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
-        updateRnd(parentId, box.id, {
-          width: newSize.width,
-          height: newSize.height,
-          x: pos.x,
-          y: pos.y,
+        const newWidth = ref.offsetWidth;
+        const newHeight = ref.offsetHeight;
+        const newX = pos.x;
+        const newY = pos.y;
+
+        setActiveDragItem({
+          ...box,
+          width: newWidth,
+          height: newHeight,
+          x: newX,
+          y: newY,
         });
-        setActiveDragItem({ ...box, ...newSize, ...pos });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
-        setIsResizing(false);
-        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+        const newWidth = ref.offsetWidth;
+        const newHeight = ref.offsetHeight;
+        const newX = pos.x;
+        const newY = pos.y;
+
         updateRnd(parentId, box.id, {
-          width: newSize.width,
-          height: newSize.height,
-          x: pos.x,
-          y: pos.y,
+          width: newWidth,
+          height: newHeight,
+          x: newX,
+          y: newY,
         });
         setActiveDragItem(null);
+        setIsResizing(false);
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -128,6 +150,12 @@ export default function RndBox({ box, parentId }) {
       className="rnd-box"
       data-id={box.id}
     >
+      {/* Drag handle area - makes the entire box draggable */}
+      <div
+        className="rnd-drag-handle absolute inset-0 cursor-move"
+        style={{ zIndex: 1 }}
+      />
+
       {/* Box label */}
       {isSelected && (
         <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium z-20">
@@ -138,7 +166,10 @@ export default function RndBox({ box, parentId }) {
       {/* Add element button */}
       {isSelected && (
         <button
-          onClick={() => setLeftPanel('AddElementPanel')}
+          onClick={(e) => {
+            e.stopPropagation();
+            setLeftPanel('AddElementPanel');
+          }}
           className="absolute -top-7 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
           aria-label="Add element"
         >
@@ -210,21 +241,26 @@ export default function RndBox({ box, parentId }) {
       {/* Render custom HTML and CSS */}
       {box.customCss && <style>{box.customCss}</style>}
       {box.customHtml && (
-        <div dangerouslySetInnerHTML={{ __html: box.customHtml }} />
+        <div
+          dangerouslySetInnerHTML={{ __html: box.customHtml }}
+          style={{ position: 'relative', zIndex: 2 }}
+        />
       )}
 
       {/* Render elements inside this box */}
-      {box.elements?.map((element) => (
-        <DraggableElement
-          key={`element-${element.id}`}
-          element={element}
-          parentId={parentId}
-          boxId={box.id}
-          isSelected={selectedElementId === element.id}
-          onSelect={() => handleElementSelect(element.id)}
-          duplicateElement={duplicateElement}
-        />
-      ))}
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        {box.elements?.map((element) => (
+          <DraggableElement
+            key={`element-${element.id}`}
+            element={element}
+            parentId={parentId}
+            boxId={box.id}
+            isSelected={selectedElementId === element.id}
+            onSelect={() => handleElementSelect(element.id)}
+            duplicateElement={duplicateElement}
+          />
+        ))}
+      </div>
     </Rnd>
   );
 }

@@ -28,9 +28,9 @@ export default function SectionComponent({ parent, parentIndex }) {
     if (sectionRef.current) {
       setSectionBounds({
         width: sectionRef.current.clientWidth - 20, // account for 10px padding on each side
-        height: sectionRef.current.clientHeight,
+        height: sectionRef.current.clientHeight - 20, // account for 10px padding on top and bottom
         x: 10, // account for 10px padding on the left
-        y: 0,
+        y: 10, // account for 10px padding on the top
       });
     }
   }, [height]); // Recalculate if height changes
@@ -53,9 +53,13 @@ export default function SectionComponent({ parent, parentIndex }) {
         height: height,
         background: background,
         position: 'relative',
-        border: selectedParentId === parent.id ? '3px solid #6f56f9' : '',
+        border:
+          selectedParentId === parent.id
+            ? '3px solid #6f56f9'
+            : '1px solid #e5e7eb',
         padding: '10px',
         boxSizing: 'border-box',
+        overflow: 'hidden', // Prevent children from going outside
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {

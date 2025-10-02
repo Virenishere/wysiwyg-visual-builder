@@ -1,16 +1,19 @@
 // utils/screen.js
 
 export const screenSizes = {
-  desktop: '100%',
-  laptop: '1366px',
-  tablet: '768px',
-  mobile: '375px',
+  '4k': '100%', // Desktop - full width
+  'l-laptop': '1920px', // Large laptop
+  laptop: '1366px', // Standard laptop
+  tablet: '768px', // Tablet
+  mobile: '375px', // Mobile
+  'mobile-m': '320px', // Mobile medium
+  'mobile-s': '280px', // Mobile small
 };
 
 export const getResponsiveValue = (value, screenSize) => {
   if (typeof value === 'object' && value !== null) {
-    // Fallback chain: current screen size -> laptop -> 0
-    return value[screenSize] ?? value['laptop'] ?? 0;
+    // Fallback chain: current screen size -> 4k (desktop) -> laptop -> 0
+    return value[screenSize] ?? value['4k'] ?? value['laptop'] ?? 0;
   }
   // Fallback for non-object values or null
   return value ?? 0;

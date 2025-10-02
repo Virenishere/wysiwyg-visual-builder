@@ -7,6 +7,27 @@
 export const generateUniqueIds = (templateData, startIds = {}) => {
   let { parentId = 1, boxId = 1, elementId = 1 } = startIds;
 
+  // Handle case where only elements are provided (for duplicateRnd)
+  if (templateData.elements && !templateData.parents) {
+    const processedElements = templateData.elements.map((element) => ({
+      ...element,
+      id: elementId++,
+    }));
+
+    return {
+      elements: processedElements,
+      nextIds: { parentId, boxId, elementId },
+    };
+  }
+
+  // Handle full template data with parents
+  if (!templateData.parents || !Array.isArray(templateData.parents)) {
+    return {
+      parents: [],
+      nextIds: { parentId, boxId, elementId },
+    };
+  }
+
   const processedParents = templateData.parents.map((parent) => ({
     ...parent,
     id: parentId++,

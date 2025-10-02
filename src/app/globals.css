@@ -329,4 +329,56 @@
   transform: translateY(-50%) scale(1);
 }
 
+/* Responsive Design Improvements */
+@media (max-width: 768px) {
+  .loadingspinner {
+    --square: 20px;
+    --offset: 24px;
+    transform: scale(0.8);
+  }
+  
+  /* Mobile panel adjustments */
+  .icon-label {
+    display: none !important;
+  }
+  
+  /* Responsive text sizes */
+  .text-lg {
+    font-size: 1rem;
+  }
+  
+  .text-xl {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .loadingspinner {
+    --square: 18px;
+    --offset: 20px;
+    transform: scale(0.7);
+  }
+  
+  /* Very small screens */
+  .shadow-2xl {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Custom scrollbar for mobile */
+@media (max-width: 768px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+  }
+}
+
 

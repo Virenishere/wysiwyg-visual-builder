@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import useDivStore from '@/store/UseDivStore';
 import GlobalLoader from '@/components/GlobalLoader';
 import PreviewComponent from '@/components/PreviewComponent';
@@ -7,7 +7,10 @@ import ResponsivenessSwitcher from '@/components/EditorPanelSection/Responsivene
 import { screenSizes } from '@/utils/screen';
 
 const PreviewPage = ({ params }) => {
-  const { templateName } = params;
+  // Use React.use() to unwrap the params promise
+  const resolvedParams = use(params);
+  const { templateName } = resolvedParams;
+
   const { layouts, screenSize, setScreenSize } = useDivStore();
 
   const [loading, setLoading] = useState(true);
@@ -30,49 +33,54 @@ const PreviewPage = ({ params }) => {
         setLoading(false);
       }, 500);
     }
-    return () => clearTimeout(timer);
-  }, [step]);
 
-  const currentLayout = layouts[screenSize] || { parents: [] };
+    return () => clearTimeout(timer);
+  }, [step, messages.length]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <GlobalLoader />
-        <p className="text-lg font-medium text-gray-700 animate-pulse">
-          {messages[step] || messages[messages.length - 1]}
-        </p>
-      </div>
-    );
+    return <GlobalLoader message={messages[step]} />;
   }
 
-  if (!currentLayout.parents || currentLayout.parents.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <GlobalLoader />
-        <p className="text-lg font-medium text-gray-700 animate-pulse">
-          Template not found or is empty...
-        </p>
-      </div>
-    );
-  }
+  const currentLayout = layouts[screenSize] || layouts['4k'] || { parents: [] };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div
-        className="shadow-2xl overflow-hidden bg-white relative transition-all duration-300 ease-in-out"
-        style={{ width: screenSizes[screenSize] }}
-      >
-        <PreviewComponent
-          parents={currentLayout.parents}
-          screenSize={screenSize}
-        />
+    <div className="min-h-screen bg-gray-100">
+      {/* Header with responsive switcher */}
+      <div className="bg-white shadow-sm border-b border-gray-200 p-4">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Preview: {templateName}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Current screen size: {screenSize}
+            </p>
+          </div>
+
+          <ResponsivenessSwitcher
+            screenSize={screenSize}
+            setScreenSize={setScreenSize}
+            showSaveButton={false}
+          />
+        </div>
       </div>
-      <ResponsivenessSwitcher
-        setScreenSize={setScreenSize}
-        screenSize={screenSize}
-        showSaveButton={false}
-      />
+
+      {/* Preview container with proper width constraints */}
+      <div className="flex justify-center p-4">
+        <div
+          className="bg-white shadow-lg overflow-hidden transition-all duration-300"
+          style={{
+            width: screenSizes[screenSize] || '100%',
+            maxWidth: screenSize === '4k' ? '100%' : screenSizes[screenSize],
+            minHeight: '600px',
+          }}
+        >
+          <PreviewComponent
+            parents={currentLayout.parents}
+            screenSize={screenSize}
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -37,12 +37,14 @@ export default function AlignIndicator({
   const generateAlignmentGuides = () => {
     const guides = { vertical: [], horizontal: [] };
 
-    const activeWidth = getResponsiveValue(activeItem.width, screenSize);
-    const activeHeight = getResponsiveValue(activeItem.height, screenSize);
-    const activeLeft = getResponsiveValue(activeItem.x, screenSize);
+    // Fix: Ensure we get responsive values properly with fallbacks
+    const activeWidth = getResponsiveValue(activeItem.width, screenSize) || 150;
+    const activeHeight =
+      getResponsiveValue(activeItem.height, screenSize) || 150;
+    const activeLeft = getResponsiveValue(activeItem.x, screenSize) || 0;
     const activeRight = activeLeft + activeWidth;
     const activeCenterX = activeLeft + activeWidth / 2;
-    const activeTop = getResponsiveValue(activeItem.y, screenSize);
+    const activeTop = getResponsiveValue(activeItem.y, screenSize) || 0;
     const activeBottom = activeTop + activeHeight;
     const activeCenterY = activeTop + activeHeight / 2;
 
@@ -50,12 +52,13 @@ export default function AlignIndicator({
     allItems.forEach((item) => {
       if (item.id === activeItem.id) return;
 
-      const itemWidth = getResponsiveValue(item.width, screenSize);
-      const itemHeight = getResponsiveValue(item.height, screenSize);
-      const itemLeft = getResponsiveValue(item.x, screenSize);
+      // Fix: Ensure we get responsive values properly with fallbacks for all items
+      const itemWidth = getResponsiveValue(item.width, screenSize) || 150;
+      const itemHeight = getResponsiveValue(item.height, screenSize) || 150;
+      const itemLeft = getResponsiveValue(item.x, screenSize) || 0;
       const itemRight = itemLeft + itemWidth;
       const itemCenterX = itemLeft + itemWidth / 2;
-      const itemTop = getResponsiveValue(item.y, screenSize);
+      const itemTop = getResponsiveValue(item.y, screenSize) || 0;
       const itemBottom = itemTop + itemHeight;
       const itemCenterY = itemTop + itemHeight / 2;
 

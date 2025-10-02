@@ -88,6 +88,77 @@ export default function DraggableElement({
     onSelect(element.id);
   };
 
+  // Build inline styles from element properties
+  const buildInlineStyles = () => {
+    const styles = {};
+
+    // Apply responsive values for common CSS properties
+    const fontSize = getResponsiveValue(element.fontSize, screenSize);
+    const color = getResponsiveValue(element.color, screenSize);
+    const backgroundColor = getResponsiveValue(
+      element.backgroundColor,
+      screenSize
+    );
+    const borderRadius = getResponsiveValue(element.borderRadius, screenSize);
+    const border = getResponsiveValue(element.border, screenSize);
+
+    if (fontSize) styles.fontSize = `${fontSize}px`;
+    if (color) styles.color = color;
+    if (backgroundColor && backgroundColor !== 'transparent')
+      styles.backgroundColor = backgroundColor;
+    if (borderRadius) styles.borderRadius = `${borderRadius}px`;
+    if (border && border !== 'none') styles.border = border;
+
+    // Apply margin and padding
+    if (element.margin) {
+      const margin = getResponsiveValue(element.margin, screenSize);
+      if (margin) {
+        if (typeof margin === 'object') {
+          styles.marginTop = `${margin.top || 0}px`;
+          styles.marginRight = `${margin.right || 0}px`;
+          styles.marginBottom = `${margin.bottom || 0}px`;
+          styles.marginLeft = `${margin.left || 0}px`;
+        }
+      }
+    }
+
+    if (element.padding) {
+      const padding = getResponsiveValue(element.padding, screenSize);
+      if (padding) {
+        if (typeof padding === 'object') {
+          styles.paddingTop = `${padding.top || 0}px`;
+          styles.paddingRight = `${padding.right || 0}px`;
+          styles.paddingBottom = `${padding.bottom || 0}px`;
+          styles.paddingLeft = `${padding.left || 0}px`;
+        }
+      }
+    }
+
+    // Apply custom styles from element.style object
+    if (element.style) {
+      Object.keys(element.style).forEach((key) => {
+        const value = getResponsiveValue(element.style[key], screenSize);
+        if (value !== undefined && value !== null) {
+          styles[key] = value;
+        }
+      });
+    }
+
+    // Apply custom styles from customStyles
+    if (element.customStyles) {
+      Object.keys(element.customStyles).forEach((key) => {
+        const value = getResponsiveValue(element.customStyles[key], screenSize);
+        if (value !== undefined && value !== null) {
+          styles[key] = value;
+        }
+      });
+    }
+
+    return styles;
+  };
+
+  const inlineStyles = buildInlineStyles();
+
   return (
     <Rnd
       size={{ width: width, height: height }}
@@ -101,6 +172,12 @@ export default function DraggableElement({
           return;
         }
         e.stopPropagation();
+        setActiveDragItem({
+          ...element,
+          x: x,
+          y: y,
+          isElement: true,
+        });
       }}
       onDrag={(e, d) => {
         if (isEditing) return;
@@ -128,6 +205,12 @@ export default function DraggableElement({
         setIsEditing(false); // Ensure not in editing mode
         e.stopPropagation();
         setIsResizing(true);
+        setActiveDragItem({
+          ...element,
+          x: x,
+          y: y,
+          isElement: true,
+        });
       }}
       onResize={(e, direction, ref, delta, pos) => {
         if (isEditing) return;
@@ -168,11 +251,25 @@ export default function DraggableElement({
             : '1px solid transparent',
         borderRadius: '2px',
         zIndex: isSelected || isEditing ? 10 : element.zIndex || 1,
-        pointerEvents: isEditing ? 'auto' : 'auto',
+        pointerEvents: 'auto',
+        cursor: isEditing ? 'text' : 'default',
+        ...inlineStyles, // Apply all computed styles
       }}
       className={`element-rnd ${element.customClassName || ''} ${isEditing ? 'editing-text' : ''}`}
     >
-      {element.customCss && <style>{element.customCss}</style>}
+      {/* Apply custom CSS if provided */}
+      {element.customCss && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: element.customCss.includes(
+              element.customClassName || `element-${element.id}`
+            )
+              ? element.customCss
+              : `.${element.customClassName || `element-${element.id}`} { ${element.customCss} }`,
+          }}
+        />
+      )}
+
       {renderElementContent()}
 
       {/* Add a style tag to handle text editing mode */}
@@ -182,6 +279,10 @@ export default function DraggableElement({
         }
         .editing-text {
           cursor: text !important;
+          pointer-events: auto !important;
+        }
+        .editing-text * {
+          pointer-events: auto !important;
         }
       `}</style>
     </Rnd>

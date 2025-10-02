@@ -33,13 +33,13 @@ export default function AddSectionPanel({ onClose }) {
       <div className="-mx-4 border-b border-gray-300 mb-4"></div>
       <div>
         <div className="flex items-center gap-4 mb-4">
-          <input
+          {/* <input
             type="number"
             value={height}
             onChange={(e) => setHeight(e.target.value)}
             className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
             placeholder="Section Height (e.g., 300)"
-          />
+          /> */}
           <button
             onClick={() => addParent(height)}
             className="relative flex items-center justify-center gap-2 cursor-pointer group whitespace-nowrap bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300"
