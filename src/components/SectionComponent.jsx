@@ -59,7 +59,7 @@ export default function SectionComponent({ parent, parentIndex }) {
             : '1px solid #e5e7eb',
         padding: '10px',
         boxSizing: 'border-box',
-        overflow: 'hidden', // Prevent children from going outside
+        overflow: 'visible', // Allow elements to move freely
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -96,18 +96,29 @@ export default function SectionComponent({ parent, parentIndex }) {
         </>
       )}
 
-      {/* Render RND boxes */}
-      {parent.rnds && parent.rnds.length > 0 ? (
-        parent.rnds.map((box) => (
-          <RndBox key={box.id} box={box} parentId={parent.id} />
-        ))
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-400">
-            This section is empty. Add a box to get started.
-          </p>
-        </div>
-      )}
+      {/* Container for RND boxes with proper bounds */}
+      <div
+        className="rnd-container"
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          overflow: 'visible', // Allow elements to move freely within boxes
+        }}
+      >
+        {/* Render RND boxes */}
+        {parent.rnds && parent.rnds.length > 0 ? (
+          parent.rnds.map((box) => (
+            <RndBox key={box.id} box={box} parentId={parent.id} />
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-400">
+              This section is empty. Add a box to get started.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

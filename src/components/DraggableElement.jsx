@@ -163,9 +163,19 @@ export default function DraggableElement({
     <Rnd
       size={{ width: width, height: height }}
       position={{ x: x, y: y }}
-      bounds={`.rnd-box[data-id="${boxId}"]`}
-      disableDragging={isEditing} // Disable dragging when editing text
-      enableResizing={!isEditing} // Disable resizing when editing text
+      bounds="parent"
+      enableResizing={{
+        top: !isEditing,
+        right: !isEditing,
+        bottom: !isEditing,
+        left: !isEditing,
+        topRight: !isEditing,
+        bottomRight: !isEditing,
+        bottomLeft: !isEditing,
+        topLeft: !isEditing,
+      }}
+      disableDragging={isEditing}
+      dragAxis="both"
       onDragStart={(e) => {
         if (isEditing) {
           e.preventDefault();
@@ -252,7 +262,8 @@ export default function DraggableElement({
         borderRadius: '2px',
         zIndex: isSelected || isEditing ? 10 : element.zIndex || 1,
         pointerEvents: 'auto',
-        cursor: isEditing ? 'text' : 'default',
+        cursor: isEditing ? 'text' : 'move',
+        touchAction: 'none',
         ...inlineStyles, // Apply all computed styles
       }}
       className={`element-rnd ${element.customClassName || ''} ${isEditing ? 'editing-text' : ''}`}
@@ -279,10 +290,9 @@ export default function DraggableElement({
         }
         .editing-text {
           cursor: text !important;
-          pointer-events: auto !important;
         }
-        .editing-text * {
-          pointer-events: auto !important;
+        .element-rnd {
+          user-select: none;
         }
       `}</style>
     </Rnd>

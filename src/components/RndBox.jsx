@@ -150,10 +150,13 @@ export default function RndBox({ box, parentId }) {
       className="rnd-box"
       data-id={box.id}
     >
-      {/* Drag handle area - makes the entire box draggable */}
+      {/* Drag handle area - positioned to not interfere with elements */}
       <div
-        className="rnd-drag-handle absolute inset-0 cursor-move"
-        style={{ zIndex: 1 }}
+        className="rnd-drag-handle absolute inset-0"
+        style={{
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
       />
 
       {/* Box label */}
@@ -243,12 +246,12 @@ export default function RndBox({ box, parentId }) {
       {box.customHtml && (
         <div
           dangerouslySetInnerHTML={{ __html: box.customHtml }}
-          style={{ position: 'relative', zIndex: 2 }}
+          style={{ position: 'relative', zIndex: 2, pointerEvents: 'none' }}
         />
       )}
 
       {/* Render elements inside this box */}
-      <div style={{ position: 'relative', zIndex: 2 }}>
+      <div style={{ position: 'relative', zIndex: 3 }}>
         {box.elements?.map((element) => (
           <DraggableElement
             key={`element-${element.id}`}
@@ -261,6 +264,28 @@ export default function RndBox({ box, parentId }) {
           />
         ))}
       </div>
+
+      {/* Empty space drag handle for box dragging */}
+      <div
+        className="rnd-drag-handle absolute inset-0"
+        style={{
+          zIndex: 1,
+          pointerEvents: 'auto',
+          cursor: 'move',
+        }}
+        onMouseDown={(e) => {
+          // Only allow dragging if clicking on empty space (not on elements)
+          const target = e.target;
+          const isEmptySpace =
+            target.classList.contains('rnd-drag-handle') ||
+            target === e.currentTarget;
+
+          if (!isEmptySpace) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+      />
     </Rnd>
   );
 }
