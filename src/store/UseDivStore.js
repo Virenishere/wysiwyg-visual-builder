@@ -422,7 +422,7 @@ const useDivStore = create(
             id: newElementId,
             type: elementType,
             x: { laptop: 10 },
-            y: { laptop: 10 },
+            y: { '4k': 0, laptop: 0 },
             zIndex: 0,
             customStyles: {},
             fontSize: 14,

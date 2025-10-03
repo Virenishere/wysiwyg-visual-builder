@@ -57,7 +57,7 @@ export default function SectionComponent({ parent, parentIndex }) {
           selectedParentId === parent.id
             ? '3px solid #6f56f9'
             : '1px solid #e5e7eb',
-        padding: '10px',
+        // padding: '10px',
         boxSizing: 'border-box',
         overflow: 'visible', // Allow elements to move freely
       }}

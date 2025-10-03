@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Rnd } from 'react-rnd';
 import useDivStore from '@/store/UseDivStore';
 import DraggableElement from './DraggableElement';
@@ -73,6 +73,20 @@ export default function RndBox({ box, parentId }) {
     activeDragItem.type && // elements have type, boxes don't
     boxElements.some((element) => element.id === activeDragItem.id);
 
+  useEffect(() => {
+    // This effect runs once after the component mounts.
+    // It triggers a state update with the component's current dimensions and position.
+    // This helps to resolve positioning glitches that can happen during the initial render,
+    // especially when complex CSS like `top: -30px` is applied to child containers.
+    // It essentially mimics the recalculation that happens on a resize.
+    updateRnd(parentId, box.id, {
+      width,
+      height,
+      x,
+      y,
+    });
+  }, []); // The empty dependency array ensures this runs only once.
+
   return (
     <Rnd
       size={{ width: width, height: height }}
@@ -88,7 +102,6 @@ export default function RndBox({ box, parentId }) {
         bottomLeft: true,
         topLeft: true,
       }}
-      dragHandleClassName="rnd-drag-handle"
       onDragStart={(e) => {
         e.stopPropagation();
       }}
@@ -251,7 +264,15 @@ export default function RndBox({ box, parentId }) {
       )}
 
       {/* Render elements inside this box */}
-      <div style={{ position: 'relative', zIndex: 3 }}>
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 3,
+          width: '100%',
+          height: '100%',
+          top: '-30px',
+        }}
+      >
         {box.elements?.map((element) => (
           <DraggableElement
             key={`element-${element.id}`}
@@ -264,28 +285,6 @@ export default function RndBox({ box, parentId }) {
           />
         ))}
       </div>
-
-      {/* Empty space drag handle for box dragging */}
-      <div
-        className="rnd-drag-handle absolute inset-0"
-        style={{
-          zIndex: 1,
-          pointerEvents: 'auto',
-          cursor: 'move',
-        }}
-        onMouseDown={(e) => {
-          // Only allow dragging if clicking on empty space (not on elements)
-          const target = e.target;
-          const isEmptySpace =
-            target.classList.contains('rnd-drag-handle') ||
-            target === e.currentTarget;
-
-          if (!isEmptySpace) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }}
-      />
     </Rnd>
   );
 }

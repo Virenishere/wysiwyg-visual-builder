@@ -639,4 +639,3 @@ export default function SectionsPanel({
     </div>
   );
 }
-k;
