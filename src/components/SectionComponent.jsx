@@ -20,8 +20,7 @@ export default function SectionComponent({ parent, parentIndex }) {
   const sectionRef = useRef(null);
   const [sectionBounds, setSectionBounds] = useState(null);
 
-  const height =
-    parseInt(getResponsiveValue(parent.size?.height, screenSize), 10) || 300;
+  const height = getResponsiveValue(parent.size?.height, screenSize) || 300;
   const background =
     getResponsiveValue(parent.size?.background, screenSize) || '#ffffff';
 

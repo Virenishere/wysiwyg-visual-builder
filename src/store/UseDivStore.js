@@ -882,11 +882,9 @@ const useDivStore = create(
             : 800; // fallback width minus padding
 
           const boxWidth =
-            parseInt(getResponsiveValue(box.width, state.screenSize), 10) ||
-            150;
+            getResponsiveValue(box.width, state.screenSize) || 150;
           const boxHeight =
-            parseInt(getResponsiveValue(box.height, state.screenSize), 10) ||
-            150;
+            getResponsiveValue(box.height, state.screenSize) || 150;
 
           // Calculate center position: (containerSize - elementSize) / 2
           const centerX = Math.max(0, (sectionWidth - boxWidth) / 2);

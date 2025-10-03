@@ -111,49 +111,64 @@ const RichTextEditor = ({
   // Execute commands with proper selection handling
   const execCommand = useCallback(
     (command, value = null) => {
-      // Restore selection before executing command
       restoreSelection();
 
       if (editorRef.current) {
-        // Ensure editor is focused
         editorRef.current.focus();
 
-        // Special handling for different commands
-        if (command === 'paste') {
-          // Handle paste specially
-          try {
-            document.execCommand('paste');
-          } catch (e) {
-            console.warn('Paste failed:', e);
-          }
-        } else if (command === 'delete') {
-          // Handle delete
-          const selection = window.getSelection();
-          if (selection.rangeCount > 0) {
+        const selection = window.getSelection();
+        const isCollapsed =
+          selection.rangeCount > 0 && selection.getRangeAt(0).collapsed;
+        const styleCommands = [
+          'bold',
+          'italic',
+          'underline',
+          'fontName',
+          'fontSize',
+          'foreColor',
+          'hiliteColor',
+          'justifyLeft',
+          'justifyCenter',
+          'justifyRight',
+          'formatBlock',
+        ];
+
+        if (isCollapsed && styleCommands.includes(command)) {
+          const originalRange = savedSelection.current.cloneRange();
+          const allContentRange = document.createRange();
+          allContentRange.selectNodeContents(editorRef.current);
+          selection.removeAllRanges();
+          selection.addRange(allContentRange);
+
+          document.execCommand(command, false, value);
+
+          selection.removeAllRanges();
+          selection.addRange(originalRange);
+        } else {
+          // Special handling for paste and delete from original function
+          if (command === 'paste') {
+            try {
+              document.execCommand('paste');
+            } catch (e) {
+              console.warn('Paste failed:', e);
+            }
+          } else if (command === 'delete') {
             const range = selection.getRangeAt(0);
             if (range.collapsed) {
-              // If no selection, delete one character forward
               try {
                 range.setEnd(range.endContainer, range.endOffset + 1);
               } catch (e) {
-                // Handle case where we can't extend selection
                 console.warn('Could not extend selection for delete');
               }
             }
             range.deleteContents();
-          }
-        } else {
-          // Regular commands
-          const success = document.execCommand(command, false, value);
-          if (!success) {
-            console.warn(`Command ${command} failed`);
+          } else {
+            document.execCommand(command, false, value);
           }
         }
 
-        // Update content after command
         requestAnimationFrame(() => {
           handleInput();
-          // Save selection after command execution
           saveSelection();
         });
       }
@@ -327,7 +342,7 @@ const RichTextEditor = ({
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       {isEditing && (
         <div
-          className="absolute -top-36 left-0 w-full z-50 toolbar-container"
+          className="absolute -top-36 left-1/2 -translate-x-1/2 z-50 toolbar-container max-w-3xl"
           data-toolbar="true"
           onMouseDown={handleToolbarMouseDown}
         >
