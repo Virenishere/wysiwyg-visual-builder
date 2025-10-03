@@ -21,6 +21,7 @@ export default function SectionsPanel({
 }) {
   const [windowHeight, setWindowHeight] = useState(800);
   const [expandedSettings, setExpandedSettings] = useState({});
+  const [customHeights, setCustomHeights] = useState({});
 
   useEffect(() => {
     const updateWindowHeight = () => {
@@ -32,11 +33,38 @@ export default function SectionsPanel({
     return () => window.removeEventListener('resize', updateWindowHeight);
   }, []);
 
+  // Initialize custom heights when parents change
+  useEffect(() => {
+    if (parents) {
+      const newCustomHeights = {};
+      parents.forEach((parent) => {
+        const heightValue =
+          typeof parent.size.height === 'object'
+            ? parent.size.height.laptop || 300
+            : parent.size.height || 300;
+        newCustomHeights[parent.id] = heightValue;
+      });
+      setCustomHeights(newCustomHeights);
+    }
+  }, [parents]);
+
   const toggleSettings = (parentId) => {
     setExpandedSettings((prev) => ({
       ...prev,
       [parentId]: !prev[parentId],
     }));
+  };
+
+  const handleCustomHeightChange = (parentId, value) => {
+    const numValue = parseInt(value) || 0;
+    setCustomHeights((prev) => ({
+      ...prev,
+      [parentId]: numValue,
+    }));
+
+    // Update parent size with validation
+    const validatedValue = Math.max(100, Math.min(5000, numValue));
+    updateParentSize(parentId, { height: validatedValue });
   };
 
   const getBackgroundValue = (background) => {
@@ -163,42 +191,262 @@ export default function SectionsPanel({
                   {/* Expanded Settings Panel */}
                   {isExpanded && (
                     <div className="border-t border-gray-200 bg-gray-50/50 p-4 space-y-4">
-                      {/* Height Slider */}
-                      <div className="space-y-2">
+                      {/* Height Controls */}
+                      <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                             <FaExpand className="text-blue-500" size={12} />
-                            Height
+                            Height Controls
                           </label>
                           <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
                             {heightValue}px
                           </span>
                         </div>
-                        <div className="relative">
-                          <input
-                            type="range"
-                            min="100"
-                            max={windowHeight}
-                            value={heightValue}
-                            onChange={(e) =>
-                              updateParentSize(parent.id, {
-                                height: Number.parseInt(e.target.value),
-                              })
-                            }
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                            style={{
-                              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${
-                                ((heightValue - 100) / (windowHeight - 100)) *
-                                100
-                              }%, #e5e7eb ${
-                                ((heightValue - 100) / (windowHeight - 100)) *
-                                100
-                              }%, #e5e7eb 100%)`,
-                            }}
-                          />
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>100px</span>
-                            <span>{windowHeight}px (Screen)</span>
+
+                        {/* Compact Height Input and Slider */}
+                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                          {/* Custom Height Input - Primary Control */}
+                          <div className="mb-3">
+                            <label className="text-xs font-medium text-gray-600 mb-1 block">
+                              Custom Height (px) - Range: 100-5000px
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 relative">
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={
+                                    customHeights[parent.id] !== undefined
+                                      ? customHeights[parent.id]
+                                      : heightValue.toString()
+                                  }
+                                  onChange={(e) =>
+                                    handleCustomHeightChange(
+                                      parent.id,
+                                      e.target.value
+                                    )
+                                  }
+                                  onBlur={(e) =>
+                                    handleCustomHeightBlur(
+                                      parent.id,
+                                      e.target.value
+                                    )
+                                  }
+                                  onKeyDown={(e) =>
+                                    handleCustomHeightKeyDown(parent.id, e)
+                                  }
+                                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-sm ${(() => {
+                                    const val = customHeights[parent.id];
+                                    const numVal = parseInt(val);
+                                    if (val === '' || val === undefined)
+                                      return 'border-gray-300 focus:border-blue-400';
+                                    if (
+                                      isNaN(numVal) ||
+                                      numVal < 100 ||
+                                      numVal > 5000
+                                    ) {
+                                      return 'border-orange-300 bg-orange-50 focus:border-orange-400';
+                                    }
+                                    return 'border-gray-300 focus:border-blue-400';
+                                  })()}`}
+                                  placeholder="Enter height (100-5000)"
+                                />
+                                {/* Validation indicator */}
+                                {(() => {
+                                  const val = customHeights[parent.id];
+                                  const numVal = parseInt(val);
+                                  if (
+                                    val &&
+                                    !isNaN(numVal) &&
+                                    (numVal < 100 || numVal > 5000)
+                                  ) {
+                                    return (
+                                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                        <span className="text-orange-500 text-xs font-medium">
+                                          {numVal < 100
+                                            ? 'Min: 100'
+                                            : 'Max: 5000'}
+                                        </span>
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              </div>
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={() => {
+                                    const currentVal = customHeights[parent.id];
+                                    const currentHeight =
+                                      currentVal && !isNaN(parseInt(currentVal))
+                                        ? parseInt(currentVal)
+                                        : heightValue;
+                                    const newHeight = Math.min(
+                                      5000,
+                                      currentHeight + 50
+                                    );
+                                    setCustomHeights((prev) => ({
+                                      ...prev,
+                                      [parent.id]: newHeight.toString(),
+                                    }));
+                                    updateParentSize(parent.id, {
+                                      height: newHeight,
+                                    });
+                                  }}
+                                  className="px-2 py-2 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200 transition-colors font-medium"
+                                  title="Increase by 50px"
+                                >
+                                  +50
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const currentVal = customHeights[parent.id];
+                                    const currentHeight =
+                                      currentVal && !isNaN(parseInt(currentVal))
+                                        ? parseInt(currentVal)
+                                        : heightValue;
+                                    const newHeight = Math.max(
+                                      100,
+                                      currentHeight - 50
+                                    );
+                                    setCustomHeights((prev) => ({
+                                      ...prev,
+                                      [parent.id]: newHeight.toString(),
+                                    }));
+                                    updateParentSize(parent.id, {
+                                      height: newHeight,
+                                    });
+                                  }}
+                                  className="px-2 py-2 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200 transition-colors font-medium"
+                                  title="Decrease by 50px"
+                                >
+                                  -50
+                                </button>
+                              </div>
+                            </div>
+                            {/* Helper text */}
+                            <div className="mt-1 text-xs text-gray-500">
+                              {(() => {
+                                const val = customHeights[parent.id];
+                                const numVal = parseInt(val);
+                                if (val === '' || val === undefined) {
+                                  return (
+                                    <span className="text-blue-600">
+                                      Type your desired height...
+                                    </span>
+                                  );
+                                } else if (isNaN(numVal)) {
+                                  return (
+                                    <span className="text-orange-600">
+                                      Please enter numbers only
+                                    </span>
+                                  );
+                                } else if (numVal < 100) {
+                                  return (
+                                    <span className="text-orange-600">
+                                      Minimum height is 100px
+                                    </span>
+                                  );
+                                } else if (numVal > 5000) {
+                                  return (
+                                    <span className="text-orange-600">
+                                      Maximum height is 5000px
+                                    </span>
+                                  );
+                                } else {
+                                  return (
+                                    <span>
+                                      Current: {heightValue}px • Valid range:
+                                      100-5000px
+                                    </span>
+                                  );
+                                }
+                              })()}
+                            </div>
+                          </div>
+
+                          {/* Height Slider - Secondary Control */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-medium text-gray-600">
+                                Quick Slider (up to {windowHeight}px)
+                              </label>
+                              <span className="text-xs text-gray-500">
+                                {heightValue > windowHeight
+                                  ? `${windowHeight}px (max)`
+                                  : `${Math.min(heightValue, windowHeight)}px`}
+                              </span>
+                            </div>
+                            <div className="relative">
+                              <input
+                                type="range"
+                                min="100"
+                                max={windowHeight}
+                                value={Math.min(heightValue, windowHeight)}
+                                onChange={(e) => {
+                                  const newHeight = Number.parseInt(
+                                    e.target.value
+                                  );
+                                  setCustomHeights((prev) => ({
+                                    ...prev,
+                                    [parent.id]: newHeight,
+                                  }));
+                                  updateParentSize(parent.id, {
+                                    height: newHeight,
+                                  });
+                                }}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                style={{
+                                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${
+                                    ((Math.min(heightValue, windowHeight) -
+                                      100) /
+                                      (windowHeight - 100)) *
+                                    100
+                                  }%, #e5e7eb ${
+                                    ((Math.min(heightValue, windowHeight) -
+                                      100) /
+                                      (windowHeight - 100)) *
+                                    100
+                                  }%, #e5e7eb 100%)`,
+                                }}
+                              />
+                              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>100px</span>
+                                <span>{windowHeight}px</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Height Presets */}
+                          <div className="mt-3">
+                            <label className="text-xs font-medium text-gray-600 mb-2 block">
+                              Quick Presets
+                            </label>
+                            <div className="flex flex-wrap gap-1">
+                              {[300, 500, 800, 1000, 1200, 1500, 2000].map(
+                                (preset) => (
+                                  <button
+                                    key={preset}
+                                    onClick={() => {
+                                      setCustomHeights((prev) => ({
+                                        ...prev,
+                                        [parent.id]: preset,
+                                      }));
+                                      updateParentSize(parent.id, {
+                                        height: preset,
+                                      });
+                                    }}
+                                    className={`px-2 py-1 rounded text-xs font-medium transition-all duration-200 ${
+                                      heightValue === preset
+                                        ? 'bg-blue-500 text-white shadow-sm'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {preset}px
+                                  </button>
+                                )
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

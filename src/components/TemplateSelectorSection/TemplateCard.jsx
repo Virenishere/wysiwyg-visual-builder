@@ -9,6 +9,10 @@ export default function TemplateCard({
   onSelect,
   onLoad,
 }) {
+  // Fallback image URL
+  const fallbackImage =
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=entropy&auto=format';
+
   return (
     <div
       key={template.id}
@@ -36,13 +40,17 @@ export default function TemplateCard({
         {/* Image with hover overlay */}
         <div className="relative group" onClick={() => onSelect(template)}>
           <img
-            src={template.thumbnail}
+            src={template.thumbnail || fallbackImage}
             alt={template.name}
             className="w-full h-52 object-cover"
             onError={(e) => {
-              e.target.src =
-                'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop';
+              e.target.src = fallbackImage;
             }}
+            onLoad={(e) => {
+              // Ensure image loaded successfully
+              e.target.style.opacity = '1';
+            }}
+            style={{ opacity: '0', transition: 'opacity 0.3s ease' }}
           />
 
           {/* Hover Overlay with Buttons */}

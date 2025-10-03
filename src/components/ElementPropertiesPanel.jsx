@@ -8,8 +8,8 @@ import Typography from './ElementPropertiesPanelSection/Typography';
 import BorderEffects from './ElementPropertiesPanelSection/BorderEffects';
 import ContentInput from './ElementPropertiesPanelSection/ContentInput';
 import LineElementProperties from './ElementPropertiesPanelSection/LineElementProperties';
-import CustomizationPanel from './ElementPropertiesPanelSection/CustomizationPanel';
-import CustomCssPanel from './ElementPropertiesPanelSection/CustomCssPanel';
+import ImagePropertiesPanel from './ElementPropertiesPanelSection/ImagePropertiesPanel';
+import CssStylesPanel from './ElementPropertiesPanelSection/CssStylesPanel';
 
 export default function ElementPropertiesPanel() {
   const {
@@ -20,6 +20,8 @@ export default function ElementPropertiesPanel() {
     updateElement,
     removeElement,
     duplicateElement,
+    copyDesktopToAllScreens,
+    screenSize,
   } = useDivStore();
 
   const selectedParent = parents.find((p) => p.id === selectedParentId);
@@ -41,10 +43,20 @@ export default function ElementPropertiesPanel() {
           <p className="text-sm font-medium text-gray-500 mb-2">
             No Element Selected
           </p>
-          <p className="text-xs text-gray-400 leading-relaxed">
+          <p className="text-xs text-gray-400 leading-relaxed mb-4">
             Click on any element in your design to start customizing its
             properties with our modern controls
           </p>
+
+          {/* Desktop-first responsive helper */}
+          {screenSize === '4k' && (
+            <button
+              onClick={copyDesktopToAllScreens}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg text-xs hover:bg-blue-600 transition-colors"
+            >
+              Copy Desktop Layout to All Screens
+            </button>
+          )}
         </div>
       </div>
     );
@@ -66,6 +78,22 @@ export default function ElementPropertiesPanel() {
           duplicateElement={duplicateElement}
         />
 
+        {/* Desktop-first helper */}
+        {screenSize === '4k' && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-blue-700 mb-2">
+              🖥️ Desktop-first design: Changes here will be copied to all screen
+              sizes
+            </p>
+            <button
+              onClick={copyDesktopToAllScreens}
+              className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+            >
+              Copy to All Screens
+            </button>
+          </div>
+        )}
+
         {/* Content Input */}
         <ContentInput
           selectedElement={selectedElement}
@@ -84,7 +112,8 @@ export default function ElementPropertiesPanel() {
           elementId={selectedElementId}
         />
 
-        <CustomizationPanel
+        {/* Image Properties (only for images) */}
+        <ImagePropertiesPanel
           selectedElement={selectedElement}
           updateElement={updateElement}
           parentId={selectedParentId}
@@ -92,7 +121,8 @@ export default function ElementPropertiesPanel() {
           elementId={selectedElementId}
         />
 
-        <CustomCssPanel
+        {/* CSS Styles & Animation */}
+        <CssStylesPanel
           selectedElement={selectedElement}
           updateElement={updateElement}
           parentId={selectedParentId}
@@ -110,7 +140,6 @@ export default function ElementPropertiesPanel() {
           />
         ) : (
           <>
-            {/* Spacing */}
             <Spacing
               selectedElement={selectedElement}
               updateElement={updateElement}
@@ -119,20 +148,14 @@ export default function ElementPropertiesPanel() {
               elementId={selectedElementId}
             />
 
-            {/* Typography */}
-            {(selectedElement.type === 'text' ||
-              selectedElement.type === 'button' ||
-              selectedElement.type === 'paragraph') && (
-              <Typography
-                selectedElement={selectedElement}
-                updateElement={updateElement}
-                parentId={selectedParentId}
-                boxId={selectedBoxId}
-                elementId={selectedElementId}
-              />
-            )}
+            <Typography
+              selectedElement={selectedElement}
+              updateElement={updateElement}
+              parentId={selectedParentId}
+              boxId={selectedBoxId}
+              elementId={selectedElementId}
+            />
 
-            {/* Border & Effects */}
             <BorderEffects
               selectedElement={selectedElement}
               updateElement={updateElement}

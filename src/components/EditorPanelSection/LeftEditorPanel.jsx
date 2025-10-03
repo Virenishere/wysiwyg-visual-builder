@@ -113,23 +113,26 @@ export default function LeftEditorPanel() {
 
   return (
     <div className="flex h-screen">
-      <div className="flex pb-10 pt-8 flex-col items-center w-16 justify-between bg-white shadow-[4px_0_10px_rgba(0,0,0,0.15)] z-20">
+      <div className="flex pb-4 md:pb-10 pt-4 md:pt-8 flex-col items-center w-12 md:w-16 justify-between bg-white shadow-[4px_0_10px_rgba(0,0,0,0.15)] z-20">
         {/* Top */}
-        <div className="mt-4">
+        <div className="mt-2 md:mt-4">
           {topIcons.map(
             ({ id, icon: Icon, size, className, label, showLabel }) => (
               <Link
                 key={id}
                 href="/"
-                className="group relative flex justify-center items-center w-12 h-12 cursor-pointer hover:scale-110 transition-transform"
+                className="group relative flex justify-center items-center w-8 h-8 md:w-12 md:h-12 cursor-pointer hover:scale-110 transition-transform"
               >
-                <Icon size={size} className={className} />
+                <Icon
+                  size={size * 0.8}
+                  className={`md:text-base ${className}`}
+                />
                 {showLabel && (
                   <span
-                    className="icon-label absolute left-14 top-1/2 -translate-y-1/2 whitespace-nowrap
+                    className="icon-label absolute left-10 md:left-14 top-1/2 -translate-y-1/2 whitespace-nowrap
                            bg-white text-black text-xs px-2 py-1 rounded shadow-lg
                            opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 
-                           transition-all duration-200 z-[100] pointer-events-none"
+                           transition-all duration-200 z-[100] pointer-events-none hidden md:block"
                   >
                     {label}
                   </span>
@@ -140,21 +143,21 @@ export default function LeftEditorPanel() {
         </div>
 
         {/* Middle */}
-        <div className="flex flex-col gap-2 z-100">
+        <div className="flex flex-col gap-1 md:gap-2 z-100">
           {middleIcons.map(
             ({ id, icon: Icon, size, className, label, showLabel, panel }) => (
               <div
                 key={id}
-                className={`group relative flex justify-center items-center w-12 h-12 cursor-pointer hover:scale-110 transition-all ${className} font-semibold`}
+                className={`group relative flex justify-center items-center w-8 h-8 md:w-12 md:h-12 cursor-pointer hover:scale-110 transition-all ${className} font-semibold`}
                 onClick={() => handleIconClick(panel)}
               >
-                <Icon size={size} />
+                <Icon size={size * 0.8} className="md:text-base" />
                 {showLabel && (
                   <span
-                    className="icon-label absolute left-14 top-2/3 -translate-y-1/2 whitespace-nowrap
+                    className="icon-label absolute left-10 md:left-14 top-2/3 -translate-y-1/2 whitespace-nowrap
                            bg-white text-black text-xs px-2 py-1 rounded shadow-lg
                            opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 
-                           transition-all duration-200 z-[100] pointer-events-none"
+                           transition-all duration-200 z-[100] pointer-events-none hidden md:block"
                   >
                     {label}
                   </span>
@@ -165,24 +168,24 @@ export default function LeftEditorPanel() {
         </div>
 
         {/* Bottom */}
-        <div className="flex flex-col gap-4 z-100">
+        <div className="flex flex-col gap-2 md:gap-4 z-100">
           {bottomIcons.map(
             ({ id, icon: Icon, size, className, label, showLabel, panel }) => (
               <div
                 key={id}
-                className={`group relative flex justify-center items-center w-12 h-12 cursor-pointer rounded-full hover:scale-110 transition-all`}
+                className={`group relative flex justify-center items-center w-8 h-8 md:w-12 md:h-12 cursor-pointer rounded-full hover:scale-110 transition-all`}
                 onClick={() => panel && handleIconClick(panel)}
               >
                 <Icon
-                  size={size}
-                  className={`${className} w-12 h-12 px-2 py-1`}
+                  size={size * 0.8}
+                  className={`${className} w-8 h-8 md:w-12 md:h-12 px-1 py-1 md:px-2 md:py-1`}
                 />
                 {showLabel && (
                   <span
-                    className="icon-label absolute left-14 top-2/3 -translate-y-1/2 whitespace-nowrap
+                    className="icon-label absolute left-10 md:left-14 top-2/3 -translate-y-1/2 whitespace-nowrap
                            bg-white text-black text-xs px-2 py-1 rounded shadow-lg
                            opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 
-                           transition-all duration-200 z-[100] pointer-events-none font-semibold"
+                           transition-all duration-200 z-[100] pointer-events-none font-semibold hidden md:block"
                   >
                     {label}
                   </span>
@@ -193,7 +196,7 @@ export default function LeftEditorPanel() {
         </div>
       </div>
       <div
-        className={`fixed top-0 left-16 h-full transition-transform duration-300 ease-in-out transform z-100 ${
+        className={`fixed top-0 left-12 md:left-16 h-full transition-transform duration-300 ease-in-out transform z-100 ${
           leftPanel ? 'translate-x-0' : '-translate-x-64'
         }`}
       >

@@ -8,13 +8,6 @@ import {
 } from 'react-icons/fa';
 import useDivStore from '@/store/UseDivStore';
 
-const screenSizes = {
-  desktop: '100%',
-  laptop: '1366px',
-  tablet: '768px',
-  mobile: '375px',
-};
-
 const ResponsivenessSwitcher = ({
   screenSize: propScreenSize,
   setScreenSize: propSetScreenSize,
@@ -22,70 +15,106 @@ const ResponsivenessSwitcher = ({
 }) => {
   const storeScreenSize = useDivStore((state) => state.screenSize);
   const storeSetScreenSize = useDivStore((state) => state.setScreenSize);
-  const saveState = useDivStore((state) => state.saveState);
+  const copyDesktopToAllScreens = useDivStore(
+    (state) => state.copyDesktopToAllScreens
+  );
 
   const screenSize =
     propScreenSize !== undefined ? propScreenSize : storeScreenSize;
   const setScreenSize = propSetScreenSize || storeSetScreenSize;
 
+  const handleSaveToAllScreens = () => {
+    copyDesktopToAllScreens();
+  };
+
   return (
-    <div className="fixed bottom-4 right-1/2 translate-x-1/2 z-50 bg-white shadow-lg rounded-lg p-2 flex items-center gap-2">
+    <div className="bg-white shadow-lg rounded-lg p-1 md:p-2 flex items-center gap-1 md:gap-2 max-w-[90vw] overflow-x-auto">
       <button
-        onClick={() => setScreenSize('desktop')}
-        className={`p-2 rounded-md ${
-          screenSize === 'desktop'
+        onClick={() => setScreenSize('4k')}
+        className={`p-1 md:p-2 rounded-md ${
+          screenSize === '4k' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
+        }`}
+        title="Desktop (4K)"
+      >
+        <FaDesktop size={16} className="md:w-5 md:h-5" />
+      </button>
+      <button
+        onClick={() => setScreenSize('l-laptop')}
+        className={`p-1 md:p-2 rounded-md ${
+          screenSize === 'l-laptop'
             ? 'bg-blue-500 text-white'
             : 'hover:bg-gray-100'
         }`}
-        title="Desktop"
+        title="Large Laptop"
       >
-        <FaDesktop size={20} />
+        <FaLaptop size={16} className="md:w-5 md:h-5" />
       </button>
       <button
         onClick={() => setScreenSize('laptop')}
-        className={`p-2 rounded-md ${
+        className={`p-1 md:p-2 rounded-md ${
           screenSize === 'laptop'
             ? 'bg-blue-500 text-white'
             : 'hover:bg-gray-100'
         }`}
         title="Laptop"
       >
-        <FaLaptop size={20} />
+        <FaLaptop size={14} className="md:w-4 md:h-4" />
       </button>
       <button
         onClick={() => setScreenSize('tablet')}
-        className={`p-2 rounded-md ${
+        className={`p-1 md:p-2 rounded-md ${
           screenSize === 'tablet'
             ? 'bg-blue-500 text-white'
             : 'hover:bg-gray-100'
         }`}
         title="Tablet"
       >
-        <FaTabletAlt size={20} />
+        <FaTabletAlt size={16} className="md:w-5 md:h-5" />
       </button>
       <button
         onClick={() => setScreenSize('mobile')}
-        className={`p-2 rounded-md ${
+        className={`p-1 md:p-2 rounded-md ${
           screenSize === 'mobile'
             ? 'bg-blue-500 text-white'
             : 'hover:bg-gray-100'
         }`}
         title="Mobile"
       >
-        <FaMobileAlt size={20} />
+        <FaMobileAlt size={16} className="md:w-5 md:h-5" />
+      </button>
+      <button
+        onClick={() => setScreenSize('mobile-m')}
+        className={`p-1 md:p-2 rounded-md ${
+          screenSize === 'mobile-m'
+            ? 'bg-blue-500 text-white'
+            : 'hover:bg-gray-100'
+        }`}
+        title="Mobile Medium"
+      >
+        <FaMobileAlt size={14} className="md:w-4 md:h-4" />
+      </button>
+      <button
+        onClick={() => setScreenSize('mobile-s')}
+        className={`p-1 md:p-2 rounded-md ${
+          screenSize === 'mobile-s'
+            ? 'bg-blue-500 text-white'
+            : 'hover:bg-gray-100'
+        }`}
+        title="Mobile Small"
+      >
+        <FaMobileAlt size={12} className="md:w-3 md:h-3" />
       </button>
 
       {showSaveButton && (
-        <>
-          <div className="w-px h-6 bg-gray-300 mx-2"></div>
+        <div className="border-l border-gray-300 ml-1 md:ml-2 pl-1 md:pl-2">
           <button
-            onClick={saveState}
-            className="p-2 rounded-md hover:bg-gray-100 text-green-500"
-            title="Save Work"
+            onClick={handleSaveToAllScreens}
+            className="p-1 md:p-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition-colors"
+            title="Copy current layout to all screen sizes"
           >
-            <FaSave size={20} />
+            <FaSave size={16} className="md:w-5 md:h-5" />
           </button>
-        </>
+        </div>
       )}
     </div>
   );

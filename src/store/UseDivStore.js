@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { getTemplateById } from '@/templates';
 import { generateUniqueIds, deepClone } from './storeUtils';
+import { getResponsiveValue } from '@/utils/screen';
 import toast from 'react-hot-toast';
 
 let nextParentId = 1;
@@ -31,50 +32,74 @@ const initialLayout = {
 };
 
 const responsiveUpdater = (obj, updates, screenSize) => {
-  const newObj = { ...obj };
-  for (const key in updates) {
-    const newValue = updates[key];
-    const currentValue = newObj[key];
+  const newObj = deepClone(obj);
 
-    if (screenSize === 'laptop') {
-      if (
-        typeof currentValue === 'object' &&
-        currentValue !== null &&
-        !Array.isArray(currentValue) &&
-        'laptop' in currentValue
-      ) {
-        newObj[key] = { ...currentValue, laptop: newValue };
-      } else {
-        newObj[key] = newValue;
-      }
+  // Properties that should NOT be made responsive
+  const nonResponsiveProperties = [
+    'imageUrl',
+    'content',
+    'link',
+    'type',
+    'id',
+    'customHtml',
+    'customCss',
+    'customClassName',
+  ];
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (nonResponsiveProperties.includes(key)) {
+      // Keep these properties as simple values
+      newObj[key] = value;
+    } else if (
+      typeof newObj[key] === 'object' &&
+      newObj[key] !== null &&
+      !Array.isArray(newObj[key])
+    ) {
+      // Update existing responsive object
+      newObj[key] = { ...newObj[key], [screenSize]: value };
     } else {
-      if (
-        typeof currentValue !== 'object' ||
-        currentValue === null ||
-        Array.isArray(currentValue)
-      ) {
-        newObj[key] = { laptop: currentValue, [screenSize]: newValue };
-      } else {
-        newObj[key] = { ...currentValue, [screenSize]: newValue };
-      }
+      // Convert to responsive object if it's not already
+      const currentValue = newObj[key];
+      newObj[key] = {
+        '4k': currentValue,
+        'l-laptop': currentValue,
+        laptop: currentValue,
+        tablet: currentValue,
+        mobile: currentValue,
+        'mobile-m': currentValue,
+        'mobile-s': currentValue,
+        [screenSize]: value,
+      };
     }
   }
   return newObj;
+};
+
+// Helper function to copy desktop layout to other screen sizes
+const copyDesktopToAllScreens = (desktopLayout) => {
+  const screenSizes = [
+    '4k',
+    'l-laptop',
+    'laptop',
+    'tablet',
+    'mobile',
+    'mobile-m',
+    'mobile-s',
+  ];
+  const layouts = {};
+
+  screenSizes.forEach((size) => {
+    layouts[size] = deepClone(desktopLayout);
+  });
+
+  return layouts;
 };
 
 const useDivStore = create(
   persist(
     (set, get) => ({
       // State
-      layouts: {
-        '4k': deepClone(initialLayout),
-        'l-laptop': deepClone(initialLayout),
-        laptop: deepClone(initialLayout),
-        tablet: deepClone(initialLayout),
-        mobile: deepClone(initialLayout),
-        'mobile-m': deepClone(initialLayout),
-        'mobile-s': deepClone(initialLayout),
-      },
+      layouts: copyDesktopToAllScreens(initialLayout), // Initialize all screens with desktop layout
       parents: initialLayout.parents, // Current working layout
       selectedParentId: null,
       selectedBoxId: null,
@@ -83,7 +108,7 @@ const useDivStore = create(
       previewingImage: null,
       leftPanel: null,
       activeDragItem: null,
-      screenSize: 'laptop', // Default screen size
+      screenSize: '4k', // Default to desktop (4k) first
 
       templateName: '',
       setTemplateName: (templateName) => set({ templateName }),
@@ -96,10 +121,10 @@ const useDivStore = create(
         const newLayouts = deepClone(layouts);
         newLayouts[oldScreenSize] = { parents: deepClone(parents) };
 
-        // Load new screen size layout
+        // Load new screen size layout, fallback to desktop (4k) if not exists
         const newParents = deepClone(
           newLayouts[screenSize]?.parents ||
-            newLayouts['laptop']?.parents ||
+            newLayouts['4k']?.parents ||
             initialLayout.parents
         );
 
@@ -111,6 +136,36 @@ const useDivStore = create(
           selectedBoxId: null,
           selectedElementId: null,
         });
+      },
+
+      // New action to copy current desktop layout to all screen sizes
+      copyDesktopToAllScreens: () => {
+        const { layouts, parents, screenSize } = get();
+
+        // Always use current parents as the source (since we're working on the current screen)
+        const sourceLayout = { parents: deepClone(parents) };
+
+        // Create new layouts object with the current layout copied to all screens
+        const newLayouts = {};
+        const screenSizes = [
+          '4k',
+          'l-laptop',
+          'laptop',
+          'tablet',
+          'mobile',
+          'mobile-m',
+          'mobile-s',
+        ];
+
+        screenSizes.forEach((size) => {
+          newLayouts[size] = deepClone(sourceLayout);
+        });
+
+        set({
+          layouts: newLayouts,
+          parents: deepClone(sourceLayout.parents), // Keep current parents unchanged
+        });
+        toast.success('Current layout copied to all screen sizes!');
       },
 
       // Image actions
@@ -569,15 +624,38 @@ const useDivStore = create(
       duplicateRnd: (parentId, boxId) => {
         set((state) => {
           const newBoxId = nextBoxId++;
-          let newRnd = null;
+          const { screenSize } = state;
+
           const parents = state.parents.map((p) => {
             if (p.id === parentId) {
               const rndToDuplicate = p.rnds.find((rnd) => rnd.id === boxId);
               if (rndToDuplicate) {
-                newRnd = deepClone(rndToDuplicate);
+                const newRnd = deepClone(rndToDuplicate);
                 newRnd.id = newBoxId;
-                newRnd.x += 20;
-                newRnd.y += 20;
+
+                // Handle responsive values properly for position
+                const currentX = getResponsiveValue(
+                  rndToDuplicate.x,
+                  screenSize
+                );
+                const currentY = getResponsiveValue(
+                  rndToDuplicate.y,
+                  screenSize
+                );
+
+                // Update position for current screen size
+                if (typeof newRnd.x === 'object') {
+                  newRnd.x[screenSize] = currentX + 20;
+                } else {
+                  newRnd.x = currentX + 20;
+                }
+
+                if (typeof newRnd.y === 'object') {
+                  newRnd.y[screenSize] = currentY + 20;
+                } else {
+                  newRnd.y = currentY + 20;
+                }
+
                 const { elements, nextIds } = generateUniqueIds(
                   { elements: newRnd.elements },
                   { elementId: nextElementId }
@@ -596,6 +674,7 @@ const useDivStore = create(
 
       duplicateElement: (parentId, boxId, elementId) => {
         set((state) => {
+          const { screenSize } = state;
           const newElementId = nextElementId++;
           const parents = state.parents.map((p) => {
             if (p.id === parentId) {
@@ -609,8 +688,34 @@ const useDivStore = create(
                     if (elementToDuplicate) {
                       const newElement = deepClone(elementToDuplicate);
                       newElement.id = newElementId;
-                      newElement.x += 20;
-                      newElement.y += 20;
+
+                      // Handle responsive values properly
+                      if (typeof newElement.x === 'object') {
+                        // If x is responsive object, update current screen size
+                        newElement.x = {
+                          ...newElement.x,
+                          [screenSize]: (newElement.x[screenSize] || 0) + 20,
+                        };
+                      } else {
+                        // If x is a number, convert to responsive and add offset
+                        newElement.x = {
+                          [screenSize]: (newElement.x || 0) + 20,
+                        };
+                      }
+
+                      if (typeof newElement.y === 'object') {
+                        // If y is responsive object, update current screen size
+                        newElement.y = {
+                          ...newElement.y,
+                          [screenSize]: (newElement.y[screenSize] || 0) + 20,
+                        };
+                      } else {
+                        // If y is a number, convert to responsive and add offset
+                        newElement.y = {
+                          [screenSize]: (newElement.y || 0) + 20,
+                        };
+                      }
+
                       return {
                         ...box,
                         elements: [...box.elements, newElement],
@@ -691,6 +796,113 @@ const useDivStore = create(
       setIsResizing: (status) => set({ isResizing: status }),
       setLeftPanel: (panel) => set({ leftPanel: panel }),
       setActiveDragItem: (item) => set({ activeDragItem: item }),
+
+      // Center functionality
+      centerBox: (parentId, boxId) => {
+        set((state) => {
+          const parent = state.parents.find((p) => p.id === parentId);
+          const box = parent?.rnds.find((b) => b.id === boxId);
+          if (!box || !parent) return state;
+
+          // Get responsive section height for current screen
+          const sectionHeight =
+            getResponsiveValue(parent.size?.height, state.screenSize) || 300;
+
+          // Get section element to calculate actual bounds
+          const sectionElement = document.querySelector(
+            `[data-id="${parentId}"]`
+          );
+          const sectionWidth = sectionElement
+            ? sectionElement.clientWidth - 20
+            : 800; // fallback width minus padding
+
+          const boxWidth =
+            getResponsiveValue(box.width, state.screenSize) || 150;
+          const boxHeight =
+            getResponsiveValue(box.height, state.screenSize) || 150;
+
+          // Calculate center position: (containerSize - elementSize) / 2
+          const centerX = Math.max(0, (sectionWidth - boxWidth) / 2);
+          const centerY = Math.max(0, (sectionHeight - boxHeight) / 2);
+
+          const updates = {
+            x: centerX,
+            y: centerY,
+          };
+
+          return {
+            parents: state.parents.map((p) =>
+              p.id === parentId
+                ? {
+                    ...p,
+                    rnds: p.rnds.map((rnd) =>
+                      rnd.id === boxId
+                        ? responsiveUpdater(rnd, updates, state.screenSize)
+                        : rnd
+                    ),
+                  }
+                : p
+            ),
+          };
+        });
+        toast.success('Box centered!');
+      },
+
+      centerElement: (parentId, boxId, elementId) => {
+        set((state) => {
+          const parent = state.parents.find((p) => p.id === parentId);
+          const box = parent?.rnds.find((b) => b.id === boxId);
+          const element = box?.elements.find((e) => e.id === elementId);
+          if (!element || !box) return state;
+
+          // Get responsive box dimensions for current screen
+          const boxWidth =
+            getResponsiveValue(box.width, state.screenSize) || 150;
+          const boxHeight =
+            getResponsiveValue(box.height, state.screenSize) || 150;
+
+          const elementWidth =
+            getResponsiveValue(element.width, state.screenSize) || 100;
+          const elementHeight =
+            getResponsiveValue(element.height, state.screenSize) || 50;
+
+          // Calculate center position: (containerSize - elementSize) / 2
+          const centerX = Math.max(0, (boxWidth - elementWidth) / 2);
+          const centerY = Math.max(0, (boxHeight - elementHeight) / 2);
+
+          const updates = {
+            x: centerX,
+            y: centerY,
+          };
+
+          return {
+            parents: state.parents.map((p) =>
+              p.id === parentId
+                ? {
+                    ...p,
+                    rnds: p.rnds.map((rnd) =>
+                      rnd.id === boxId
+                        ? {
+                            ...rnd,
+                            elements: rnd.elements.map((el) =>
+                              el.id === elementId
+                                ? responsiveUpdater(
+                                    el,
+                                    updates,
+                                    state.screenSize
+                                  )
+                                : el
+                            ),
+                          }
+                        : rnd
+                    ),
+                  }
+                : p
+            ),
+          };
+        });
+        toast.success('Element centered!');
+      },
 
       // Utility actions
       exportData: () => {

@@ -15,7 +15,11 @@ export default function HomePage() {
   }, []);
 
   if (loading) {
-    return <GlobalLoader />;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F7F7]">
+        <GlobalLoader />
+      </div>
+    );
   }
 
   return (

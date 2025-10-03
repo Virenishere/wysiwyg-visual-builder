@@ -6,6 +6,7 @@ import {
   FiMaximize,
   FiArrowRight,
   FiArrowDown,
+  FiTarget,
 } from 'react-icons/fi';
 
 export default function PositionSize({
@@ -15,7 +16,7 @@ export default function PositionSize({
   boxId,
   elementId,
 }) {
-  const screenSize = useDivStore((state) => state.screenSize);
+  const { screenSize, centerBox, centerElement } = useDivStore();
 
   const fields = [
     {
@@ -53,6 +54,16 @@ export default function PositionSize({
     updateElement(parentId, boxId, elementId, { [key]: newValue });
   };
 
+  const handleCenter = () => {
+    if (elementId) {
+      // Center element within box
+      centerElement(parentId, boxId, elementId);
+    } else {
+      // Center box within section
+      centerBox(parentId, boxId);
+    }
+  };
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -62,6 +73,17 @@ export default function PositionSize({
         <h4 className="text-sm font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
           Position & Size
         </h4>
+      </div>
+
+      {/* Center Button */}
+      <div className="mb-4">
+        <button
+          onClick={handleCenter}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+        >
+          <FiTarget className="w-4 h-4" />
+          Center {elementId ? 'Element' : 'Box'}
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
