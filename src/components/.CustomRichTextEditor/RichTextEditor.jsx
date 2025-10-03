@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useCallback, useState } from 'react';
 import Toolbar from './Toolbar';
 import { getResponsiveValue } from '@/utils/screen';
 import useDivStore from '@/store/UseDivStore';
+import { applyStyle, insertList, setBlockFormat } from '@/utils/domUtils.js';
 
 const RichTextEditor = ({
   content,
@@ -15,6 +16,11 @@ const RichTextEditor = ({
   const savedSelection = useRef(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const { screenSize } = useDivStore();
+  const [formatState, setFormatState] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+  });
 
   const fontSize = getResponsiveValue(element?.fontSize, screenSize);
   const fontFamily = getResponsiveValue(element?.fontFamily, screenSize);
@@ -105,146 +111,145 @@ const RichTextEditor = ({
     }
   }, [onChange]);
 
-  // Execute commands with proper selection handling
-  const execCommand = useCallback(
-    (command, value = null) => {
-      restoreSelection();
+  const updateFormatState = useCallback(() => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
 
-      if (editorRef.current) {
-        editorRef.current.focus();
+    const range = selection.getRangeAt(0);
+    let parent = range.startContainer.parentElement;
 
-        const selection = window.getSelection();
-        const isCollapsed =
-          selection.rangeCount > 0 && selection.getRangeAt(0).collapsed;
-
-        // Commands that should apply to all text when no selection
-        const styleCommands = [
-          'fontName',
-          'fontSize',
-          'foreColor',
-          'hiliteColor',
-        ];
-
-        // If no text is selected and it's a style command, apply to all content
-        if (isCollapsed && styleCommands.includes(command)) {
-          const originalRange = savedSelection.current.cloneRange();
-          const allContentRange = document.createRange();
-          allContentRange.selectNodeContents(editorRef.current);
-          selection.removeAllRanges();
-          selection.addRange(allContentRange);
-
-          document.execCommand(command, false, value);
-
-          // Restore original cursor position
-          selection.removeAllRanges();
-          selection.addRange(originalRange);
-        } else {
-          // For selected text or non-style commands, apply normally
-          if (command === 'paste') {
-            try {
-              document.execCommand('paste');
-            } catch (e) {
-              console.warn('Paste failed:', e);
-            }
-          } else if (command === 'delete') {
-            const range = selection.getRangeAt(0);
-            if (range.collapsed) {
-              try {
-                range.setEnd(range.endContainer, range.endOffset + 1);
-              } catch (e) {
-                console.warn('Could not extend selection for delete');
-              }
-            }
-            range.deleteContents();
-          } else {
-            document.execCommand(command, false, value);
-          }
-        }
-
-        requestAnimationFrame(() => {
-          handleInput();
-          saveSelection();
-        });
+    const isBold = () => {
+      let node = range.startContainer;
+      while (node && node !== editorRef.current) {
+        if (node.nodeName === 'B') return true;
+        node = node.parentNode;
       }
-    },
-    [restoreSelection, handleInput, saveSelection]
-  );
+      return false;
+    };
+
+    const isItalic = () => {
+      let node = range.startContainer;
+      while (node && node !== editorRef.current) {
+        if (node.nodeName === 'I') return true;
+        node = node.parentNode;
+      }
+      return false;
+    };
+
+    const isUnderline = () => {
+      let node = range.startContainer;
+      while (node && node !== editorRef.current) {
+        if (node.nodeName === 'U') return true;
+        node = node.parentNode;
+      }
+      return false;
+    };
+
+    setFormatState({
+      bold: isBold(),
+      italic: isItalic(),
+      underline: isUnderline(),
+    });
+  }, []);
 
   // Handle toolbar actions
   const handleAction = useCallback(
     (action) => {
+      restoreSelection();
       const commandMap = {
         bold: 'bold',
         italic: 'italic',
         underline: 'underline',
-        justifyLeft: 'justifyLeft',
-        justifyCenter: 'justifyCenter',
-        justifyRight: 'justifyRight',
-        insertOrderedList: 'insertOrderedList',
-        insertUnorderedList: 'insertUnorderedList',
-        copy: 'copy',
-        cut: 'cut',
-        paste: 'paste',
-        delete: 'delete',
-        undo: 'undo',
-        redo: 'redo',
       };
 
       if (commandMap[action]) {
-        execCommand(commandMap[action]);
+        applyStyle(commandMap[action]);
       } else if (action === 'quote') {
-        execCommand('formatBlock', 'blockquote');
+        setBlockFormat('blockquote');
+      } else if (action === 'insertOrderedList') {
+        insertList(true);
+      } else if (action === 'insertUnorderedList') {
+        insertList(false);
       }
+      saveSelection();
+      handleInput();
+      updateFormatState();
     },
-    [execCommand]
+    [restoreSelection, saveSelection, handleInput, updateFormatState]
   );
 
   const handleFontChange = useCallback(
     (font) => {
-      execCommand('fontName', font);
+      restoreSelection();
+      applyStyle('fontName', font);
+      saveSelection();
+      handleInput();
     },
-    [execCommand]
+    [restoreSelection, saveSelection, handleInput]
   );
 
   const handleHeadingChange = useCallback(
     (heading) => {
-      execCommand('formatBlock', heading);
+      restoreSelection();
+      setBlockFormat(heading);
+      saveSelection();
+      handleInput();
     },
-    [execCommand]
+    [restoreSelection, saveSelection, handleInput]
   );
 
   const handleFontSizeChange = useCallback(
     (size) => {
-      execCommand('fontSize', size);
+      restoreSelection();
+      applyStyle('fontSize', size);
+      saveSelection();
+      handleInput();
     },
-    [execCommand]
+    [restoreSelection, saveSelection, handleInput]
   );
 
   const handleColorChange = useCallback(
     (color) => {
-      execCommand('foreColor', color);
+      restoreSelection();
+      applyStyle('foreColor', color);
+      saveSelection();
+      handleInput();
     },
-    [execCommand]
+    [restoreSelection, saveSelection, handleInput]
   );
 
   const handleBackgroundColorChange = useCallback(
     (color) => {
-      execCommand('hiliteColor', color);
+      restoreSelection();
+      applyStyle('hiliteColor', color);
+      saveSelection();
+      handleInput();
     },
-    [execCommand]
+    [restoreSelection, saveSelection, handleInput]
   );
 
   const handleInsertLink = useCallback(() => {
     const url = prompt('Enter URL:');
     if (url) {
-      execCommand('createLink', url);
+      restoreSelection();
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      const a = document.createElement('a');
+      a.href = url;
+      a.textContent = range.toString();
+      range.deleteContents();
+      range.insertNode(a);
+      saveSelection();
+      handleInput();
     }
-  }, [execCommand]);
+  }, [restoreSelection, saveSelection, handleInput]);
 
   const handleInsertTable = useCallback(() => {
     const rows = prompt('Number of rows:', '2');
     const cols = prompt('Number of columns:', '2');
     if (rows && cols && !isNaN(rows) && !isNaN(cols)) {
+      restoreSelection();
       let tableHTML = `
         <table style="
           border-collapse: collapse; 
@@ -271,9 +276,17 @@ const RichTextEditor = ({
         tableHTML += '</tr>';
       }
       tableHTML += '</table><p>&nbsp;</p>';
-      execCommand('insertHTML', tableHTML);
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      const template = document.createElement('template');
+      template.innerHTML = tableHTML.trim();
+      range.deleteContents();
+      range.insertNode(template.content.firstChild);
+      saveSelection();
+      handleInput();
     }
-  }, [execCommand]);
+  }, [restoreSelection, saveSelection, handleInput]);
 
   const handleFocus = useCallback(
     (e) => {
@@ -315,8 +328,9 @@ const RichTextEditor = ({
       document.activeElement === editorRef.current
     ) {
       saveSelection();
+      updateFormatState();
     }
-  }, [isEditing, saveSelection]);
+  }, [isEditing, saveSelection, updateFormatState]);
 
   useEffect(() => {
     document.addEventListener('selectionchange', handleSelectionChange);
@@ -361,6 +375,7 @@ const RichTextEditor = ({
             onBackgroundColorChange={handleBackgroundColorChange}
             onInsertLink={handleInsertLink}
             onInsertTable={handleInsertTable}
+            formatState={formatState}
           />
         </div>
       )}

@@ -123,10 +123,7 @@ export default function LeftEditorPanel() {
                 href="/"
                 className="group relative flex justify-center items-center w-8 h-8 md:w-12 md:h-12 cursor-pointer hover:scale-110 transition-transform"
               >
-                <Icon
-                  size={size * 0.8}
-                  className={`md:text-base ${className}`}
-                />
+                <Icon size={size * 1} className={`md:text-base ${className}`} />
                 {showLabel && (
                   <span
                     className="icon-label absolute left-10 md:left-14 top-1/2 -translate-y-1/2 whitespace-nowrap
@@ -151,7 +148,7 @@ export default function LeftEditorPanel() {
                 className={`group relative flex justify-center items-center w-8 h-8 md:w-12 md:h-12 cursor-pointer hover:scale-110 transition-all ${className} font-semibold`}
                 onClick={() => handleIconClick(panel)}
               >
-                <Icon size={size * 0.8} className="md:text-base" />
+                <Icon size={size * 1} className="md:text-base" />
                 {showLabel && (
                   <span
                     className="icon-label absolute left-10 md:left-14 top-2/3 -translate-y-1/2 whitespace-nowrap
@@ -177,7 +174,7 @@ export default function LeftEditorPanel() {
                 onClick={() => panel && handleIconClick(panel)}
               >
                 <Icon
-                  size={size * 0.8}
+                  size={size * 1}
                   className={`${className} w-8 h-8 md:w-12 md:h-12 px-1 py-1 md:px-2 md:py-1`}
                 />
                 {showLabel && (
