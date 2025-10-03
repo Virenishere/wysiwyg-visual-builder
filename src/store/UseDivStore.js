@@ -141,12 +141,8 @@ const useDivStore = create(
       // New action to copy current desktop layout to all screen sizes
       copyDesktopToAllScreens: () => {
         const { layouts, parents, screenSize } = get();
-
-        // Always use current parents as the source (since we're working on the current screen)
         const sourceLayout = { parents: deepClone(parents) };
 
-        // Create new layouts object with the current layout copied to all screens
-        const newLayouts = {};
         const screenSizes = [
           '4k',
           'l-laptop',
@@ -157,14 +153,64 @@ const useDivStore = create(
           'mobile-s',
         ];
 
+        const nonResponsiveProperties = [
+          'imageUrl',
+          'content',
+          'link',
+          'type',
+          'id',
+          'customHtml',
+          'customCss',
+          'customClassName',
+          'x',
+          'y',
+        ];
+
+        const makePropertiesResponsive = (obj) => {
+          if (typeof obj !== 'object' || obj === null) {
+            return obj;
+          }
+
+          if (Array.isArray(obj)) {
+            return obj.map(makePropertiesResponsive);
+          }
+
+          const newObj = {};
+          for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+              const value = obj[key];
+              if (nonResponsiveProperties.includes(key)) {
+                newObj[key] = value;
+              } else if (typeof value !== 'object' || value === null) {
+                newObj[key] = {
+                  '4k': value,
+                  'l-laptop': value,
+                  laptop: value,
+                  tablet: value,
+                  mobile: value,
+                  'mobile-m': value,
+                  'mobile-s': value,
+                };
+              } else {
+                newObj[key] = makePropertiesResponsive(value);
+              }
+            }
+          }
+          return newObj;
+        };
+
+        const responsiveLayout = makePropertiesResponsive(sourceLayout);
+
+        const newLayouts = {};
         screenSizes.forEach((size) => {
-          newLayouts[size] = deepClone(sourceLayout);
+          newLayouts[size] = deepClone(responsiveLayout);
         });
 
         set({
           layouts: newLayouts,
-          parents: deepClone(sourceLayout.parents), // Keep current parents unchanged
+          parents: deepClone(responsiveLayout.parents),
         });
+
         toast.success('Current layout copied to all screen sizes!');
       },
 
@@ -328,14 +374,30 @@ const useDivStore = create(
 
       updateParentSize: (parentId, size) =>
         set((state) => ({
-          parents: state.parents.map((p) =>
-            p.id === parentId
-              ? {
-                  ...p,
-                  size: responsiveUpdater(p.size, size, state.screenSize),
+          parents: state.parents.map((p) => {
+            if (p.id === parentId) {
+              const newSize = { ...p.size };
+              for (const [key, value] of Object.entries(size)) {
+                if (typeof newSize[key] !== 'object' || newSize[key] === null) {
+                  newSize[key] = {
+                    '4k': newSize[key],
+                    'l-laptop': newSize[key],
+                    laptop: newSize[key],
+                    tablet: newSize[key],
+                    mobile: newSize[key],
+                    'mobile-m': newSize[key],
+                    'mobile-s': newSize[key],
+                  };
                 }
-              : p
-          ),
+                newSize[key][state.screenSize] = value;
+              }
+              return {
+                ...p,
+                size: newSize,
+              };
+            }
+            return p;
+          }),
         })),
 
       // RND actions inside a parent

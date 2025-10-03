@@ -1,5 +1,7 @@
 'use client';
 import { FiSquare, FiCircle } from 'react-icons/fi';
+import useDivStore from '@/store/UseDivStore';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function BorderEffects({
   selectedElement,
@@ -8,6 +10,28 @@ export default function BorderEffects({
   boxId,
   elementId,
 }) {
+  const { screenSize } = useDivStore();
+
+  const handleUpdate = (key, value) => {
+    const currentValue = selectedElement[key];
+    const newValue = {
+      ...(typeof currentValue === 'object' ? currentValue : {}),
+      [screenSize]: value,
+    };
+    updateElement(parentId, boxId, elementId, { [key]: newValue });
+  };
+
+  const borderRadius = getResponsiveValue(
+    selectedElement.borderRadius,
+    screenSize
+  );
+  const border = getResponsiveValue(selectedElement.border, screenSize);
+  const backgroundColor = getResponsiveValue(
+    selectedElement.backgroundColor,
+    screenSize
+  );
+  const boxShadow = getResponsiveValue(selectedElement.boxShadow, screenSize);
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -28,7 +52,7 @@ export default function BorderEffects({
               Border Radius
             </label>
             <span className="px-2 py-1 bg-white rounded-lg text-xs font-bold text-gray-600 border">
-              {selectedElement.borderRadius}px
+              {borderRadius}px
             </span>
           </div>
           <div className="relative">
@@ -36,11 +60,12 @@ export default function BorderEffects({
               type="range"
               min="0"
               max="50"
-              value={selectedElement.borderRadius}
+              value={borderRadius || 0}
               onChange={(e) =>
-                updateElement(parentId, boxId, elementId, {
-                  borderRadius: Number.parseInt(e.target.value) || 0,
-                })
+                handleUpdate(
+                  'borderRadius',
+                  Number.parseInt(e.target.value) || 0
+                )
               }
               className="w-full h-2 bg-gradient-to-r from-emerald-200 to-teal-300 rounded-lg appearance-none cursor-pointer slider"
             />
@@ -53,12 +78,8 @@ export default function BorderEffects({
             Border Style
           </label>
           <select
-            value={selectedElement.border}
-            onChange={(e) =>
-              updateElement(parentId, boxId, elementId, {
-                border: e.target.value,
-              })
-            }
+            value={border || 'none'}
+            onChange={(e) => handleUpdate('border', e.target.value)}
             className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none hover:border-gray-300 cursor-pointer"
           >
             <option value="none">✨ No Border</option>
@@ -78,15 +99,9 @@ export default function BorderEffects({
           <input
             type="color"
             value={
-              selectedElement.backgroundColor !== 'transparent'
-                ? selectedElement.backgroundColor
-                : '#ffffff'
+              backgroundColor !== 'transparent' ? backgroundColor : '#ffffff'
             }
-            onChange={(e) =>
-              updateElement(parentId, boxId, elementId, {
-                backgroundColor: e.target.value,
-              })
-            }
+            onChange={(e) => handleUpdate('backgroundColor', e.target.value)}
             className="w-full h-10 px-1 py-1 bg-white border-2 border-gray-200 rounded-xl cursor-pointer focus:outline-none focus:ring-4 focus:ring-emerald-100"
           />
         </div>
@@ -97,12 +112,8 @@ export default function BorderEffects({
             Custom Border
           </label>
           <textarea
-            value={selectedElement.border || ''}
-            onChange={(e) =>
-              updateElement(parentId, boxId, elementId, {
-                border: e.target.value,
-              })
-            }
+            value={border || ''}
+            onChange={(e) => handleUpdate('border', e.target.value)}
             className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none hover:border-gray-300"
             rows="2"
             placeholder="e.g., 2px solid #ccc"
@@ -115,12 +126,8 @@ export default function BorderEffects({
             Custom Background
           </label>
           <textarea
-            value={selectedElement.backgroundColor || ''}
-            onChange={(e) =>
-              updateElement(parentId, boxId, elementId, {
-                backgroundColor: e.target.value,
-              })
-            }
+            value={backgroundColor || ''}
+            onChange={(e) => handleUpdate('backgroundColor', e.target.value)}
             className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none hover:border-gray-300"
             rows="2"
             placeholder="e.g., linear-gradient(to right, #ff0000, #0000ff)"
@@ -133,16 +140,8 @@ export default function BorderEffects({
             Box Shadow
           </label>
           <select
-            value={
-              selectedElement.boxShadow ||
-              selectedElement.style?.boxShadow ||
-              'none'
-            }
-            onChange={(e) =>
-              updateElement(parentId, boxId, elementId, {
-                boxShadow: e.target.value,
-              })
-            }
+            value={boxShadow || 'none'}
+            onChange={(e) => handleUpdate('boxShadow', e.target.value)}
             className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none hover:border-gray-300 cursor-pointer"
           >
             <option value="none">✨ None</option>

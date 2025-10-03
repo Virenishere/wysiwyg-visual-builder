@@ -9,6 +9,8 @@ import {
   FaExpand,
 } from 'react-icons/fa';
 import { MdModeEditOutline } from 'react-icons/md';
+import useDivStore from '@/store/UseDivStore';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function SectionsPanel({
   parents,
@@ -19,6 +21,7 @@ export default function SectionsPanel({
   selectedParent,
   updateParentSize,
 }) {
+  const { screenSize } = useDivStore();
   const [windowHeight, setWindowHeight] = useState(800);
   const [expandedSettings, setExpandedSettings] = useState({});
   const [customHeights, setCustomHeights] = useState({});
@@ -39,14 +42,12 @@ export default function SectionsPanel({
       const newCustomHeights = {};
       parents.forEach((parent) => {
         const heightValue =
-          typeof parent.size.height === 'object'
-            ? parent.size.height.laptop || 300
-            : parent.size.height || 300;
+          getResponsiveValue(parent.size.height, screenSize) || 300;
         newCustomHeights[parent.id] = heightValue;
       });
       setCustomHeights(newCustomHeights);
     }
-  }, [parents]);
+  }, [parents, screenSize]);
 
   const toggleSettings = (parentId) => {
     setExpandedSettings((prev) => ({
@@ -64,21 +65,16 @@ export default function SectionsPanel({
 
     // Update parent size with validation
     const validatedValue = Math.max(100, Math.min(5000, numValue));
-    updateParentSize(parentId, { height: validatedValue });
+    const currentHeight = selectedParent.size.height;
+    const newHeight = {
+      ...(typeof currentHeight === 'object' ? currentHeight : {}),
+      [screenSize]: validatedValue,
+    };
+    updateParentSize(parentId, { height: newHeight });
   };
 
   const getBackgroundValue = (background) => {
-    // Handle responsive background objects
-    if (typeof background === 'object' && background !== null) {
-      return (
-        background.laptop ||
-        background['4k'] ||
-        background.tablet ||
-        background.mobile ||
-        '#ffffff'
-      );
-    }
-    return background || '#ffffff';
+    return getResponsiveValue(background, screenSize) || '#ffffff';
   };
 
   const getBackgroundPreview = (background) => {
@@ -112,9 +108,7 @@ export default function SectionsPanel({
                 parent.size.background
               );
               const heightValue =
-                typeof parent.size.height === 'object'
-                  ? parent.size.height.laptop || 300
-                  : parent.size.height || 300;
+                getResponsiveValue(parent.size.height, screenSize) || 300;
 
               return (
                 <div
@@ -463,8 +457,9 @@ export default function SectionsPanel({
                             <input
                               type="color"
                               value={
-                                backgroundValue.startsWith('linear') ||
-                                backgroundValue.startsWith('radial')
+                                typeof backgroundValue === 'string' &&
+                                (backgroundValue.startsWith('linear') ||
+                                  backgroundValue.startsWith('radial'))
                                   ? '#3b82f6'
                                   : backgroundValue
                               }
@@ -603,9 +598,8 @@ export default function SectionsPanel({
               <input
                 type="number"
                 value={
-                  typeof selectedParent.size.height === 'object'
-                    ? selectedParent.size.height.laptop || 300
-                    : selectedParent.size.height || 300
+                  getResponsiveValue(selectedParent.size.height, screenSize) ||
+                  300
                 }
                 onChange={(e) =>
                   updateParentSize(selectedParent.id, {

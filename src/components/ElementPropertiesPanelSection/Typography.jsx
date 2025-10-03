@@ -1,5 +1,7 @@
 'use client';
 import { FiType, FiDroplet, FiEdit3 } from 'react-icons/fi';
+import useDivStore from '@/store/UseDivStore';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function Typography({
   selectedElement,
@@ -8,6 +10,25 @@ export default function Typography({
   boxId,
   elementId,
 }) {
+  const { screenSize } = useDivStore();
+
+  const handleUpdate = (key, value) => {
+    const currentValue = selectedElement[key];
+    const newValue = {
+      ...(typeof currentValue === 'object' ? currentValue : {}),
+      [screenSize]: value,
+    };
+    updateElement(parentId, boxId, elementId, { [key]: newValue });
+  };
+
+  const fontSize = getResponsiveValue(selectedElement.fontSize, screenSize);
+  const fontFamily = getResponsiveValue(selectedElement.fontFamily, screenSize);
+  const color = getResponsiveValue(selectedElement.color, screenSize);
+  const backgroundColor = getResponsiveValue(
+    selectedElement.backgroundColor,
+    screenSize
+  );
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -28,7 +49,7 @@ export default function Typography({
               Font Size
             </label>
             <span className="px-2 py-1 bg-white rounded-lg text-xs font-bold text-gray-600 border">
-              {selectedElement.fontSize}px
+              {fontSize}px
             </span>
           </div>
           <div className="space-y-2">
@@ -36,21 +57,17 @@ export default function Typography({
               type="range"
               min="8"
               max="72"
-              value={selectedElement.fontSize}
+              value={fontSize || 12}
               onChange={(e) =>
-                updateElement(parentId, boxId, elementId, {
-                  fontSize: Number.parseInt(e.target.value) || 12,
-                })
+                handleUpdate('fontSize', Number.parseInt(e.target.value) || 12)
               }
               className="w-full h-2 bg-gradient-to-r from-pink-200 to-rose-300 rounded-lg appearance-none cursor-pointer slider"
             />
             <input
               type="number"
-              value={selectedElement.fontSize}
+              value={fontSize || 12}
               onChange={(e) =>
-                updateElement(parentId, boxId, elementId, {
-                  fontSize: Number.parseInt(e.target.value) || 12,
-                })
+                handleUpdate('fontSize', Number.parseInt(e.target.value) || 12)
               }
               className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-100 focus:outline-none"
             />
@@ -64,12 +81,8 @@ export default function Typography({
             Font Family
           </label>
           <select
-            value={selectedElement.fontFamily}
-            onChange={(e) =>
-              updateElement(parentId, boxId, elementId, {
-                fontFamily: e.target.value,
-              })
-            }
+            value={fontFamily || 'Arial, sans-serif'}
+            onChange={(e) => handleUpdate('fontFamily', e.target.value)}
             className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none hover:border-gray-300 cursor-pointer"
           >
             <option value="Arial, sans-serif">Arial (Sans-serif)</option>
@@ -91,16 +104,8 @@ export default function Typography({
             <div className="relative group">
               <input
                 type="color"
-                value={
-                  selectedElement.color !== 'transparent'
-                    ? selectedElement.color
-                    : '#000000'
-                }
-                onChange={(e) =>
-                  updateElement(parentId, boxId, elementId, {
-                    color: e.target.value,
-                  })
-                }
+                value={color !== 'transparent' ? color : '#000000'}
+                onChange={(e) => handleUpdate('color', e.target.value)}
                 className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-cyan-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -117,25 +122,19 @@ export default function Typography({
                 <input
                   type="color"
                   value={
-                    selectedElement.backgroundColor !== 'transparent'
-                      ? selectedElement.backgroundColor
+                    backgroundColor !== 'transparent'
+                      ? backgroundColor
                       : '#ffffff'
                   }
                   onChange={(e) =>
-                    updateElement(parentId, boxId, elementId, {
-                      backgroundColor: e.target.value,
-                    })
+                    handleUpdate('backgroundColor', e.target.value)
                   }
                   className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-violet-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <button
-                onClick={() =>
-                  updateElement(parentId, boxId, elementId, {
-                    backgroundColor: 'transparent',
-                  })
-                }
+                onClick={() => handleUpdate('backgroundColor', 'transparent')}
                 className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 active:scale-95"
                 title="Make transparent"
               >

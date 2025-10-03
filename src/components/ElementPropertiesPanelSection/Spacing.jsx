@@ -8,6 +8,8 @@ import {
   FiPackage,
   FiTarget,
 } from 'react-icons/fi';
+import useDivStore from '@/store/UseDivStore';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function Spacing({
   selectedElement,
@@ -16,6 +18,8 @@ export default function Spacing({
   boxId,
   elementId,
 }) {
+  const { screenSize } = useDivStore();
+
   const sides = [
     { key: 'top', label: 'T', icon: <FiArrowUp className="w-3 h-3" /> },
     { key: 'right', label: 'R', icon: <FiArrowRight className="w-3 h-3" /> },
@@ -24,48 +28,64 @@ export default function Spacing({
   ];
 
   const handleChange = (type, side, value) => {
+    const currentTypeValue = selectedElement[type] || {};
+    const currentSideValue = currentTypeValue[side];
+
+    const newSideValue = {
+      ...(typeof currentSideValue === 'object' ? currentSideValue : {}),
+      [screenSize]: Number.parseInt(value) || 0,
+    };
+
     updateElement(parentId, boxId, elementId, {
-      [type]: { ...selectedElement[type], [side]: Number.parseInt(value) || 0 },
+      [type]: { ...currentTypeValue, [side]: newSideValue },
     });
   };
 
-  const SpacingSection = ({ type, title, icon, gradientFrom, gradientTo }) => (
-    <div
-      className={`p-4 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-xl border border-gray-200`}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        {icon}
-        <label className="text-sm font-medium text-gray-700">{title}</label>
-      </div>
+  const SpacingSection = ({ type, title, icon, gradientFrom, gradientTo }) => {
+    const spacingValues = getResponsiveValue(selectedElement[type], screenSize);
 
-      <div className="grid grid-cols-4 gap-2">
-        {sides.map(({ key, label, icon }) => (
-          <div key={key} className="text-center">
-            <label className="text-xs text-gray-600 block mb-1 flex items-center justify-center gap-1">
-              {icon}
-              {label}
-            </label>
-            <div className="space-y-1">
-              <input
-                type="range"
-                min="0"
-                max="50"
-                value={selectedElement[type]?.[key] || 0}
-                onChange={(e) => handleChange(type, key, e.target.value)}
-                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-small"
-              />
-              <input
-                type="number"
-                value={selectedElement[type]?.[key] || 0}
-                onChange={(e) => handleChange(type, key, e.target.value)}
-                className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-center text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 focus:outline-none"
-              />
-            </div>
-          </div>
-        ))}
+    return (
+      <div
+        className={`p-4 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-xl border border-gray-200`}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          {icon}
+          <label className="text-sm font-medium text-gray-700">{title}</label>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2">
+          {sides.map(({ key, label, icon }) => {
+            const value =
+              getResponsiveValue(spacingValues?.[key], screenSize) || 0;
+            return (
+              <div key={key} className="text-center">
+                <label className="text-xs text-gray-600 block mb-1 flex items-center justify-center gap-1">
+                  {icon}
+                  {label}
+                </label>
+                <div className="space-y-1">
+                  <input
+                    type="range"
+                    min="0"
+                    max="50"
+                    value={value}
+                    onChange={(e) => handleChange(type, key, e.target.value)}
+                    className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-small"
+                  />
+                  <input
+                    type="number"
+                    value={value}
+                    onChange={(e) => handleChange(type, key, e.target.value)}
+                    className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-center text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 focus:outline-none"
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="mb-6">

@@ -48,7 +48,7 @@ export default function PositionSize({
   const handleUpdate = (key, value) => {
     const currentValue = selectedElement[key];
     const newValue = {
-      ...currentValue,
+      ...(typeof currentValue === 'object' ? currentValue : {}),
       [screenSize]: value,
     };
     updateElement(parentId, boxId, elementId, { [key]: newValue });
@@ -108,7 +108,7 @@ export default function PositionSize({
                   type="range"
                   min="0"
                   max={max}
-                  value={value}
+                  value={value || 0}
                   onChange={(e) =>
                     handleUpdate(key, Number.parseInt(e.target.value) || 0)
                   }
@@ -116,7 +116,7 @@ export default function PositionSize({
                 />
                 <input
                   type="number"
-                  value={value}
+                  value={value || 0}
                   onChange={(e) =>
                     handleUpdate(key, Number.parseInt(e.target.value) || 0)
                   }
