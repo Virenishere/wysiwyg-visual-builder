@@ -38,13 +38,16 @@ export default function AlignIndicator({
     const guides = { vertical: [], horizontal: [] };
 
     // Fix: Ensure we get responsive values properly with fallbacks
-    const activeWidth = getResponsiveValue(activeItem.width, screenSize) || 150;
+    const activeWidth =
+      parseInt(getResponsiveValue(activeItem.width, screenSize), 10) || 150;
     const activeHeight =
-      getResponsiveValue(activeItem.height, screenSize) || 150;
-    const activeLeft = getResponsiveValue(activeItem.x, screenSize) || 0;
+      parseInt(getResponsiveValue(activeItem.height, screenSize), 10) || 150;
+    const activeLeft =
+      parseInt(getResponsiveValue(activeItem.x, screenSize), 10) || 0;
     const activeRight = activeLeft + activeWidth;
     const activeCenterX = activeLeft + activeWidth / 2;
-    const activeTop = getResponsiveValue(activeItem.y, screenSize) || 0;
+    const activeTop =
+      parseInt(getResponsiveValue(activeItem.y, screenSize), 10) || 0;
     const activeBottom = activeTop + activeHeight;
     const activeCenterY = activeTop + activeHeight / 2;
 
@@ -53,12 +56,15 @@ export default function AlignIndicator({
       if (item.id === activeItem.id) return;
 
       // Fix: Ensure we get responsive values properly with fallbacks for all items
-      const itemWidth = getResponsiveValue(item.width, screenSize) || 150;
-      const itemHeight = getResponsiveValue(item.height, screenSize) || 150;
-      const itemLeft = getResponsiveValue(item.x, screenSize) || 0;
+      const itemWidth =
+        parseInt(getResponsiveValue(item.width, screenSize), 10) || 150;
+      const itemHeight =
+        parseInt(getResponsiveValue(item.height, screenSize), 10) || 150;
+      const itemLeft =
+        parseInt(getResponsiveValue(item.x, screenSize), 10) || 0;
       const itemRight = itemLeft + itemWidth;
       const itemCenterX = itemLeft + itemWidth / 2;
-      const itemTop = getResponsiveValue(item.y, screenSize) || 0;
+      const itemTop = parseInt(getResponsiveValue(item.y, screenSize), 10) || 0;
       const itemBottom = itemTop + itemHeight;
       const itemCenterY = itemTop + itemHeight / 2;
 

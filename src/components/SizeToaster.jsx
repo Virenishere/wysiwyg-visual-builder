@@ -25,12 +25,18 @@ export default function SizeToaster() {
     const element = box.elements.find((e) => e.id === selectedElementId);
     if (!element) return null;
 
-    const boxX = getResponsiveValue(box.x, screenSize);
-    const boxY = getResponsiveValue(box.y, screenSize);
-    const elementX = getResponsiveValue(element.x, screenSize);
-    const elementY = getResponsiveValue(element.y, screenSize);
-    const elementWidth = getResponsiveValue(element.width, screenSize);
-    const elementHeight = getResponsiveValue(element.height, screenSize);
+    const boxX = parseInt(getResponsiveValue(box.x, screenSize), 10);
+    const boxY = parseInt(getResponsiveValue(box.y, screenSize), 10);
+    const elementX = parseInt(getResponsiveValue(element.x, screenSize), 10);
+    const elementY = parseInt(getResponsiveValue(element.y, screenSize), 10);
+    const elementWidth = parseInt(
+      getResponsiveValue(element.width, screenSize),
+      10
+    );
+    const elementHeight = parseInt(
+      getResponsiveValue(element.height, screenSize),
+      10
+    );
 
     return (
       <div
@@ -53,10 +59,10 @@ export default function SizeToaster() {
     const box = parent.rnds.find((b) => b.id === selectedBoxId);
     if (!box) return null;
 
-    const boxX = getResponsiveValue(box.x, screenSize);
-    const boxY = getResponsiveValue(box.y, screenSize);
-    const boxWidth = getResponsiveValue(box.width, screenSize);
-    const boxHeight = getResponsiveValue(box.height, screenSize);
+    const boxX = parseInt(getResponsiveValue(box.x, screenSize), 10);
+    const boxY = parseInt(getResponsiveValue(box.y, screenSize), 10);
+    const boxWidth = parseInt(getResponsiveValue(box.width, screenSize), 10);
+    const boxHeight = parseInt(getResponsiveValue(box.height, screenSize), 10);
 
     return (
       <div

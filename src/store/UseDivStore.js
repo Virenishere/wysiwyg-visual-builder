@@ -696,13 +696,13 @@ const useDivStore = create(
                 newRnd.id = newBoxId;
 
                 // Handle responsive values properly for position
-                const currentX = getResponsiveValue(
-                  rndToDuplicate.x,
-                  screenSize
+                const currentX = parseInt(
+                  getResponsiveValue(rndToDuplicate.x, screenSize),
+                  10
                 );
-                const currentY = getResponsiveValue(
-                  rndToDuplicate.y,
-                  screenSize
+                const currentY = parseInt(
+                  getResponsiveValue(rndToDuplicate.y, screenSize),
+                  10
                 );
 
                 // Update position for current screen size
@@ -868,7 +868,10 @@ const useDivStore = create(
 
           // Get responsive section height for current screen
           const sectionHeight =
-            getResponsiveValue(parent.size?.height, state.screenSize) || 300;
+            parseInt(
+              getResponsiveValue(parent.size?.height, state.screenSize),
+              10
+            ) || 300;
 
           // Get section element to calculate actual bounds
           const sectionElement = document.querySelector(
@@ -879,9 +882,11 @@ const useDivStore = create(
             : 800; // fallback width minus padding
 
           const boxWidth =
-            getResponsiveValue(box.width, state.screenSize) || 150;
+            parseInt(getResponsiveValue(box.width, state.screenSize), 10) ||
+            150;
           const boxHeight =
-            getResponsiveValue(box.height, state.screenSize) || 150;
+            parseInt(getResponsiveValue(box.height, state.screenSize), 10) ||
+            150;
 
           // Calculate center position: (containerSize - elementSize) / 2
           const centerX = Math.max(0, (sectionWidth - boxWidth) / 2);
@@ -919,14 +924,20 @@ const useDivStore = create(
 
           // Get responsive box dimensions for current screen
           const boxWidth =
-            getResponsiveValue(box.width, state.screenSize) || 150;
+            parseInt(getResponsiveValue(box.width, state.screenSize), 10) ||
+            150;
           const boxHeight =
-            getResponsiveValue(box.height, state.screenSize) || 150;
+            parseInt(getResponsiveValue(box.height, state.screenSize), 10) ||
+            150;
 
           const elementWidth =
-            getResponsiveValue(element.width, state.screenSize) || 100;
+            parseInt(getResponsiveValue(element.width, state.screenSize), 10) ||
+            100;
           const elementHeight =
-            getResponsiveValue(element.height, state.screenSize) || 50;
+            parseInt(
+              getResponsiveValue(element.height, state.screenSize),
+              10
+            ) || 50;
 
           // Calculate center position: (containerSize - elementSize) / 2
           const centerX = Math.max(0, (boxWidth - elementWidth) / 2);

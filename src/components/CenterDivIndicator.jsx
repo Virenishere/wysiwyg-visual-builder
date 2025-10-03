@@ -27,10 +27,11 @@ export default function CenterDivIndicator({ activeBox, containerBounds }) {
 
   // Fix: Ensure we get responsive values properly for all screen sizes
   const boxRect = {
-    width: getResponsiveValue(activeBox.width, screenSize) || 150,
-    height: getResponsiveValue(activeBox.height, screenSize) || 150,
-    x: getResponsiveValue(activeBox.x, screenSize) || 0,
-    y: getResponsiveValue(activeBox.y, screenSize) || 0,
+    width: parseInt(getResponsiveValue(activeBox.width, screenSize), 10) || 150,
+    height:
+      parseInt(getResponsiveValue(activeBox.height, screenSize), 10) || 150,
+    x: parseInt(getResponsiveValue(activeBox.x, screenSize), 10) || 0,
+    y: parseInt(getResponsiveValue(activeBox.y, screenSize), 10) || 0,
   };
 
   const containerCenter = {

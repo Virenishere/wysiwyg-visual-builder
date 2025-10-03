@@ -34,10 +34,11 @@ export default function RndBox({ box, parentId }) {
   };
 
   // Get responsive values with fallbacks
-  const width = getResponsiveValue(box.width, screenSize) || 150;
-  const height = getResponsiveValue(box.height, screenSize) || 150;
-  const x = getResponsiveValue(box.x, screenSize) || 0;
-  const y = getResponsiveValue(box.y, screenSize) || 0;
+  const width = parseInt(getResponsiveValue(box.width, screenSize), 10) || 150;
+  const height =
+    parseInt(getResponsiveValue(box.height, screenSize), 10) || 150;
+  const x = parseInt(getResponsiveValue(box.x, screenSize), 10) || 0;
+  const y = parseInt(getResponsiveValue(box.y, screenSize), 10) || 0;
 
   //container bounds for this RND box (for element indicators)
   const boxBounds = {
@@ -51,10 +52,12 @@ export default function RndBox({ box, parentId }) {
 
   const minConstraints = box.elements.reduce(
     (acc, el) => {
-      const elWidth = getResponsiveValue(el.width, screenSize) || 100;
-      const elHeight = getResponsiveValue(el.height, screenSize) || 50;
-      const elX = getResponsiveValue(el.x, screenSize) || 0;
-      const elY = getResponsiveValue(el.y, screenSize) || 0;
+      const elWidth =
+        parseInt(getResponsiveValue(el.width, screenSize), 10) || 100;
+      const elHeight =
+        parseInt(getResponsiveValue(el.height, screenSize), 10) || 50;
+      const elX = parseInt(getResponsiveValue(el.x, screenSize), 10) || 0;
+      const elY = parseInt(getResponsiveValue(el.y, screenSize), 10) || 0;
 
       const right = elX + elWidth;
       const bottom = elY + elHeight;

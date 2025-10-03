@@ -65,12 +65,7 @@ export default function SectionsPanel({
 
     // Update parent size with validation
     const validatedValue = Math.max(100, Math.min(5000, numValue));
-    const currentHeight = selectedParent.size.height;
-    const newHeight = {
-      ...(typeof currentHeight === 'object' ? currentHeight : {}),
-      [screenSize]: validatedValue,
-    };
-    updateParentSize(parentId, { height: newHeight });
+    updateParentSize(parentId, { height: validatedValue });
   };
 
   const getBackgroundValue = (background) => {
