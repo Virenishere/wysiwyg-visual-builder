@@ -4,8 +4,11 @@ import useDivStore from '@/store/UseDivStore';
 import ParentPreview from './PreviewComponentSection/ParentPreview';
 
 export default function PreviewComponent({ parents: parentsProp, screenSize }) {
-  const { parents: parentsFromStore } = useDivStore();
-  const parents = parentsProp || parentsFromStore;
+  const { parents: parentsFromStore, layouts } = useDivStore();
+
+  // Use prop parents first, then store parents, then fallback to current screen layout
+  const parents =
+    parentsProp || parentsFromStore || layouts[screenSize]?.parents || [];
 
   if (!parents || parents.length === 0) {
     return (

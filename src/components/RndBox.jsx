@@ -76,6 +76,10 @@ export default function RndBox({ box, parentId }) {
     activeDragItem.type && // elements have type, boxes don't
     boxElements.some((element) => element.id === activeDragItem.id);
 
+  // Check if any element is selected in this box
+  const hasSelectedElement =
+    selectedElementId && boxElements.some((el) => el.id === selectedElementId);
+
   useEffect(() => {
     // This effect runs once after the component mounts.
     // It triggers a state update with the component's current dimensions and position.
@@ -160,12 +164,30 @@ export default function RndBox({ box, parentId }) {
           ? 'rgba(59, 130, 246, 0.05)'
           : 'rgba(0, 0, 0, 0.02)',
         zIndex: isSelected ? 5 : 1,
+        // Add visual containment indicator
+        boxSizing: 'border-box',
       }}
       minWidth={minConstraints.minWidth}
       minHeight={minConstraints.minHeight}
       className="rnd-box"
       data-id={box.id}
     >
+      {/* Visual bounds indicator when selected */}
+      {isSelected && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 2,
+            left: 2,
+            right: 2,
+            bottom: 2,
+            border: '1px dashed rgba(59, 130, 246, 0.3)',
+            borderRadius: '2px',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+      )}
       {/* Drag handle area - positioned to not interfere with elements */}
       <div
         className="rnd-drag-handle absolute inset-0"
@@ -182,14 +204,18 @@ export default function RndBox({ box, parentId }) {
         </div>
       )}
 
-      {/* Add element button */}
+      {/* Add element button - adjust positioning to not interfere with containment */}
       {isSelected && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             setLeftPanel('AddElementPanel');
           }}
-          className="absolute -top-7 left-14 bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          className="absolute bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          style={{
+            top: '-37px', // Always position outside the box
+            left: '56px',
+          }}
           aria-label="Add element"
         >
           <FaPlus />
@@ -201,7 +227,7 @@ export default function RndBox({ box, parentId }) {
         </button>
       )}
 
-      {/* Delete box button */}
+      {/* Delete box button - adjust positioning to not interfere with containment */}
       {isSelected && (
         <button
           onClick={(e) => {
@@ -210,7 +236,11 @@ export default function RndBox({ box, parentId }) {
               removeRnd(parentId, box.id);
             }
           }}
-          className="absolute -top-7 left-24 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          className="absolute bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          style={{
+            top: '-37px', // Always position outside the box
+            left: '88px',
+          }}
           aria-label="Delete box"
         >
           <FaTrash />
@@ -222,14 +252,18 @@ export default function RndBox({ box, parentId }) {
         </button>
       )}
 
-      {/* Copy box button */}
+      {/* Copy box button - adjust positioning to not interfere with containment */}
       {isSelected && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             duplicateRnd(parentId, box.id);
           }}
-          className="absolute -top-7 left-32 bg-blue-500 text-white p-1 rounded-full hover:bg-blue-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          className="absolute bg-blue-500 text-white p-1 rounded-full hover:bg-blue-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          style={{
+            top: '-37px', // Always position outside the box
+            left: '120px',
+          }}
           aria-label="Copy box"
         >
           <FaCopy />
@@ -266,15 +300,18 @@ export default function RndBox({ box, parentId }) {
         />
       )}
 
-      {/* Render elements inside this box */}
+      {/* Render elements inside this box with proper absolute positioning */}
       <div
         style={{
-          position: 'relative',
-          zIndex: 3,
+          position: 'absolute',
+          top: 0,
+          left: 0,
           width: '100%',
           height: '100%',
-          top: '-30px',
+          zIndex: 3,
+          pointerEvents: 'none', // Allow clicks to pass through to elements
         }}
+        className="rnd-box-container"
       >
         {box.elements?.map((element) => (
           <DraggableElement
@@ -285,6 +322,12 @@ export default function RndBox({ box, parentId }) {
             isSelected={selectedElementId === element.id}
             onSelect={() => handleElementSelect(element.id)}
             duplicateElement={duplicateElement}
+            containerBounds={{
+              width: width,
+              height: height,
+              x: 0,
+              y: 0,
+            }}
           />
         ))}
       </div>

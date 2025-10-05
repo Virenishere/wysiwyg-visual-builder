@@ -11,7 +11,7 @@ const PreviewPage = ({ params }) => {
   const resolvedParams = use(params);
   const { templateName } = resolvedParams;
 
-  const { layouts, screenSize, setScreenSize } = useDivStore();
+  const { layouts, screenSize, setScreenSize, loadTemplate } = useDivStore();
 
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
@@ -21,6 +21,13 @@ const PreviewPage = ({ params }) => {
     'Fetching components...',
     'Applying styles...',
   ];
+
+  // Load template data when component mounts
+  useEffect(() => {
+    if (templateName && templateName !== 'new-template') {
+      loadTemplate(templateName);
+    }
+  }, [templateName, loadTemplate]);
 
   useEffect(() => {
     let timer;

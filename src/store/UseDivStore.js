@@ -110,8 +110,17 @@ const useDivStore = create(
       activeDragItem: null,
       screenSize: '4k', // Default to desktop (4k) first
 
+      // Container dimensions tracking
+      editorContainerWidth: null,
+      previewContainerWidth: null,
+
       templateName: '',
       setTemplateName: (templateName) => set({ templateName }),
+
+      // Container width setters
+      setEditorContainerWidth: (width) => set({ editorContainerWidth: width }),
+      setPreviewContainerWidth: (width) =>
+        set({ previewContainerWidth: width }),
 
       // Action to set the screen size
       setScreenSize: (screenSize) => {
@@ -430,9 +439,9 @@ const useDivStore = create(
         toast.success('New div box added!');
       },
 
-      updateRnd: (parentId, boxId, updates) =>
-        set((state) => ({
-          parents: state.parents.map((p) =>
+      updateRnd: (parentId, boxId, updates) => {
+        set((state) => {
+          const newParents = state.parents.map((p) =>
             p.id === parentId
               ? {
                   ...p,
@@ -443,8 +452,18 @@ const useDivStore = create(
                   ),
                 }
               : p
-          ),
-        })),
+          );
+
+          // Auto-save to layouts when RND is updated
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
+
+          return {
+            parents: newParents,
+            layouts: newLayouts,
+          };
+        });
+      },
 
       removeRnd: (parentId, boxId) => {
         set((state) => ({
@@ -479,12 +498,20 @@ const useDivStore = create(
       // Element actions inside RND boxes
       addElement: (parentId, boxId, elementType) => {
         set((state) => {
+          const parent = state.parents.find((p) => p.id === parentId);
+          const box = parent?.rnds.find((b) => b.id === boxId);
+
+          if (!box) return state;
+
+          const boxWidth =
+            getResponsiveValue(box.width, state.screenSize) || 150;
+          const boxHeight =
+            getResponsiveValue(box.height, state.screenSize) || 150;
+
           const newElementId = nextElementId++;
           const newElement = {
             id: newElementId,
             type: elementType,
-            x: { laptop: 10 },
-            y: { '4k': 0, laptop: 0 },
             zIndex: 0,
             customStyles: {},
             fontSize: 14,
@@ -502,23 +529,23 @@ const useDivStore = create(
           switch (elementType) {
             case 'text':
               Object.assign(newElement, {
-                width: { laptop: 100 },
-                height: { laptop: 30 },
+                width: { '4k': 100, laptop: 100 },
+                height: { '4k': 30, laptop: 30 },
                 content: 'Sample Text',
                 fontSize: 16,
               });
               break;
             case 'paragraph':
               Object.assign(newElement, {
-                width: { laptop: 200 },
-                height: { laptop: 60 },
+                width: { '4k': 200, laptop: 200 },
+                height: { '4k': 60, laptop: 60 },
                 content: '<p>Sample paragraph content</p>',
               });
               break;
             case 'button':
               Object.assign(newElement, {
-                width: { laptop: 120 },
-                height: { laptop: 35 },
+                width: { '4k': 120, laptop: 120 },
+                height: { '4k': 35, laptop: 35 },
                 content: 'Click Me',
                 backgroundColor: '#007bff',
                 color: '#ffffff',
@@ -528,16 +555,16 @@ const useDivStore = create(
               break;
             case 'image':
               Object.assign(newElement, {
-                width: { laptop: 80 },
-                height: { laptop: 80 },
+                width: { '4k': 80, laptop: 80 },
+                height: { '4k': 80, laptop: 80 },
                 content: '',
                 padding: { top: 0, right: 0, bottom: 0, left: 0 },
               });
               break;
             case 'card':
               Object.assign(newElement, {
-                width: { laptop: 200 },
-                height: { laptop: 150 },
+                width: { '4k': 200, laptop: 200 },
+                height: { '4k': 150, laptop: 150 },
                 backgroundColor: '#f8f9fa',
                 borderRadius: 8,
                 padding: { top: 15, right: 15, bottom: 15, left: 15 },
@@ -550,8 +577,8 @@ const useDivStore = create(
               break;
             case 'line':
               Object.assign(newElement, {
-                width: { laptop: 200 },
-                height: { laptop: 2 },
+                width: { '4k': 200, laptop: 200 },
+                height: { '4k': 2, laptop: 2 },
                 content: '',
                 backgroundColor: '#000000',
                 padding: { top: 0, right: 0, bottom: 0, left: 0 },
@@ -579,30 +606,43 @@ const useDivStore = create(
               break;
           }
 
-          return {
-            parents: state.parents.map((p) =>
-              p.id === parentId
-                ? {
-                    ...p,
-                    rnds: p.rnds.map((box) =>
-                      box.id === boxId
-                        ? {
-                            ...box,
-                            elements: [...box.elements, newElement],
-                          }
-                        : box
-                    ),
-                  }
-                : p
-            ),
-          };
-        });
-        toast.success(`'${elementType}' element added!`);
-      },
+          // Ensure element fits within box bounds
+          const elementWidth = Math.min(
+            getResponsiveValue(newElement.width, state.screenSize) || 100,
+            boxWidth - 20
+          );
+          const elementHeight = Math.min(
+            getResponsiveValue(newElement.height, state.screenSize) || 30,
+            boxHeight - 20
+          );
 
-      updateElement: (parentId, boxId, elementId, updates) =>
-        set((state) => ({
-          parents: state.parents.map((p) =>
+          // Set position ensuring element stays within box bounds
+          const elementX = Math.max(
+            10,
+            Math.min(10, boxWidth - elementWidth - 10)
+          );
+          const elementY = Math.max(
+            10,
+            Math.min(10, boxHeight - elementHeight - 10)
+          );
+
+          // Update element with responsive position and size
+          newElement.x = { [state.screenSize]: elementX };
+          newElement.y = { [state.screenSize]: elementY };
+
+          if (typeof newElement.width === 'object') {
+            newElement.width[state.screenSize] = elementWidth;
+          } else {
+            newElement.width = { [state.screenSize]: elementWidth };
+          }
+
+          if (typeof newElement.height === 'object') {
+            newElement.height[state.screenSize] = elementHeight;
+          } else {
+            newElement.height = { [state.screenSize]: elementHeight };
+          }
+
+          const newParents = state.parents.map((p) =>
             p.id === parentId
               ? {
                   ...p,
@@ -610,22 +650,127 @@ const useDivStore = create(
                     box.id === boxId
                       ? {
                           ...box,
-                          elements: box.elements.map((element) =>
-                            element.id === elementId
-                              ? responsiveUpdater(
-                                  element,
-                                  updates,
-                                  state.screenSize
-                                )
-                              : element
-                          ),
+                          elements: [...box.elements, newElement],
                         }
                       : box
                   ),
                 }
               : p
-          ),
-        })),
+          );
+
+          // Auto-save to layouts
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
+
+          return {
+            parents: newParents,
+            layouts: newLayouts,
+            selectedElementId: newElementId,
+          };
+        });
+        toast.success(`'${elementType}' element added!`);
+      },
+
+      updateElement: (parentId, boxId, elementId, updates) => {
+        set((state) => {
+          const parent = state.parents.find((p) => p.id === parentId);
+          const box = parent?.rnds.find((b) => b.id === boxId);
+          const element = box?.elements.find((e) => e.id === elementId);
+
+          if (!element || !box) return state;
+
+          // Validate bounds if position or size is being updated
+          let validatedUpdates = { ...updates };
+
+          if (
+            updates.x !== undefined ||
+            updates.y !== undefined ||
+            updates.width !== undefined ||
+            updates.height !== undefined
+          ) {
+            const boxWidth =
+              getResponsiveValue(box.width, state.screenSize) || 150;
+            const boxHeight =
+              getResponsiveValue(box.height, state.screenSize) || 150;
+
+            const elementWidth =
+              updates.width !== undefined
+                ? updates.width
+                : getResponsiveValue(element.width, state.screenSize) || 100;
+            const elementHeight =
+              updates.height !== undefined
+                ? updates.height
+                : getResponsiveValue(element.height, state.screenSize) || 30;
+            const elementX =
+              updates.x !== undefined
+                ? updates.x
+                : getResponsiveValue(element.x, state.screenSize) || 0;
+            const elementY =
+              updates.y !== undefined
+                ? updates.y
+                : getResponsiveValue(element.y, state.screenSize) || 0;
+
+            // Ensure element stays within box bounds
+            validatedUpdates.x = Math.max(
+              0,
+              Math.min(elementX, boxWidth - elementWidth)
+            );
+            validatedUpdates.y = Math.max(
+              0,
+              Math.min(elementY, boxHeight - elementHeight)
+            );
+            validatedUpdates.width = Math.min(
+              elementWidth,
+              boxWidth - validatedUpdates.x
+            );
+            validatedUpdates.height = Math.min(
+              elementHeight,
+              boxHeight - validatedUpdates.y
+            );
+          }
+
+          const newParents = state.parents.map((p) =>
+            p.id === parentId
+              ? {
+                  ...p,
+                  rnds: p.rnds.map((rnd) =>
+                    rnd.id === boxId
+                      ? {
+                          ...rnd,
+                          elements: rnd.elements.map((el) =>
+                            el.id === elementId
+                              ? responsiveUpdater(
+                                  el,
+                                  validatedUpdates,
+                                  state.screenSize
+                                )
+                              : el
+                          ),
+                        }
+                      : rnd
+                  ),
+                }
+              : p
+          );
+
+          // Auto-save to layouts when element is updated
+          const newLayouts = {
+            ...state.layouts,
+            [state.screenSize]: {
+              ...state.layouts[state.screenSize],
+              parents: structuredClone(newParents),
+            },
+          };
+
+          // Persist to localStorage
+          localStorage.setItem('divLayouts', JSON.stringify(newLayouts));
+
+          return {
+            parents: newParents,
+            layouts: newLayouts,
+          };
+        });
+      },
 
       removeElement: (parentId, boxId, elementId) => {
         set((state) => ({
@@ -812,8 +957,8 @@ const useDivStore = create(
       setSelectedElement: (id) => set({ selectedElementId: id }),
 
       updateElementContent: (elementId, content) => {
-        set((state) => ({
-          parents: state.parents.map((p) => ({
+        set((state) => {
+          const newParents = state.parents.map((p) => ({
             ...p,
             rnds: p.rnds.map((box) => ({
               ...box,
@@ -821,13 +966,22 @@ const useDivStore = create(
                 element.id === elementId ? { ...element, content } : element
               ),
             })),
-          })),
-        }));
+          }));
+
+          // Auto-save to layouts when content is updated
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
+
+          return {
+            parents: newParents,
+            layouts: newLayouts,
+          };
+        });
       },
 
       updateElementPosition: (elementId, x, y) => {
-        set((state) => ({
-          parents: state.parents.map((p) => ({
+        set((state) => {
+          const newParents = state.parents.map((p) => ({
             ...p,
             rnds: p.rnds.map((box) => ({
               ...box,
@@ -835,13 +989,22 @@ const useDivStore = create(
                 element.id === elementId ? { ...element, x, y } : element
               ),
             })),
-          })),
-        }));
+          }));
+
+          // Auto-save to layouts when position is updated
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
+
+          return {
+            parents: newParents,
+            layouts: newLayouts,
+          };
+        });
       },
 
       updateElementSize: (elementId, width, height) => {
-        set((state) => ({
-          parents: state.parents.map((p) => ({
+        set((state) => {
+          const newParents = state.parents.map((p) => ({
             ...p,
             rnds: p.rnds.map((box) => ({
               ...box,
@@ -851,8 +1014,17 @@ const useDivStore = create(
                   : element
               ),
             })),
-          })),
-        }));
+          }));
+
+          // Auto-save to layouts when size is updated
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
+
+          return {
+            parents: newParents,
+            layouts: newLayouts,
+          };
+        });
       },
 
       setIsResizing: (status) => set({ isResizing: status }),

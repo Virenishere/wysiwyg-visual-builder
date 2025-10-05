@@ -54,9 +54,15 @@ const TemplatePage = ({ params }) => {
 
       if (container) {
         const rect = container.getBoundingClientRect();
-        // Adjust for container's own position relative to viewport
+        // Calculate the actual available width for the canvas
+        const availableWidth = mainContainerRef.current.clientWidth - 32; // Account for padding
+        const targetWidth =
+          screenSizes[screenSize] === '100%'
+            ? availableWidth
+            : Math.min(parseInt(screenSizes[screenSize], 10), availableWidth);
+
         const relativeRect = {
-          width: container.clientWidth,
+          width: targetWidth,
           height: container.clientHeight,
           x: 0,
           y: 0,
@@ -64,9 +70,14 @@ const TemplatePage = ({ params }) => {
         setContainerRect(relativeRect);
       } else {
         // Fallback: use the main container itself
-        const rect = mainContainerRef.current.getBoundingClientRect();
+        const availableWidth = mainContainerRef.current.clientWidth - 32;
+        const targetWidth =
+          screenSizes[screenSize] === '100%'
+            ? availableWidth
+            : Math.min(parseInt(screenSizes[screenSize], 10), availableWidth);
+
         const relativeRect = {
-          width: mainContainerRef.current.clientWidth,
+          width: targetWidth,
           height: mainContainerRef.current.clientHeight,
           x: 0,
           y: 0,
@@ -224,7 +235,10 @@ const TemplatePage = ({ params }) => {
           <div
             className="h-full max-h-full shadow-2xl overflow-hidden bg-white relative transition-all duration-300 ease-in-out"
             style={{
-              width: screenSizes[screenSize] || '100%',
+              width:
+                screenSizes[screenSize] === '100%'
+                  ? '100%'
+                  : `min(${screenSizes[screenSize]}, 100%)`,
               maxWidth: screenSize === '4k' ? '100%' : screenSizes[screenSize],
             }}
           >
@@ -239,6 +253,8 @@ const TemplatePage = ({ params }) => {
                 <AlignIndicator
                   activeItem={activeDragItem}
                   allItems={allBoxes}
+                  containerBounds={containerRect}
+                  tolerance={2}
                 />
               </>
             )}

@@ -415,7 +415,8 @@ const RichTextEditor = ({
           textAlign: 'left',
           overflowWrap: 'break-word',
           lineHeight: '1.5',
-          cursor: 'text',
+          cursor: isEditing ? 'text' : 'inherit',
+          // Remove custom border styling - let DraggableElement handle it
           ...element?.customStyles,
         }}
         className="rich-text-editor"

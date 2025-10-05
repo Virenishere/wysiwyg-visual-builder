@@ -12,7 +12,7 @@ import CardElement from './DraggableElementSection/CardElement';
 import LineElement from './DraggableElementSection/LineElement';
 import DivElement from './DraggableElementSection/DivElement';
 
-import { getResponsiveValue } from '@/utils/screen';
+import { getResponsiveValue, getScreenPixelWidth } from '@/utils/screen';
 
 export default function DraggableElement({
   element,
@@ -20,16 +20,60 @@ export default function DraggableElement({
   boxId,
   isSelected,
   onSelect,
+  duplicateElement,
+  containerBounds,
 }) {
-  const { updateElement, setIsResizing, setActiveDragItem, screenSize } =
-    useDivStore();
+  const {
+    updateElement,
+    setActiveDragItem,
+    activeDragItem,
+    screenSize,
+    containerRect,
+  } = useDivStore();
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef(null);
 
-  const width = getResponsiveValue(element.width, screenSize);
-  const height = getResponsiveValue(element.height, screenSize);
-  const x = getResponsiveValue(element.x, screenSize);
-  const y = getResponsiveValue(element.y, screenSize);
+  // Get the actual editor container width for scaling calculations
+  const editorContainerWidth =
+    containerRect?.width || getScreenPixelWidth(screenSize);
+
+  const width = getResponsiveValue(element.width, screenSize) || 100;
+  const height = getResponsiveValue(element.height, screenSize) || 30;
+  const x = getResponsiveValue(element.x, screenSize) || 0;
+  const y = getResponsiveValue(element.y, screenSize) || 0;
+
+  // Custom bounds validation function
+  const validateBounds = (newX, newY, newWidth, newHeight) => {
+    if (!containerBounds)
+      return { x: newX, y: newY, width: newWidth, height: newHeight };
+
+    const maxX = containerBounds.width - newWidth;
+    const maxY = containerBounds.height - newHeight;
+
+    return {
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY)),
+      width: Math.min(newWidth, containerBounds.width),
+      height: Math.min(newHeight, containerBounds.height),
+    };
+  };
+
+  // Debug logging for text elements
+  if (element.type === 'text') {
+    console.log('Text element values:', {
+      elementId: element.id,
+      screenSize,
+      editorContainerWidth,
+      rawX: element.x,
+      rawY: element.y,
+      rawWidth: element.width,
+      rawHeight: element.height,
+      resolvedX: x,
+      resolvedY: y,
+      resolvedWidth: width,
+      resolvedHeight: height,
+    });
+  }
 
   const renderElementContent = () => {
     switch (element.type) {
@@ -161,9 +205,15 @@ export default function DraggableElement({
 
   return (
     <Rnd
-      size={{ width: width, height: height }}
-      position={{ x: x, y: y }}
-      bounds="parent"
+      size={{
+        width: Math.max(width || 100, 10),
+        height: Math.max(height || 30, 10),
+      }}
+      position={{
+        x: Math.max(0, x || 0),
+        y: Math.max(0, y || 0),
+      }}
+      // Remove bounds="parent" and implement custom bounds
       enableResizing={{
         top: !isEditing,
         right: !isEditing,
@@ -192,19 +242,26 @@ export default function DraggableElement({
       onDrag={(e, d) => {
         if (isEditing) return;
 
-        // Set active drag item with element data for indicators
+        // Apply custom bounds validation during drag
+        const validated = validateBounds(d.x, d.y, width, height);
+
         setActiveDragItem({
           ...element,
-          x: d.x,
-          y: d.y,
-          // Add a flag to identify this as an element
+          x: validated.x,
+          y: validated.y,
           isElement: true,
         });
       }}
       onDragStop={(e, d) => {
         if (isEditing) return;
 
-        updateElement(parentId, boxId, element.id, { x: d.x, y: d.y });
+        // Apply bounds validation on drag stop
+        const validated = validateBounds(d.x, d.y, width, height);
+
+        updateElement(parentId, boxId, element.id, {
+          x: validated.x,
+          y: validated.y,
+        });
         setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
@@ -212,7 +269,7 @@ export default function DraggableElement({
           e.preventDefault();
           return;
         }
-        setIsEditing(false); // Ensure not in editing mode
+        setIsEditing(false);
         e.stopPropagation();
         setIsResizing(true);
         setActiveDragItem({
@@ -222,35 +279,53 @@ export default function DraggableElement({
           isElement: true,
         });
       }}
-      onResize={(e, direction, ref, delta, pos) => {
+      onResize={(e, direction, ref, delta, position) => {
         if (isEditing) return;
 
-        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+        // Apply bounds validation during resize
+        const validated = validateBounds(
+          position.x,
+          position.y,
+          ref.offsetWidth,
+          ref.offsetHeight
+        );
+
         updateElement(parentId, boxId, element.id, {
-          width: newSize.width,
-          height: newSize.height,
-          x: pos.x,
-          y: pos.y,
+          width: validated.width,
+          height: validated.height,
+          x: validated.x,
+          y: validated.y,
         });
-        // Set active drag item for resizing indicators
+
         setActiveDragItem({
           ...element,
-          ...newSize,
-          ...pos,
+          width: validated.width,
+          height: validated.height,
+          x: validated.x,
+          y: validated.y,
           isElement: true,
         });
       }}
-      onResizeStop={(e, direction, ref, delta, pos) => {
+      onResizeStop={(e, direction, ref, delta, position) => {
         if (isEditing) return;
 
         setIsResizing(false);
-        const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+
+        // Apply final bounds validation on resize stop
+        const validated = validateBounds(
+          position.x,
+          position.y,
+          ref.offsetWidth,
+          ref.offsetHeight
+        );
+
         updateElement(parentId, boxId, element.id, {
-          width: newSize.width,
-          height: newSize.height,
-          x: pos.x,
-          y: pos.y,
+          width: validated.width,
+          height: validated.height,
+          x: validated.x,
+          y: validated.y,
         });
+
         setActiveDragItem(null);
       }}
       onClick={handleClick}
@@ -264,7 +339,7 @@ export default function DraggableElement({
         pointerEvents: 'auto',
         cursor: isEditing ? 'text' : 'move',
         touchAction: 'none',
-        ...inlineStyles, // Apply all computed styles
+        ...inlineStyles,
       }}
       className={`element-rnd ${element.customClassName || ''} ${isEditing ? 'editing-text' : ''}`}
     >

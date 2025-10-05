@@ -19,6 +19,7 @@ export default function BoxPreview({ box, screenSize }) {
         left: `${left}px`,
         width: `${width}px`,
         height: `${height}px`,
+        overflow: 'hidden', // Ensure elements stay within bounds in preview too
       }}
     >
       {box.customCss && <style>{box.customCss}</style>}
