@@ -213,7 +213,8 @@ export default function DraggableElement({
         x: Math.max(0, x || 0),
         y: Math.max(0, y || 0),
       }}
-      // Remove bounds="parent" and implement custom bounds
+      // Add bounds to prevent visual dragging outside parent
+      bounds="parent"
       enableResizing={{
         top: !isEditing,
         right: !isEditing,
@@ -242,25 +243,21 @@ export default function DraggableElement({
       onDrag={(e, d) => {
         if (isEditing) return;
 
-        // Apply custom bounds validation during drag
-        const validated = validateBounds(d.x, d.y, width, height);
-
+        // Update active drag item with current position
         setActiveDragItem({
           ...element,
-          x: validated.x,
-          y: validated.y,
+          x: d.x,
+          y: d.y,
           isElement: true,
         });
       }}
       onDragStop={(e, d) => {
         if (isEditing) return;
 
-        // Apply bounds validation on drag stop
-        const validated = validateBounds(d.x, d.y, width, height);
-
+        // Update element position on drag stop
         updateElement(parentId, boxId, element.id, {
-          x: validated.x,
-          y: validated.y,
+          x: d.x,
+          y: d.y,
         });
         setActiveDragItem(null);
       }}
