@@ -51,6 +51,20 @@ const RichTextEditor = ({
     }
   }, []);
 
+  // Check if there's any text selected - more reliable method
+  const hasSelection = useCallback(() => {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return false;
+
+    const range = selection.getRangeAt(0);
+    // Check if range is collapsed (no selection) or if it has actual content
+    if (range.collapsed) return false;
+
+    // Check if the selection contains actual text content
+    const selectedText = range.toString();
+    return selectedText.length > 0;
+  }, []);
+
   // Initialize editor content only once
   useEffect(() => {
     if (editorRef.current && !isInitialized) {
@@ -105,69 +119,97 @@ const RichTextEditor = ({
     }
   }, [onChange]);
 
-  // Execute commands with proper selection handling
+  // Execute commands with proper text selection behavior
   const execCommand = useCallback(
     (command, value = null) => {
-      restoreSelection();
+      if (!editorRef.current) return;
 
-      if (editorRef.current) {
-        editorRef.current.focus();
+      // Ensure editor has focus
+      editorRef.current.focus();
 
+      // Restore selection if we have one saved
+      if (savedSelection.current) {
+        try {
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(savedSelection.current);
+        } catch (e) {
+          // If restore fails, continue with current selection
+        }
+      }
+
+      const hasTextSelected = hasSelection();
+
+      // Commands that should apply to all text when no selection exists
+      // Now includes formatting commands (bold, italic, underline) as requested
+      const globalStyleCommands = [
+        'fontName',
+        'fontSize',
+        'foreColor',
+        'hiliteColor',
+        'backColor',
+        'bold',
+        'italic',
+        'underline',
+      ];
+
+      // Special handling for different command types
+      if (command === 'paste') {
+        try {
+          document.execCommand('paste');
+        } catch (e) {
+          console.warn('Paste failed:', e);
+        }
+      } else if (command === 'delete') {
+        if (hasTextSelected) {
+          const selection = window.getSelection();
+          const range = selection.getRangeAt(0);
+          range.deleteContents();
+        }
+      } else if (!hasTextSelected && globalStyleCommands.includes(command)) {
+        // Apply to all text when no selection for style and formatting commands
         const selection = window.getSelection();
-        const isCollapsed =
-          selection.rangeCount > 0 && selection.getRangeAt(0).collapsed;
+        const currentRange =
+          selection.rangeCount > 0
+            ? selection.getRangeAt(0).cloneRange()
+            : null;
 
-        // Commands that should apply to all text when no selection
-        const styleCommands = [
-          'fontName',
-          'fontSize',
-          'foreColor',
-          'hiliteColor',
-        ];
+        // Select all content temporarily
+        const allRange = document.createRange();
+        allRange.selectNodeContents(editorRef.current);
+        selection.removeAllRanges();
+        selection.addRange(allRange);
 
-        // If no text is selected and it's a style command, apply to all content
-        if (isCollapsed && styleCommands.includes(command)) {
-          const originalRange = savedSelection.current.cloneRange();
-          const allContentRange = document.createRange();
-          allContentRange.selectNodeContents(editorRef.current);
-          selection.removeAllRanges();
-          selection.addRange(allContentRange);
+        // Apply the command to all text
+        document.execCommand(command, false, value);
 
-          document.execCommand(command, false, value);
-
-          // Restore original cursor position
-          selection.removeAllRanges();
-          selection.addRange(originalRange);
-        } else {
-          // For selected text or non-style commands, apply normally
-          if (command === 'paste') {
-            try {
-              document.execCommand('paste');
-            } catch (e) {
-              console.warn('Paste failed:', e);
-            }
-          } else if (command === 'delete') {
-            const range = selection.getRangeAt(0);
-            if (range.collapsed) {
-              try {
-                range.setEnd(range.endContainer, range.endOffset + 1);
-              } catch (e) {
-                console.warn('Could not extend selection for delete');
-              }
-            }
-            range.deleteContents();
-          } else {
-            document.execCommand(command, false, value);
+        // Restore cursor position
+        if (currentRange) {
+          try {
+            selection.removeAllRanges();
+            selection.addRange(currentRange);
+          } catch (e) {
+            // If restore fails, place cursor at end
+            const endRange = document.createRange();
+            endRange.selectNodeContents(editorRef.current);
+            endRange.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(endRange);
           }
         }
-
-        requestAnimationFrame(() => {
-          handleInput();
-          saveSelection();
-        });
+      } else {
+        // For all other cases - apply command normally
+        // This includes: selected text formatting, alignment, lists, etc.
+        document.execCommand(command, false, value);
       }
+
+      // Update content and save selection after a brief delay
+      setTimeout(() => {
+        handleInput();
+        saveSelection();
+      }, 10);
     },
-    [restoreSelection, handleInput, saveSelection]
+    [hasSelection, handleInput, saveSelection]
   );
 
   // Handle toolbar actions
@@ -248,81 +290,51 @@ const RichTextEditor = ({
       let tableHTML = `
         <table style="
           border-collapse: collapse; 
-          margin: 10px 0; 
           width: 100%; 
-          border: 2px solid #333;
+          margin: 10px 0;
+          border: 1px solid #ddd;
         ">`;
 
-      for (let i = 0; i < parseInt(rows, 10); i++) {
+      for (let i = 0; i < parseInt(rows); i++) {
         tableHTML += '<tr>';
-        for (let j = 0; j < parseInt(cols, 10); j++) {
-          tableHTML += `
-            <td style="
-              padding: 12px; 
-              border: 1px solid #666; 
-              min-width: 80px; 
-              min-height: 30px;
-              background-color: #f9f9f9;
-              vertical-align: top;
-            ">
-              &nbsp;
-            </td>`;
+        for (let j = 0; j < parseInt(cols); j++) {
+          tableHTML += `<td style="
+            border: 1px solid #ddd; 
+            padding: 8px; 
+            min-width: 50px;
+            min-height: 20px;
+          ">&nbsp;</td>`;
         }
         tableHTML += '</tr>';
       }
-      tableHTML += '</table><p>&nbsp;</p>';
-      execCommand('insertHTML', tableHTML);
+      tableHTML += '</table>';
+
+      restoreSelection();
+      document.execCommand('insertHTML', false, tableHTML);
+      handleInput();
     }
-  }, [execCommand]);
+  }, [execCommand, restoreSelection, handleInput]);
 
-  const handleFocus = useCallback(
-    (e) => {
-      e.stopPropagation();
-      setTimeout(() => {
-        saveSelection();
-      }, 0);
-    },
-    [saveSelection]
-  );
-
-  const handleDoubleClick = useCallback(() => {
+  const handleFocus = useCallback(() => {
     setIsEditing(true);
   }, [setIsEditing]);
 
   const handleBlur = useCallback(
     (e) => {
-      const relatedTarget = e.relatedTarget;
-
-      const isToolbarClick =
-        relatedTarget &&
-        (relatedTarget.closest('.toolbar-container') ||
-          relatedTarget.closest('[data-toolbar]') ||
-          relatedTarget.type === 'color');
-
-      if (!isToolbarClick) {
-        setIsEditing(false);
-        handleInput();
-        savedSelection.current = null;
+      // Don't blur if clicking on toolbar
+      if (e.relatedTarget?.closest('[data-toolbar="true"]')) {
+        return;
       }
+
+      // Small delay to allow toolbar interactions
+      setTimeout(() => {
+        if (!document.activeElement?.closest('[data-toolbar="true"]')) {
+          setIsEditing(false);
+        }
+      }, 100);
     },
-    [setIsEditing, handleInput]
+    [setIsEditing]
   );
-
-  const handleSelectionChange = useCallback(() => {
-    if (
-      isEditing &&
-      editorRef.current &&
-      document.activeElement === editorRef.current
-    ) {
-      saveSelection();
-    }
-  }, [isEditing, saveSelection]);
-
-  useEffect(() => {
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () =>
-      document.removeEventListener('selectionchange', handleSelectionChange);
-  }, [handleSelectionChange]);
 
   const handleToolbarMouseDown = useCallback(
     (e) => {
@@ -332,12 +344,17 @@ const RichTextEditor = ({
     [saveSelection]
   );
 
-  // Get responsive toolbar width based on screen size
-  const getToolbarMaxWidth = () => {
-    if (screenSize === 'mobile') return '95vw';
-    if (screenSize === 'tablet') return '90vw';
-    return '1200px'; // desktop
-  };
+  const handleDoubleClick = useCallback(() => {
+    setIsEditing(true);
+    setTimeout(() => {
+      saveSelection();
+    }, 0);
+  }, [setIsEditing, saveSelection]);
+
+  // Handle selection changes
+  const handleSelectionChange = useCallback(() => {
+    saveSelection();
+  }, [saveSelection]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -347,9 +364,10 @@ const RichTextEditor = ({
           data-toolbar="true"
           onMouseDown={handleToolbarMouseDown}
           style={{
-            top: 'calc(50% - 300px)',
-            maxWidth: getToolbarMaxWidth(),
-            width: '95%',
+            top: '60px',
+            width: 'auto',
+            minWidth: '800px',
+            maxWidth: '95vw',
           }}
         >
           <Toolbar
@@ -371,8 +389,8 @@ const RichTextEditor = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onInput={handleInput}
-        onMouseUp={saveSelection}
-        onKeyUp={saveSelection}
+        onMouseUp={handleSelectionChange}
+        onKeyUp={handleSelectionChange}
         onDoubleClick={handleDoubleClick}
         onMouseDown={(e) => {
           if (isEditing) {
@@ -397,6 +415,7 @@ const RichTextEditor = ({
           textAlign: 'left',
           overflowWrap: 'break-word',
           lineHeight: '1.5',
+          cursor: 'text',
           ...element?.customStyles,
         }}
         className="rich-text-editor"

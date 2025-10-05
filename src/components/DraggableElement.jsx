@@ -26,10 +26,10 @@ export default function DraggableElement({
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef(null);
 
-  const width = parseInt(getResponsiveValue(element.width, screenSize), 10);
-  const height = parseInt(getResponsiveValue(element.height, screenSize), 10);
-  const x = parseInt(getResponsiveValue(element.x, screenSize), 10);
-  const y = parseInt(getResponsiveValue(element.y, screenSize), 10);
+  const width = getResponsiveValue(element.width, screenSize);
+  const height = getResponsiveValue(element.height, screenSize);
+  const x = getResponsiveValue(element.x, screenSize);
+  const y = getResponsiveValue(element.y, screenSize);
 
   const renderElementContent = () => {
     switch (element.type) {
