@@ -3,9 +3,16 @@ import React from 'react';
 import BoxPreview from './BoxPreview';
 
 import { getResponsiveValue } from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
 export default function ParentPreview({ parent, index, total, screenSize }) {
-  const height = getResponsiveValue(parent.size.height, screenSize);
+  const { editorContainerWidth } = useDivStore();
+
+  const height = getResponsiveValue(
+    parent.size.height,
+    screenSize,
+    editorContainerWidth
+  );
 
   return (
     <div

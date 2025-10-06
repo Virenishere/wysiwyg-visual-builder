@@ -384,19 +384,13 @@ const RichTextEditor = ({
       )}
       <div
         ref={editorRef}
-        contentEditable={true}
+        contentEditable={isEditing}
         suppressContentEditableWarning={true}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onInput={handleInput}
         onMouseUp={handleSelectionChange}
         onKeyUp={handleSelectionChange}
-        onDoubleClick={handleDoubleClick}
-        onMouseDown={(e) => {
-          if (isEditing) {
-            e.stopPropagation();
-          }
-        }}
         style={{
           width: '100%',
           height: '100%',
@@ -415,7 +409,6 @@ const RichTextEditor = ({
           textAlign: 'left',
           overflowWrap: 'break-word',
           lineHeight: '1.5',
-          cursor: isEditing ? 'text' : 'inherit',
           // Remove custom border styling - let DraggableElement handle it
           ...element?.customStyles,
         }}

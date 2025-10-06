@@ -3,12 +3,19 @@ import React from 'react';
 import ElementRenderer from './ElementRenderer';
 
 import { getResponsiveValue } from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
 export default function BoxPreview({ box, screenSize }) {
-  const top = getResponsiveValue(box.y, screenSize);
-  const left = getResponsiveValue(box.x, screenSize);
-  const width = getResponsiveValue(box.width, screenSize);
-  const height = getResponsiveValue(box.height, screenSize);
+  const { editorContainerWidth } = useDivStore();
+
+  const top = getResponsiveValue(box.y, screenSize, editorContainerWidth);
+  const left = getResponsiveValue(box.x, screenSize, editorContainerWidth);
+  const width = getResponsiveValue(box.width, screenSize, editorContainerWidth);
+  const height = getResponsiveValue(
+    box.height,
+    screenSize,
+    editorContainerWidth
+  );
 
   return (
     <div
@@ -22,10 +29,6 @@ export default function BoxPreview({ box, screenSize }) {
         overflow: 'hidden', // Ensure elements stay within bounds in preview too
       }}
     >
-      {box.customCss && <style>{box.customCss}</style>}
-      {box.customHtml && (
-        <div dangerouslySetInnerHTML={{ __html: box.customHtml }} />
-      )}
       {box.elements?.map((element) => (
         <ElementRenderer
           key={element.id}

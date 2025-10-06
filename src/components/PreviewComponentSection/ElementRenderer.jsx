@@ -2,14 +2,17 @@
 import React from 'react';
 
 import { getResponsiveValue } from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
 export default function ElementRenderer({ element, screenSize }) {
+  const { editorContainerWidth } = useDivStore();
+
   const baseStyle = {
     position: 'absolute',
-    left: `${getResponsiveValue(element.x, screenSize)}px`,
-    top: `${getResponsiveValue(element.y, screenSize)}px`,
-    width: `${getResponsiveValue(element.width, screenSize)}px`,
-    height: `${getResponsiveValue(element.height, screenSize)}px`,
+    left: `${getResponsiveValue(element.x, screenSize, editorContainerWidth)}px`,
+    top: `${getResponsiveValue(element.y, screenSize, editorContainerWidth)}px`,
+    width: `${getResponsiveValue(element.width, screenSize, editorContainerWidth)}px`,
+    height: `${getResponsiveValue(element.height, screenSize, editorContainerWidth)}px`,
     margin: `${getResponsiveValue(element.margin?.top, screenSize) || 0}px ${getResponsiveValue(element.margin?.right, screenSize) || 0}px ${getResponsiveValue(element.margin?.bottom, screenSize) || 0}px ${getResponsiveValue(element.margin?.left, screenSize) || 0}px`,
     padding: `${getResponsiveValue(element.padding?.top, screenSize) || 5}px ${getResponsiveValue(element.padding?.right, screenSize) || 10}px ${getResponsiveValue(element.padding?.bottom, screenSize) || 5}px ${getResponsiveValue(element.padding?.left, screenSize) || 10}px`,
     fontSize: `${getResponsiveValue(element.fontSize, screenSize) || 16}px`,

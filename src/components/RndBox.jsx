@@ -164,6 +164,7 @@ export default function RndBox({ box, parentId }) {
           ? 'rgba(59, 130, 246, 0.05)'
           : 'rgba(0, 0, 0, 0.02)',
         zIndex: isSelected ? 5 : 1,
+        // pointerEvents: isSelected ? 'auto' : 'none',
         // Add visual containment indicator
         boxSizing: 'border-box',
       }}

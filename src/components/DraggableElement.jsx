@@ -328,6 +328,7 @@ export default function DraggableElement({
 
         setActiveDragItem(null);
       }}
+      onDoubleClick={() => setIsEditing(true)}
       onClick={handleClick}
       style={{
         border:

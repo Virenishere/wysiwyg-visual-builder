@@ -764,9 +764,6 @@ const useDivStore = create(
             },
           };
 
-          // Persist to localStorage
-          localStorage.setItem('divLayouts', JSON.stringify(newLayouts));
-
           return {
             parents: newParents,
             layouts: newLayouts,
@@ -948,7 +945,7 @@ const useDivStore = create(
           const { screenSize, parents, layouts } = state;
           const newLayouts = deepClone(layouts);
           newLayouts[screenSize] = { parents: deepClone(parents) };
-          return { layouts: newLayouts };
+          return { layouts: { ...newLayouts } };
         });
         toast.success('Your work has been saved!');
       },
