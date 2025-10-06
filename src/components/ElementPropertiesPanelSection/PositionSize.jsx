@@ -46,12 +46,7 @@ export default function PositionSize({
   ];
 
   const handleUpdate = (key, value) => {
-    const currentValue = selectedElement[key];
-    const newValue = {
-      ...(typeof currentValue === 'object' ? currentValue : {}),
-      [screenSize]: value,
-    };
-    updateElement(parentId, boxId, elementId, { [key]: newValue });
+    updateElement(parentId, boxId, elementId, { [key]: value });
   };
 
   const handleCenter = () => {

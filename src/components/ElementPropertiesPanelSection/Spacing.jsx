@@ -29,16 +29,21 @@ export default function Spacing({
 
   const handleChange = (type, side, value) => {
     const currentTypeValue = selectedElement[type] || {};
-    const currentSideValue = currentTypeValue[side];
+    const responsiveSideValue =
+      typeof currentTypeValue[side] === 'object' &&
+      currentTypeValue[side] !== null
+        ? currentTypeValue[side]
+        : { '4k': currentTypeValue[side] };
 
-    const newSideValue = {
-      ...(typeof currentSideValue === 'object' ? currentSideValue : {}),
-      [screenSize]: Number.parseInt(value) || 0,
+    const newTypeValue = {
+      ...currentTypeValue,
+      [side]: {
+        ...responsiveSideValue,
+        [screenSize]: Number.parseInt(value) || 0,
+      },
     };
 
-    updateElement(parentId, boxId, elementId, {
-      [type]: { ...currentTypeValue, [side]: newSideValue },
-    });
+    updateElement(parentId, boxId, elementId, { [type]: newTypeValue });
   };
 
   const SpacingSection = ({ type, title, icon, gradientFrom, gradientTo }) => {

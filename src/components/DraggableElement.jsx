@@ -31,6 +31,7 @@ export default function DraggableElement({
     containerRect,
   } = useDivStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const fileInputRef = useRef(null);
 
   // Get the actual editor container width for scaling calculations
@@ -254,10 +255,19 @@ export default function DraggableElement({
       onDragStop={(e, d) => {
         if (isEditing) return;
 
+        const newX = parseFloat(d.x);
+        const newY = parseFloat(d.y);
+
+        if (isNaN(newX) || isNaN(newY)) {
+          console.error('NaN detected on drag stop. Aborting update.');
+          setActiveDragItem(null);
+          return;
+        }
+
         // Update element position on drag stop
         updateElement(parentId, boxId, element.id, {
-          x: d.x,
-          y: d.y,
+          x: newX,
+          y: newY,
         });
         setActiveDragItem(null);
       }}
@@ -278,28 +288,13 @@ export default function DraggableElement({
       }}
       onResize={(e, direction, ref, delta, position) => {
         if (isEditing) return;
-
-        // Apply bounds validation during resize
-        const validated = validateBounds(
-          position.x,
-          position.y,
-          ref.offsetWidth,
-          ref.offsetHeight
-        );
-
-        updateElement(parentId, boxId, element.id, {
-          width: validated.width,
-          height: validated.height,
-          x: validated.x,
-          y: validated.y,
-        });
-
+        // Only update the active drag item for visual feedback
         setActiveDragItem({
           ...element,
-          width: validated.width,
-          height: validated.height,
-          x: validated.x,
-          y: validated.y,
+          width: ref.offsetWidth,
+          height: ref.offsetHeight,
+          x: position.x,
+          y: position.y,
           isElement: true,
         });
       }}
@@ -308,12 +303,20 @@ export default function DraggableElement({
 
         setIsResizing(false);
 
-        // Apply final bounds validation on resize stop
+        const newWidth = parseFloat(ref.style.width);
+        const newHeight = parseFloat(ref.style.height);
+
+        if (isNaN(newWidth) || isNaN(newHeight)) {
+          console.error('NaN detected on resize stop. Aborting update.');
+          setActiveDragItem(null);
+          return;
+        }
+
         const validated = validateBounds(
           position.x,
           position.y,
-          ref.offsetWidth,
-          ref.offsetHeight
+          newWidth,
+          newHeight
         );
 
         updateElement(parentId, boxId, element.id, {

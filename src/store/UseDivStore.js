@@ -44,6 +44,8 @@ const responsiveUpdater = (obj, updates, screenSize) => {
     'customHtml',
     'customCss',
     'customClassName',
+    'margin',
+    'padding',
   ];
 
   for (const [key, value] of Object.entries(updates)) {
@@ -694,19 +696,19 @@ const useDivStore = create(
               getResponsiveValue(box.height, state.screenSize) || 150;
 
             const elementWidth =
-              updates.width !== undefined
+              updates.width !== undefined && isFinite(updates.width)
                 ? updates.width
                 : getResponsiveValue(element.width, state.screenSize) || 100;
             const elementHeight =
-              updates.height !== undefined
+              updates.height !== undefined && isFinite(updates.height)
                 ? updates.height
                 : getResponsiveValue(element.height, state.screenSize) || 30;
             const elementX =
-              updates.x !== undefined
+              updates.x !== undefined && isFinite(updates.x)
                 ? updates.x
                 : getResponsiveValue(element.x, state.screenSize) || 0;
             const elementY =
-              updates.y !== undefined
+              updates.y !== undefined && isFinite(updates.y)
                 ? updates.y
                 : getResponsiveValue(element.y, state.screenSize) || 0;
 
@@ -1092,24 +1094,30 @@ const useDivStore = create(
           const element = box?.elements.find((e) => e.id === elementId);
           if (!element || !box) return state;
 
-          // Get responsive box dimensions for current screen
-          const boxWidth =
-            parseInt(getResponsiveValue(box.width, state.screenSize), 10) ||
-            150;
-          const boxHeight =
-            parseInt(getResponsiveValue(box.height, state.screenSize), 10) ||
-            150;
+          const boxWidth = parseFloat(
+            getResponsiveValue(box.width, state.screenSize)
+          );
+          const boxHeight = parseFloat(
+            getResponsiveValue(box.height, state.screenSize)
+          );
+          const elementWidth = parseFloat(
+            getResponsiveValue(element.width, state.screenSize)
+          );
+          const elementHeight = parseFloat(
+            getResponsiveValue(element.height, state.screenSize)
+          );
 
-          const elementWidth =
-            parseInt(getResponsiveValue(element.width, state.screenSize), 10) ||
-            100;
-          const elementHeight =
-            parseInt(
-              getResponsiveValue(element.height, state.screenSize),
-              10
-            ) || 50;
+          if (
+            !isFinite(boxWidth) ||
+            !isFinite(boxHeight) ||
+            !isFinite(elementWidth) ||
+            !isFinite(elementHeight)
+          ) {
+            console.error('Cannot center element due to invalid dimensions.');
+            toast.error('Cannot center element due to invalid dimensions.');
+            return state;
+          }
 
-          // Calculate center position: (containerSize - elementSize) / 2
           const centerX = Math.max(0, (boxWidth - elementWidth) / 2);
           const centerY = Math.max(0, (boxHeight - elementHeight) / 2);
 
@@ -1118,31 +1126,27 @@ const useDivStore = create(
             y: centerY,
           };
 
-          return {
-            parents: state.parents.map((p) =>
-              p.id === parentId
-                ? {
-                    ...p,
-                    rnds: p.rnds.map((rnd) =>
-                      rnd.id === boxId
-                        ? {
-                            ...rnd,
-                            elements: rnd.elements.map((el) =>
-                              el.id === elementId
-                                ? responsiveUpdater(
-                                    el,
-                                    updates,
-                                    state.screenSize
-                                  )
-                                : el
-                            ),
-                          }
-                        : rnd
-                    ),
-                  }
-                : p
-            ),
-          };
+          const newParents = state.parents.map((p) =>
+            p.id === parentId
+              ? {
+                  ...p,
+                  rnds: p.rnds.map((rnd) =>
+                    rnd.id === boxId
+                      ? {
+                          ...rnd,
+                          elements: rnd.elements.map((el) =>
+                            el.id === elementId
+                              ? responsiveUpdater(el, updates, state.screenSize)
+                              : el
+                          ),
+                        }
+                      : rnd
+                  ),
+                }
+              : p
+          );
+
+          return { parents: newParents };
         });
         toast.success('Element centered!');
       },
