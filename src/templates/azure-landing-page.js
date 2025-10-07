@@ -1,0 +1,75 @@
+// templates/azure-landing-page.js
+export const azureLandingPageTemplate = {
+  id: 'Azure Landing Page',
+  name: 'Azure Landing Page',
+  description: 'A professional landing page template with an Azure theme.',
+  thumbnail:
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=150&fit=crop',
+  parents: [
+    // Hero Section
+    {
+      size: {
+        height: 600,
+        background: 'linear-gradient(135deg, #0078D4 0%, #004878 100%)',
+      },
+      rnds: [
+        {
+          width: { desktop: 500, laptop: 400, tablet: 300, mobile: 200 },
+          height: { desktop: 250, laptop: 200, tablet: 150, mobile: 100 },
+          x: { desktop: 100, laptop: 80, tablet: 60, mobile: 40 },
+          y: { desktop: 150, laptop: 120, tablet: 90, mobile: 60 },
+          elements: [
+            {
+              type: 'text',
+              x: { desktop: 20, laptop: 16, tablet: 12, mobile: 8 },
+              y: { desktop: 20, laptop: 16, tablet: 12, mobile: 8 },
+              width: { desktop: 460, laptop: 368, tablet: 276, mobile: 184 },
+              height: { desktop: 80, laptop: 64, tablet: 48, mobile: 32 },
+              content: 'Welcome to the Azure Cloud',
+              fontSize: { desktop: 36, laptop: 29, tablet: 22, mobile: 14 },
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 10, right: 20, bottom: 10, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'text',
+              x: { desktop: 20, laptop: 16, tablet: 12, mobile: 8 },
+              y: { desktop: 110, laptop: 88, tablet: 66, mobile: 44 },
+              width: { desktop: 460, laptop: 368, tablet: 276, mobile: 184 },
+              height: { desktop: 40, laptop: 32, tablet: 24, mobile: 16 },
+              content: 'Build, deploy, and manage applications and services.',
+              fontSize: { desktop: 18, laptop: 14, tablet: 11, mobile: 7 },
+              fontFamily: 'Arial, sans-serif',
+              color: '#e8e8e8',
+              backgroundColor: 'transparent',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 5, right: 20, bottom: 5, left: 20 },
+              borderRadius: 0,
+              border: 'none',
+            },
+            {
+              type: 'button',
+              x: { desktop: 20, laptop: 16, tablet: 12, mobile: 8 },
+              y: { desktop: 170, laptop: 136, tablet: 102, mobile: 68 },
+              width: { desktop: 160, laptop: 128, tablet: 96, mobile: 64 },
+              height: { desktop: 50, laptop: 40, tablet: 30, mobile: 20 },
+              content: 'Get Started',
+              fontSize: { desktop: 16, laptop: 13, tablet: 10, mobile: 6 },
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffffff',
+              backgroundColor: '#0078D4',
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              padding: { top: 12, right: 24, bottom: 12, left: 24 },
+              borderRadius: 25,
+              border: '2px solid #ffffff',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};

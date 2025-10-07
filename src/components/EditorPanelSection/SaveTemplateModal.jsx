@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 export default function SaveTemplateModal({ onClose }) {
   const [templateName, setTemplateName] = useState('');
-  const { parents } = useDivStore();
+  const { layouts } = useDivStore();
 
   const handleSave = () => {
     if (templateName.trim() === '') {
@@ -23,7 +23,7 @@ export default function SaveTemplateModal({ onClose }) {
       description: 'A custom saved template.',
       thumbnail:
         'https://images.unsplash.com/photo-1621155346337-7d1947ea715d?w=200&h=150&fit=crop',
-      parents: parents,
+      layouts: layouts, // Save the entire layouts object
     };
     localStorage.setItem('savedTemplates', JSON.stringify(savedTemplates));
     toast.success(`Template "${templateName}" saved successfully!`);

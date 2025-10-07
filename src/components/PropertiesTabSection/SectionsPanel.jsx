@@ -57,15 +57,35 @@ export default function SectionsPanel({
   };
 
   const handleCustomHeightChange = (parentId, value) => {
-    const numValue = parseInt(value) || 0;
     setCustomHeights((prev) => ({
       ...prev,
-      [parentId]: numValue,
+      [parentId]: value,
     }));
+  };
 
-    // Update parent size with validation
+  const handleCustomHeightBlur = (parentId, value) => {
+    const numValue = parseInt(value) || 0;
     const validatedValue = Math.max(100, Math.min(5000, numValue));
+
+    setCustomHeights((prev) => ({
+      ...prev,
+      [parentId]: validatedValue,
+    }));
     updateParentSize(parentId, { height: validatedValue });
+  };
+
+  const handleCustomHeightKeyDown = (parentId, e) => {
+    if (e.key === 'Enter') {
+      const value = e.target.value;
+      const numValue = parseInt(value) || 0;
+      const validatedValue = Math.max(100, Math.min(5000, numValue));
+
+      setCustomHeights((prev) => ({
+        ...prev,
+        [parentId]: validatedValue,
+      }));
+      updateParentSize(parentId, { height: validatedValue });
+    }
   };
 
   const getBackgroundValue = (background) => {

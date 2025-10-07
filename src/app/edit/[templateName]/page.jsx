@@ -97,10 +97,11 @@ const TemplatePage = ({ params }) => {
 
   useEffect(() => {
     if (templateName) {
-      setTemplateName(templateName);
-    }
-    if (templateName && templateName !== 'new-template') {
-      loadTemplate(templateName);
+      const decodedTemplateName = decodeURIComponent(templateName);
+      setTemplateName(decodedTemplateName);
+      if (decodedTemplateName && decodedTemplateName !== 'new-template') {
+        loadTemplate(decodedTemplateName);
+      }
     }
   }, [templateName, loadTemplate, setTemplateName]);
 

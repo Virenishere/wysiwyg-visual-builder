@@ -13,6 +13,7 @@ export default function SiteActionsPanel({ onClose }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const templateName = useDivStore((state) => state.templateName);
+  const saveState = useDivStore((state) => state.saveState);
 
   const handleDownload = () => {
     const { parents } = useDivStore.getState();
@@ -47,7 +48,7 @@ export default function SiteActionsPanel({ onClose }) {
 
           {/* Save Current Work */}
           <button
-            onClick={useDivStore.getState().saveState}
+            onClick={saveState}
             className="flex items-center gap-3 w-full px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition cursor-pointer"
           >
             <MdSave className="text-blue-600" size={20} />

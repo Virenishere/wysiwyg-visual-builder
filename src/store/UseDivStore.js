@@ -132,6 +132,8 @@ const useDivStore = create(
           'customHtml',
           'customCss',
           'customClassName',
+          'width', // Add width to this list
+          'height', // Add height to this list
           'x',
           'y',
         ];
@@ -203,16 +205,17 @@ const useDivStore = create(
 
       // Template Actions
       loadTemplate: (templateId) => {
-        let template = getTemplateById(templateId);
+        const decodedTemplateId = decodeURIComponent(templateId);
+        let template = getTemplateById(decodedTemplateId);
 
         if (!template) {
           const savedTemplates = JSON.parse(
             localStorage.getItem('savedTemplates') || '{}'
           );
-          if (savedTemplates[templateId]) {
-            template = savedTemplates[templateId];
+          if (savedTemplates[decodedTemplateId]) {
+            template = savedTemplates[decodedTemplateId];
           } else {
-            console.error('Template not found:', templateId);
+            console.error('Template not found:', decodedTemplateId);
             toast.error('Template not found!');
             return;
           }
@@ -224,8 +227,10 @@ const useDivStore = create(
         let maxBoxId = 0;
         let maxElementId = 0;
 
-        Object.keys(layouts).forEach((screen) => {
-          const templateCopy = deepClone(template);
+        const layoutsToProcess = template.layouts || layouts;
+
+        Object.keys(layoutsToProcess).forEach((screen) => {
+          const templateCopy = deepClone(layoutsToProcess[screen]);
           const { parents: processedParents, nextIds } = generateUniqueIds(
             templateCopy,
             {
@@ -833,7 +838,7 @@ const useDivStore = create(
           const mergedParents = mergeParents(currentLayout.parents, parents);
           newLayouts[screenSize] = { parents: mergedParents };
 
-          return { layouts: newLayouts };
+          return { layouts: newLayouts, parents: mergedParents };
         });
         toast.success('Your work has been saved!');
       },
