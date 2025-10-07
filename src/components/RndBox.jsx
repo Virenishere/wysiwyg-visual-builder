@@ -9,11 +9,12 @@ import { FaPlus, FaTrash, FaCopy } from 'react-icons/fa';
 
 import { getResponsiveValue } from '@/utils/screen';
 
-export default function RndBox({ box, parentId }) {
+export default function RndBox({ box, parentId, isSectionSelected }) {
   const {
     updateRnd,
     setSelectedBox,
     setSelectedElement,
+    screenSize,
     selectedBoxId,
     selectedElementId,
     removeRnd,
@@ -23,14 +24,40 @@ export default function RndBox({ box, parentId }) {
     duplicateRnd,
     setActiveDragItem,
     activeDragItem,
-    screenSize,
+    setSelectedParent,
   } = useDivStore();
 
-  const isSelected = selectedBoxId === box.id;
+  // const isSelected = selectedBoxId === box.id;
+
+  // Check if this specific box is selected
+  const isBoxSelected = selectedBoxId === box.id;
 
   const handleElementSelect = (elementId) => {
     setSelectedElement(elementId);
     setSelectedBox(box.id);
+  };
+
+  // Determine border style based on selection state
+  const getBorderStyle = () => {
+    if (isBoxSelected) {
+      // Box is specifically selected - strongest highlight
+      return '3px solid #6f56f9';
+    } else if (isSectionSelected) {
+      // Parent section is selected - subtle highlight
+      return '2px solid #a78bfa'; // Lighter purple
+    } else {
+      // Nothing selected - default
+      return '1px solid #e5e7eb';
+    }
+  };
+
+  const getBoxShadow = () => {
+    if (isBoxSelected) {
+      return '0 0 0 3px rgba(111, 86, 249, 0.2)';
+    } else if (isSectionSelected) {
+      return '0 0 0 2px rgba(167, 139, 250, 0.15)';
+    }
+    return 'none';
   };
 
   // Get responsive values with fallbacks
@@ -155,15 +182,17 @@ export default function RndBox({ box, parentId }) {
       onClick={(e) => {
         e.stopPropagation();
         setSelectedBox(box.id);
-        setSelectedElement(null);
+        setSelectedParent(parentId);
       }}
       style={{
-        border: isSelected ? '3px solid #3b82f6' : '2px dashed #d1d5db',
+        border: getBorderStyle(),
+        boxShadow: getBoxShadow(),
+        transition: 'border 0.2s ease, box-shadow 0.2s ease',
         borderRadius: '4px',
-        backgroundColor: isSelected
+        backgroundColor: isBoxSelected
           ? 'rgba(59, 130, 246, 0.05)'
           : 'rgba(0, 0, 0, 0.02)',
-        zIndex: isSelected ? 5 : 1,
+        zIndex: isBoxSelected ? 5 : 1,
         // pointerEvents: isSelected ? 'auto' : 'none',
         // Add visual containment indicator
         boxSizing: 'border-box',
@@ -174,7 +203,7 @@ export default function RndBox({ box, parentId }) {
       data-id={box.id}
     >
       {/* Visual bounds indicator when selected */}
-      {isSelected && (
+      {isBoxSelected && (
         <div
           style={{
             position: 'absolute',
@@ -198,15 +227,22 @@ export default function RndBox({ box, parentId }) {
         }}
       />
 
-      {/* Box label */}
-      {isSelected && (
-        <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium z-20">
+      {/* Box label - show when box is selected OR section is selected */}
+      {(isBoxSelected || isSectionSelected) && (
+        <div
+          className={`absolute -top-6 left-0 px-2 py-1 rounded text-xs font-medium z-50 ${
+            isBoxSelected
+              ? 'bg-purple-600 text-white'
+              : 'bg-purple-300 text-purple-900'
+          }`}
+          style={{ pointerEvents: 'none' }}
+        >
           Box {box.id}
         </div>
       )}
 
       {/* Add element button - adjust positioning to not interfere with containment */}
-      {isSelected && (
+      {isBoxSelected && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -229,7 +265,7 @@ export default function RndBox({ box, parentId }) {
       )}
 
       {/* Delete box button - adjust positioning to not interfere with containment */}
-      {isSelected && (
+      {isBoxSelected && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -254,7 +290,7 @@ export default function RndBox({ box, parentId }) {
       )}
 
       {/* Copy box button - adjust positioning to not interfere with containment */}
-      {isSelected && (
+      {isBoxSelected && (
         <button
           onClick={(e) => {
             e.stopPropagation();

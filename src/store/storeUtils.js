@@ -47,6 +47,53 @@ export const generateUniqueIds = (templateData, startIds = {}) => {
   };
 };
 
+export const responsiveUpdater = (obj, updates, screenSize) => {
+  const newObj = deepClone(obj);
+
+  // Properties that should NOT be made responsive
+  const nonResponsiveProperties = [
+    'imageUrl',
+    'content',
+    'link',
+    'type',
+    'id',
+    'customHtml',
+    'customCss',
+    'customClassName',
+    'inlineStyles',
+    'margin',
+    'padding',
+  ];
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (nonResponsiveProperties.includes(key)) {
+      // Keep these properties as simple values
+      newObj[key] = value;
+    } else if (
+      typeof newObj[key] === 'object' &&
+      newObj[key] !== null &&
+      !Array.isArray(newObj[key])
+    ) {
+      // Update existing responsive object
+      newObj[key] = { ...newObj[key], [screenSize]: value };
+    } else {
+      // Convert to responsive object if it's not already
+      const currentValue = newObj[key];
+      newObj[key] = {
+        '4k': currentValue,
+        'l-laptop': currentValue,
+        laptop: currentValue,
+        tablet: currentValue,
+        mobile: currentValue,
+        'mobile-m': currentValue,
+        'mobile-s': currentValue,
+        [screenSize]: value,
+      };
+    }
+  }
+  return newObj;
+};
+
 /**
  * Deep clone object to avoid reference issues
  */
@@ -311,6 +358,71 @@ export const generateElementCSS = (element) => {
   };
 
   return styles;
+};
+
+export const mergeParents = (targetParents, sourceParents) => {
+  const mergedParents = [...targetParents];
+
+  sourceParents.forEach((sourceParent) => {
+    const targetParentIndex = mergedParents.findIndex(
+      (p) => p.id === sourceParent.id
+    );
+
+    if (targetParentIndex !== -1) {
+      // Merge parent
+      const targetParent = mergedParents[targetParentIndex];
+      const mergedRnds = [...targetParent.rnds];
+
+      sourceParent.rnds.forEach((sourceRnd) => {
+        const targetRndIndex = mergedRnds.findIndex(
+          (r) => r.id === sourceRnd.id
+        );
+
+        if (targetRndIndex !== -1) {
+          // Merge RND
+          const targetRnd = mergedRnds[targetRndIndex];
+          const mergedElements = [...targetRnd.elements];
+
+          sourceRnd.elements.forEach((sourceElement) => {
+            const targetElementIndex = mergedElements.findIndex(
+              (e) => e.id === sourceElement.id
+            );
+
+            if (targetElementIndex !== -1) {
+              // Merge element
+              mergedElements[targetElementIndex] = {
+                ...mergedElements[targetElementIndex],
+                ...sourceElement,
+              };
+            } else {
+              // Add new element
+              mergedElements.push(sourceElement);
+            }
+          });
+
+          mergedRnds[targetRndIndex] = {
+            ...targetRnd,
+            ...sourceRnd,
+            elements: mergedElements,
+          };
+        } else {
+          // Add new RND
+          mergedRnds.push(sourceRnd);
+        }
+      });
+
+      mergedParents[targetParentIndex] = {
+        ...targetParent,
+        ...sourceParent,
+        rnds: mergedRnds,
+      };
+    } else {
+      // Add new parent
+      mergedParents.push(sourceParent);
+    }
+  });
+
+  return mergedParents;
 };
 
 /**

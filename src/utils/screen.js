@@ -10,23 +10,14 @@ export const screenSizes = {
   'mobile-s': '280px', // Mobile small
 };
 
-export const getResponsiveValue = (value, screenSize, editorContainerWidth) => {
-  let responsiveValue = null;
+export const getResponsiveValue = (value, screenSize) => {
   if (typeof value === 'object' && value !== null) {
     // Fallback chain: current screen size -> 4k (desktop) -> laptop -> null
-    responsiveValue =
-      value[screenSize] ?? value['4k'] ?? value['laptop'] ?? null;
+    return value[screenSize] ?? value['4k'] ?? value['laptop'] ?? null;
   } else {
     // Fallback for non-object values or null
-    responsiveValue = value ?? null;
+    return value ?? null;
   }
-
-  if (editorContainerWidth && responsiveValue !== null) {
-    const scale = getEditorToPreviewScale(editorContainerWidth, screenSize);
-    return responsiveValue / scale;
-  }
-
-  return responsiveValue;
 };
 
 // Get the target pixel width for a screen size

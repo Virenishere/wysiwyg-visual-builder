@@ -24,6 +24,9 @@ export default function SectionComponent({ parent, parentIndex }) {
   const background =
     getResponsiveValue(parent.size?.background, screenSize) || '#ffffff';
 
+  //check if this selection is selected
+  const isSectionSelected = selectedParentId === parent.id;
+
   useEffect(() => {
     if (sectionRef.current) {
       setSectionBounds({
@@ -53,13 +56,9 @@ export default function SectionComponent({ parent, parentIndex }) {
         height: height,
         background: background,
         position: 'relative',
-        border:
-          selectedParentId === parent.id
-            ? '3px solid #6f56f9'
-            : '1px solid #e5e7eb',
-        // padding: '10px',
+        border: isSectionSelected ? '3px solid #6f56f9' : '1px solid #e5e7eb',
         boxSizing: 'border-box',
-        overflow: 'visible', // Allow elements to move freely
+        overflow: 'visible',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -109,7 +108,12 @@ export default function SectionComponent({ parent, parentIndex }) {
         {/* Render RND boxes */}
         {parent.rnds && parent.rnds.length > 0 ? (
           parent.rnds.map((box) => (
-            <RndBox key={box.id} box={box} parentId={parent.id} />
+            <RndBox
+              key={box.id}
+              box={box}
+              parentId={parent.id}
+              isSectionSelected={isSectionSelected}
+            />
           ))
         ) : (
           <div className="flex items-center justify-center h-full">

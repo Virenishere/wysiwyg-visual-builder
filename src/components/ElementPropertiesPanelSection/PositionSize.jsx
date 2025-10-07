@@ -84,6 +84,9 @@ export default function PositionSize({
       <div className="grid grid-cols-2 gap-4">
         {fields.map(({ label, key, icon, max }) => {
           const value = getResponsiveValue(selectedElement[key], screenSize);
+          const displayValue =
+            value !== null && value !== undefined ? value : 0;
+
           return (
             <div
               key={key}
@@ -95,7 +98,7 @@ export default function PositionSize({
                   {label}
                 </label>
                 <span className="px-2 py-1 bg-white rounded-lg text-xs font-bold text-gray-600 border">
-                  {value}px
+                  {Math.round(displayValue)}px
                 </span>
               </div>
               <div className="space-y-2">
@@ -103,7 +106,7 @@ export default function PositionSize({
                   type="range"
                   min="0"
                   max={max}
-                  value={value || 0}
+                  value={displayValue}
                   onChange={(e) =>
                     handleUpdate(key, Number.parseInt(e.target.value) || 0)
                   }
@@ -111,7 +114,7 @@ export default function PositionSize({
                 />
                 <input
                   type="number"
-                  value={value || 0}
+                  value={displayValue}
                   onChange={(e) =>
                     handleUpdate(key, Number.parseInt(e.target.value) || 0)
                   }

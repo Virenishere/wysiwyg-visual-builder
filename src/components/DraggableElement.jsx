@@ -30,6 +30,8 @@ export default function DraggableElement({
     screenSize,
     containerRect,
   } = useDivStore();
+  const [isDragging, setIsDragging] = useState(false);
+
   const [isEditing, setIsEditing] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const fileInputRef = useRef(null);
@@ -234,6 +236,7 @@ export default function DraggableElement({
           return;
         }
         e.stopPropagation();
+        setIsDragging(true);
         setActiveDragItem({
           ...element,
           x: x,
@@ -254,6 +257,8 @@ export default function DraggableElement({
       }}
       onDragStop={(e, d) => {
         if (isEditing) return;
+
+        setIsDragging(false);
 
         const newX = parseFloat(d.x);
         const newY = parseFloat(d.y);
@@ -336,7 +341,10 @@ export default function DraggableElement({
             ? '2px solid #007bff'
             : '1px solid transparent',
         borderRadius: '2px',
-        zIndex: isSelected || isEditing ? 10 : element.zIndex || 1,
+        zIndex:
+          isDragging || isResizing || isSelected || isEditing
+            ? 10
+            : element.zIndex || 1,
         pointerEvents: 'auto',
         cursor: isEditing ? 'text' : 'move',
         touchAction: 'none',

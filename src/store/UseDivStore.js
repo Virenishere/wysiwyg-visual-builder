@@ -2,7 +2,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { getTemplateById } from '@/templates';
-import { generateUniqueIds, deepClone } from './storeUtils';
+import {
+  generateUniqueIds,
+  deepClone,
+  responsiveUpdater,
+  mergeParents,
+} from './storeUtils';
 import { getResponsiveValue } from '@/utils/screen';
 import toast from 'react-hot-toast';
 
@@ -29,52 +34,6 @@ const initialLayout = {
       ],
     },
   ],
-};
-
-const responsiveUpdater = (obj, updates, screenSize) => {
-  const newObj = deepClone(obj);
-
-  // Properties that should NOT be made responsive
-  const nonResponsiveProperties = [
-    'imageUrl',
-    'content',
-    'link',
-    'type',
-    'id',
-    'customHtml',
-    'customCss',
-    'customClassName',
-    'margin',
-    'padding',
-  ];
-
-  for (const [key, value] of Object.entries(updates)) {
-    if (nonResponsiveProperties.includes(key)) {
-      // Keep these properties as simple values
-      newObj[key] = value;
-    } else if (
-      typeof newObj[key] === 'object' &&
-      newObj[key] !== null &&
-      !Array.isArray(newObj[key])
-    ) {
-      // Update existing responsive object
-      newObj[key] = { ...newObj[key], [screenSize]: value };
-    } else {
-      // Convert to responsive object if it's not already
-      const currentValue = newObj[key];
-      newObj[key] = {
-        '4k': currentValue,
-        'l-laptop': currentValue,
-        laptop: currentValue,
-        tablet: currentValue,
-        mobile: currentValue,
-        'mobile-m': currentValue,
-        'mobile-s': currentValue,
-        [screenSize]: value,
-      };
-    }
-  }
-  return newObj;
 };
 
 // Helper function to copy desktop layout to other screen sizes
@@ -456,13 +415,8 @@ const useDivStore = create(
               : p
           );
 
-          // Auto-save to layouts when RND is updated
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
-
           return {
             parents: newParents,
-            layouts: newLayouts,
           };
         });
       },
@@ -570,11 +524,6 @@ const useDivStore = create(
                 backgroundColor: '#f8f9fa',
                 borderRadius: 8,
                 padding: { top: 15, right: 15, bottom: 15, left: 15 },
-                style: {
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                },
               });
               break;
             case 'line':
@@ -675,98 +624,34 @@ const useDivStore = create(
 
       updateElement: (parentId, boxId, elementId, updates) => {
         set((state) => {
-          const parent = state.parents.find((p) => p.id === parentId);
-          const box = parent?.rnds.find((b) => b.id === boxId);
-          const element = box?.elements.find((e) => e.id === elementId);
-
-          if (!element || !box) return state;
-
-          // Validate bounds if position or size is being updated
-          let validatedUpdates = { ...updates };
-
-          if (
-            updates.x !== undefined ||
-            updates.y !== undefined ||
-            updates.width !== undefined ||
-            updates.height !== undefined
-          ) {
-            const boxWidth =
-              getResponsiveValue(box.width, state.screenSize) || 150;
-            const boxHeight =
-              getResponsiveValue(box.height, state.screenSize) || 150;
-
-            const elementWidth =
-              updates.width !== undefined && isFinite(updates.width)
-                ? updates.width
-                : getResponsiveValue(element.width, state.screenSize) || 100;
-            const elementHeight =
-              updates.height !== undefined && isFinite(updates.height)
-                ? updates.height
-                : getResponsiveValue(element.height, state.screenSize) || 30;
-            const elementX =
-              updates.x !== undefined && isFinite(updates.x)
-                ? updates.x
-                : getResponsiveValue(element.x, state.screenSize) || 0;
-            const elementY =
-              updates.y !== undefined && isFinite(updates.y)
-                ? updates.y
-                : getResponsiveValue(element.y, state.screenSize) || 0;
-
-            // Ensure element stays within box bounds
-            validatedUpdates.x = Math.max(
-              0,
-              Math.min(elementX, boxWidth - elementWidth)
-            );
-            validatedUpdates.y = Math.max(
-              0,
-              Math.min(elementY, boxHeight - elementHeight)
-            );
-            validatedUpdates.width = Math.min(
-              elementWidth,
-              boxWidth - validatedUpdates.x
-            );
-            validatedUpdates.height = Math.min(
-              elementHeight,
-              boxHeight - validatedUpdates.y
-            );
-          }
-
-          const newParents = state.parents.map((p) =>
-            p.id === parentId
-              ? {
-                  ...p,
-                  rnds: p.rnds.map((rnd) =>
-                    rnd.id === boxId
-                      ? {
-                          ...rnd,
-                          elements: rnd.elements.map((el) =>
-                            el.id === elementId
-                              ? responsiveUpdater(
-                                  el,
-                                  validatedUpdates,
-                                  state.screenSize
-                                )
-                              : el
-                          ),
+          const newParents = state.parents.map((p) => {
+            if (p.id === parentId) {
+              return {
+                ...p,
+                rnds: p.rnds.map((rnd) => {
+                  if (rnd.id === boxId) {
+                    return {
+                      ...rnd,
+                      elements: rnd.elements.map((el) => {
+                        if (el.id === elementId) {
+                          return {
+                            ...responsiveUpdater(el, updates, state.screenSize),
+                            version: (el.version || 0) + 1,
+                          };
                         }
-                      : rnd
-                  ),
-                }
-              : p
-          );
-
-          // Auto-save to layouts when element is updated
-          const newLayouts = {
-            ...state.layouts,
-            [state.screenSize]: {
-              ...state.layouts[state.screenSize],
-              parents: structuredClone(newParents),
-            },
-          };
+                        return el;
+                      }),
+                    };
+                  }
+                  return rnd;
+                }),
+              };
+            }
+            return p;
+          });
 
           return {
             parents: newParents,
-            layouts: newLayouts,
           };
         });
       },
@@ -943,9 +828,12 @@ const useDivStore = create(
       saveState: () => {
         set((state) => {
           const { screenSize, parents, layouts } = state;
-          const newLayouts = deepClone(layouts);
-          newLayouts[screenSize] = { parents: deepClone(parents) };
-          return { layouts: { ...newLayouts } };
+          const newLayouts = { ...layouts };
+          const currentLayout = newLayouts[screenSize] || { parents: [] };
+          const mergedParents = mergeParents(currentLayout.parents, parents);
+          newLayouts[screenSize] = { parents: mergedParents };
+
+          return { layouts: newLayouts };
         });
         toast.success('Your work has been saved!');
       },
