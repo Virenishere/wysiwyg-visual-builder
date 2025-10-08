@@ -596,55 +596,6 @@ export default function SectionsPanel({
           </div>
         )}
       </div>
-
-      {/* Section Properties */}
-      {selectedParent && (
-        <div className="border-t border-gray-200 bg-white px-3 py-4 shadow-inner">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">
-            Section Properties
-          </h4>
-
-          <div className="space-y-4">
-            {/* Height */}
-            <div>
-              <label className="text-xs font-medium block mb-1 text-gray-600">
-                Height (px)
-              </label>
-              <input
-                type="number"
-                value={
-                  getResponsiveValue(selectedParent.size.height, screenSize) ||
-                  300
-                }
-                onChange={(e) =>
-                  updateParentSize(selectedParent.id, {
-                    height: parseInt(e.target.value) || 0,
-                  })
-                }
-                className="border border-gray-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm transition"
-              />
-            </div>
-
-            {/* Custom Background */}
-            <div>
-              <label className="text-xs font-medium block mb-1 text-gray-600">
-                Custom Background (CSS)
-              </label>
-              <textarea
-                value={getBackgroundValue(selectedParent.size.background)}
-                onChange={(e) =>
-                  updateParentSize(selectedParent.id, {
-                    background: e.target.value,
-                  })
-                }
-                className="border border-gray-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-xs transition"
-                placeholder="e.g. linear-gradient(45deg, red, blue)"
-                rows={2}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { FiMaximize2 } from 'react-icons/fi';
 import SectionHeight from './SectionPropertiesPanel/SectionHeight';
 
 export default function SectionPropertiesPanel() {
-  const { parents, selectedParentId, updateParent } = useDivStore();
+  const { parents, selectedParentId, updateParentSize } = useDivStore();
 
   const selectedParent = parents.find((p) => p.id === selectedParentId);
 
@@ -26,7 +26,7 @@ export default function SectionPropertiesPanel() {
         </div>
         <SectionHeight
           selectedParent={selectedParent}
-          updateParent={updateParent}
+          updateParentSize={updateParentSize}
         />
       </div>
     </div>

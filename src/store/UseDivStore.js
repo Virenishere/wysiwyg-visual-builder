@@ -23,10 +23,42 @@ const initialLayout = {
       rnds: [
         {
           id: nextBoxId++,
-          width: 150,
-          height: 150,
-          x: 0,
-          y: 0,
+          width: {
+            '4k': 150,
+            'l-laptop': 150,
+            laptop: 150,
+            tablet: 150,
+            mobile: 150,
+            'mobile-m': 150,
+            'mobile-s': 150,
+          },
+          height: {
+            '4k': 150,
+            'l-laptop': 150,
+            laptop: 150,
+            tablet: 150,
+            mobile: 150,
+            'mobile-m': 150,
+            'mobile-s': 150,
+          },
+          x: {
+            '4k': 0,
+            'l-laptop': 0,
+            laptop: 0,
+            tablet: 0,
+            mobile: 0,
+            'mobile-m': 0,
+            'mobile-s': 0,
+          },
+          y: {
+            '4k': 0,
+            'l-laptop': 0,
+            laptop: 0,
+            tablet: 0,
+            mobile: 0,
+            'mobile-m': 0,
+            'mobile-s': 0,
+          },
           elements: [],
           customHtml: '',
           customCss: '',
@@ -34,26 +66,6 @@ const initialLayout = {
       ],
     },
   ],
-};
-
-// Helper function to copy desktop layout to other screen sizes
-const copyDesktopToAllScreens = (desktopLayout) => {
-  const screenSizes = [
-    '4k',
-    'l-laptop',
-    'laptop',
-    'tablet',
-    'mobile',
-    'mobile-m',
-    'mobile-s',
-  ];
-  const layouts = {};
-
-  screenSizes.forEach((size) => {
-    layouts[size] = deepClone(desktopLayout);
-  });
-
-  return layouts;
 };
 
 const ensureResponsiveProperty = (value) => {
@@ -80,7 +92,15 @@ const useDivStore = create(
   persist(
     (set, get) => ({
       // State
-      layouts: copyDesktopToAllScreens(initialLayout), // Initialize all screens with desktop layout
+      layouts: {
+        '4k': initialLayout,
+        'l-laptop': initialLayout,
+        laptop: initialLayout,
+        tablet: initialLayout,
+        mobile: initialLayout,
+        'mobile-m': initialLayout,
+        'mobile-s': initialLayout,
+      },
       parents: initialLayout.parents, // Current working layout
       selectedParentId: null,
       selectedBoxId: null,
@@ -128,8 +148,7 @@ const useDivStore = create(
         });
       },
 
-      // New action to copy current desktop layout to all screen sizes
-      copyDesktopToAllScreens: () => {
+      copyCurrentScreenToAll: () => {
         const { layouts, parents, screenSize } = get();
         const sourceLayout = { parents: deepClone(parents) };
 
@@ -937,18 +956,6 @@ const useDivStore = create(
           return { parents };
         });
         toast.success('Element duplicated!');
-      },
-
-      // Save state action
-      saveState: () => {
-        set((state) => {
-          const { screenSize, parents, layouts } = state;
-          const newLayouts = deepClone(layouts);
-          newLayouts[screenSize] = { parents: deepClone(parents) };
-
-          return { layouts: newLayouts };
-        });
-        toast.success('Your work has been saved!');
       },
 
       // Selection actions

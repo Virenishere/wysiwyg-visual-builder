@@ -15,16 +15,16 @@ const ResponsivenessSwitcher = ({
 }) => {
   const storeScreenSize = useDivStore((state) => state.screenSize);
   const storeSetScreenSize = useDivStore((state) => state.setScreenSize);
-  const copyDesktopToAllScreens = useDivStore(
-    (state) => state.copyDesktopToAllScreens
+  const copyCurrentScreenToAll = useDivStore(
+    (state) => state.copyCurrentScreenToAll
   );
 
   const screenSize =
     propScreenSize !== undefined ? propScreenSize : storeScreenSize;
   const setScreenSize = propSetScreenSize || storeSetScreenSize;
 
-  const handleSaveToAllScreens = () => {
-    copyDesktopToAllScreens();
+  const handleSave = () => {
+    copyCurrentScreenToAll();
   };
 
   return (
@@ -108,7 +108,7 @@ const ResponsivenessSwitcher = ({
       {showSaveButton && (
         <div className="border-l border-gray-300 ml-1 md:ml-2 pl-1 md:pl-2">
           <button
-            onClick={handleSaveToAllScreens}
+            onClick={handleSave}
             className="p-1 md:p-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition-colors"
             title="Copy current layout to all screen sizes"
           >

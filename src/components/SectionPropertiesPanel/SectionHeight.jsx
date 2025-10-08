@@ -1,7 +1,7 @@
 'use client';
 import { FiMaximize2 } from 'react-icons/fi';
 
-export default function SectionHeight({ selectedParent, updateParent }) {
+export default function SectionHeight({ selectedParent, updateParentSize }) {
   const fields = [
     {
       label: 'Height',
@@ -37,11 +37,8 @@ export default function SectionHeight({ selectedParent, updateParent }) {
                 placeholder="Enter height (e.g., 300)"
                 value={selectedParent?.size?.[key] || ''}
                 onChange={(e) =>
-                  updateParent(selectedParent.id, {
-                    size: {
-                      ...selectedParent?.size,
-                      [key]: Number.parseInt(e.target.value) || undefined,
-                    },
+                  updateParentSize(selectedParent.id, {
+                    [key]: Number.parseInt(e.target.value) || undefined,
                   })
                 }
                 className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-green-500 focus:ring-2 focus:ring-green-100 focus:outline-none"
