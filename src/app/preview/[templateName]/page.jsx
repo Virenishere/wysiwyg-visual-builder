@@ -11,7 +11,8 @@ const PreviewPage = ({ params }) => {
   const resolvedParams = use(params);
   const { templateName } = resolvedParams;
 
-  const { layouts, screenSize, setScreenSize, loadTemplate } = useDivStore();
+  const { layouts, parents, screenSize, setScreenSize, loadTemplate } =
+    useDivStore();
 
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
@@ -48,8 +49,6 @@ const PreviewPage = ({ params }) => {
     return <GlobalLoader message={messages[step]} />;
   }
 
-  const currentLayout = layouts[screenSize] || layouts['4k'] || { parents: [] };
-
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header with responsive switcher */}
@@ -82,10 +81,7 @@ const PreviewPage = ({ params }) => {
             minHeight: '600px',
           }}
         >
-          <PreviewComponent
-            parents={currentLayout.parents}
-            screenSize={screenSize}
-          />
+          <PreviewComponent parents={parents} screenSize={screenSize} />
         </div>
       </div>
     </div>

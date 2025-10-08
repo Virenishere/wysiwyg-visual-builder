@@ -1,6 +1,6 @@
-import { getResponsiveValue } from './screen';
+import { getResponsiveValue, screenSizes as appScreenSizes } from './screen';
 
-const getElementStyle = (element, screenSize = 'desktop') => {
+const getElementStyle = (element, screenSize = '4k') => {
   let style = ``;
 
   // Base positioning and dimensions
@@ -178,7 +178,7 @@ const generateElementHtml = (element) => {
   }
 };
 
-const generateStyleBlock = (parents) => {
+const generateStyleBlock = (parents, screenSize = '4k') => {
   let css = `<style>\n`;
   css += `body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }\n`;
   css += `* { box-sizing: border-box; }\n`;
@@ -189,13 +189,52 @@ const generateStyleBlock = (parents) => {
   css += `.btn-hover { transition: all 0.3s ease; }\n`;
 
   // Add smooth transitions for all elements
-  css += `[class*="element-"] { transition: all 0.3s ease; }\n`;
+  let keyframes = '';
+  parents.forEach((parent) => {
+    parent.rnds.forEach((box) => {
+      if (box.customCss) {
+        const keyframeRegex = /(@keyframes[\s\S]*?})/g;
+        let match;
+        while ((match = keyframeRegex.exec(box.customCss)) !== null) {
+          keyframes += match[0] + '\n';
+        }
+      }
+      box.elements.forEach((element) => {
+        if (element.customCss) {
+          const keyframeRegex = /(@keyframes[\s\S]*?})/g;
+          let match;
+          while ((match = keyframeRegex.exec(element.customCss)) !== null) {
+            keyframes += match[0] + '\n';
+          }
+        }
+      });
+    });
+  });
+
+  if (keyframes) {
+    css += `\n/* Keyframes */\n`;
+    css += keyframes;
+    css += `\n`;
+  }
 
   parents.forEach((parent) => {
     css += `#parent-${parent.id} {\n`;
     css += `  width: 100%;\n`;
-    css += `  height: ${getResponsiveValue(parent.size.height, 'desktop')}px;\n`;
-    css += `  background: ${parent.size.background || '#fff'};\n`;
+    css += `  height: ${getResponsiveValue(parent.size.height, screenSize)}px;\n`;
+    // Use responsive background if object, else raw value
+    const bgVal =
+      typeof parent.size.background === 'object'
+        ? getResponsiveValue(parent.size.background, screenSize)
+        : parent.size.background;
+    const bgStr = bgVal || '#fff';
+    if (
+      String(bgStr).startsWith('linear') ||
+      String(bgStr).startsWith('radial')
+    ) {
+      css += `  background: ${bgStr};\n`;
+    } else {
+      css += `  background-color: ${bgStr};\n`;
+    }
     css += `  position: relative;\n`;
     css += `  overflow: hidden;\n`;
     css += `}\n`;
@@ -203,10 +242,10 @@ const generateStyleBlock = (parents) => {
     parent.rnds.forEach((box) => {
       css += `#box-${box.id} {\n`;
       css += `  position: absolute;\n`;
-      css += `  left: ${getResponsiveValue(box.x, 'desktop')}px;\n`;
-      css += `  top: ${getResponsiveValue(box.y, 'desktop')}px;\n`;
-      css += `  width: ${getResponsiveValue(box.width, 'desktop')}px;\n`;
-      css += `  height: ${getResponsiveValue(box.height, 'desktop')}px;\n`;
+      css += `  left: ${getResponsiveValue(box.x, screenSize)}px;\n`;
+      css += `  top: ${getResponsiveValue(box.y, screenSize)}px;\n`;
+      css += `  width: ${getResponsiveValue(box.width, screenSize)}px;\n`;
+      css += `  height: ${getResponsiveValue(box.height, screenSize)}px;\n`;
       css += `}\n`;
 
       // Add custom CSS for boxes
@@ -221,24 +260,13 @@ const generateStyleBlock = (parents) => {
 
         // Base element styles
         css += `.${className} {\n`;
-        css += getElementStyle(element, 'desktop');
+        css += getElementStyle(element, screenSize);
         css += `}\n`;
 
         // Add custom CSS for individual elements
         if (element.customCss) {
-          // Handle both class-based and direct CSS
-          if (
-            element.customCss.includes(`.${className}`) ||
-            element.customCss.includes(`#${element.id}`)
-          ) {
-            // Custom CSS already targets the element specifically
-            css += `${element.customCss}\n`;
-          } else {
-            // Apply custom CSS to the element class
-            css += `.${className} {\n`;
-            css += `  ${element.customCss}\n`;
-            css += `}\n`;
-          }
+          css += `\n/* Custom CSS for element ${element.id} */\n`;
+          css += `${element.customCss}\n`;
         }
 
         // Add hover effects for buttons and interactive elements
@@ -274,13 +302,34 @@ const generateStyleBlock = (parents) => {
   });
 
   css += `\n/* Responsive Design */\n`;
-  const screenSizes = { laptop: 1366, tablet: 768, mobile: 480 };
+  const sortedScreenSizes = Object.entries(appScreenSizes)
+    .map(([name, width]) => ({ name, width: parseInt(width) }))
+    .filter((screen) => screen.name !== '4k' && !isNaN(screen.width))
+    .sort((a, b) => b.width - a.width);
 
-  for (const screenSize in screenSizes) {
-    css += `@media (max-width: ${screenSizes[screenSize]}px) {\n`;
+  for (const screen of sortedScreenSizes) {
+    const screenSize = screen.name;
+    css += `@media (max-width: ${screen.width}px) {\n`;
     parents.forEach((parent) => {
       css += `  #parent-${parent.id} {\n`;
-      css += `    height: ${getResponsiveValue(parent.size.height, screenSize)}px;\n`;
+      css += `    height: ${getResponsiveValue(
+        parent.size.height,
+        screenSize
+      )}px;\n`;
+      const bgV =
+        typeof parent.size.background === 'object'
+          ? getResponsiveValue(parent.size.background, screenSize)
+          : parent.size.background;
+      if (bgV) {
+        if (
+          String(bgV).startsWith('linear') ||
+          String(bgV).startsWith('radial')
+        ) {
+          css += `    background: ${bgV};\n`;
+        } else {
+          css += `    background-color: ${bgV};\n`;
+        }
+      }
       css += `  }\n`;
 
       parent.rnds.forEach((box) => {
@@ -319,21 +368,6 @@ const generateBoxHtml = (box) => {
   } else {
     box.elements.forEach((element) => {
       html += `  ${generateElementHtml(element)}\n`;
-
-      // Add element-specific custom CSS
-      if (element.customCss) {
-        const className = element.customClassName || `element-${element.id}`;
-        html += `  <style>\n`;
-        if (
-          element.customCss.includes(`.${className}`) ||
-          element.customCss.includes(`#${element.id}`)
-        ) {
-          html += `    ${element.customCss.replace(/\n/g, '\n    ')}\n`;
-        } else {
-          html += `    .${className} {\n      ${element.customCss.replace(/\n/g, '\n      ')}\n    }\n`;
-        }
-        html += `  </style>\n`;
-      }
     });
   }
 
@@ -350,8 +384,8 @@ const generateParentHtml = (parent) => {
   return html;
 };
 
-export const generateHtmlCss = (parents) => {
-  const styleBlock = generateStyleBlock(parents);
+export const generateHtmlCss = (parents, screenSize = '4k') => {
+  const styleBlock = generateStyleBlock(parents, screenSize);
   let html = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Generated Website</title>\n${styleBlock}\n</head>\n<body>\n`;
 
   parents.forEach((parent) => {

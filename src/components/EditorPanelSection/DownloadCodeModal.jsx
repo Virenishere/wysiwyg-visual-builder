@@ -17,7 +17,7 @@ export default function DownloadCodeModal({ onClose, onDownload }) {
         </div>
         <div className="flex flex-col gap-4">
           <button
-            onClick={() => onDownload('html')}
+            onClick={onDownload}
             className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
           >
             Download HTML/CSS

@@ -333,7 +333,14 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
       {box.customHtml && (
         <div
           dangerouslySetInnerHTML={{ __html: box.customHtml }}
-          style={{ position: 'relative', zIndex: 2, pointerEvents: 'none' }}
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            pointerEvents: 'none',
+            width: '100%',
+            height: '100%',
+            overflow: 'auto',
+          }}
         />
       )}
 

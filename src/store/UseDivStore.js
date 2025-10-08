@@ -56,6 +56,26 @@ const copyDesktopToAllScreens = (desktopLayout) => {
   return layouts;
 };
 
+const ensureResponsiveProperty = (value) => {
+  if (typeof value === 'object' && value !== null) {
+    return value;
+  }
+  const responsiveValue = {};
+  const screenSizes = [
+    '4k',
+    'l-laptop',
+    'laptop',
+    'tablet',
+    'mobile',
+    'mobile-m',
+    'mobile-s',
+  ];
+  screenSizes.forEach((size) => {
+    responsiveValue[size] = value;
+  });
+  return responsiveValue;
+};
+
 const useDivStore = create(
   persist(
     (set, get) => ({
@@ -132,10 +152,6 @@ const useDivStore = create(
           'customHtml',
           'customCss',
           'customClassName',
-          'width', // Add width to this list
-          'height', // Add height to this list
-          'x',
-          'y',
         ];
 
         const makePropertiesResponsive = (obj) => {
@@ -172,6 +188,60 @@ const useDivStore = create(
         };
 
         const responsiveLayout = makePropertiesResponsive(sourceLayout);
+
+        // Scale map to reduce sizes for smaller screens
+        const scaleByScreen = {
+          '4k': 1,
+          'l-laptop': 0.95,
+          laptop: 0.9,
+          tablet: 0.75,
+          mobile: 0.6,
+          'mobile-m': 0.55,
+          'mobile-s': 0.5,
+        };
+
+        const scaleResponsiveMetric = (metricObj) => {
+          if (typeof metricObj !== 'object' || metricObj === null)
+            return metricObj;
+          const scaled = { ...metricObj };
+          Object.keys(scaleByScreen).forEach((scr) => {
+            const val = scaled[scr];
+            if (typeof val === 'number') {
+              scaled[scr] = Math.max(0, Math.round(val * scaleByScreen[scr]));
+            }
+          });
+          return scaled;
+        };
+
+        // Apply scaling and centering to boxes and elements
+        responsiveLayout.parents.forEach((parent) => {
+          const sectionWidth = parent.size?.width || 800; // Use a fallback width
+
+          parent.rnds.forEach((box) => {
+            box.width = scaleResponsiveMetric(box.width);
+            box.height = scaleResponsiveMetric(box.height);
+            box.x = scaleResponsiveMetric(box.x);
+            box.y = scaleResponsiveMetric(box.y);
+
+            // Center boxes on mobile
+            ['mobile', 'mobile-m', 'mobile-s'].forEach((size) => {
+              const boxWidth = box.width[size];
+              if (boxWidth) {
+                box.x[size] = Math.max(0, (sectionWidth - boxWidth) / 2);
+              }
+            });
+
+            box.elements.forEach((el) => {
+              el.width = scaleResponsiveMetric(el.width);
+              el.height = scaleResponsiveMetric(el.height);
+              el.x = scaleResponsiveMetric(el.x);
+              el.y = scaleResponsiveMetric(el.y);
+              if (typeof el.fontSize === 'object') {
+                el.fontSize = scaleResponsiveMetric(el.fontSize);
+              }
+            });
+          });
+        });
 
         const newLayouts = {};
         screenSizes.forEach((size) => {
@@ -227,7 +297,16 @@ const useDivStore = create(
         let maxBoxId = 0;
         let maxElementId = 0;
 
-        const layoutsToProcess = template.layouts || layouts;
+        let layoutsToProcess;
+        if (template.layouts) {
+          layoutsToProcess = template.layouts;
+        } else {
+          layoutsToProcess = {};
+          const screenSizes = Object.keys(get().layouts);
+          screenSizes.forEach((screen) => {
+            layoutsToProcess[screen] = { parents: deepClone(template.parents) };
+          });
+        }
 
         Object.keys(layoutsToProcess).forEach((screen) => {
           const templateCopy = deepClone(layoutsToProcess[screen]);
@@ -243,6 +322,11 @@ const useDivStore = create(
 
           processedParents.forEach((parent) => {
             maxParentId = Math.max(maxParentId, parent.id);
+            if (parent.size && parent.size.background) {
+              parent.size.background = ensureResponsiveProperty(
+                parent.size.background
+              );
+            }
             parent.rnds.forEach((rnd) => {
               maxBoxId = Math.max(maxBoxId, rnd.id);
               rnd.elements.forEach((element) => {
@@ -321,7 +405,10 @@ const useDivStore = create(
             ...state.parents,
             {
               id: nextParentId++,
-              size: { height: height || 300, background: '#f8f8f8' },
+              size: {
+                height: ensureResponsiveProperty(height || 300),
+                background: ensureResponsiveProperty('#f8f8f8'),
+              },
               rnds: [],
             },
           ],
@@ -348,22 +435,12 @@ const useDivStore = create(
       },
 
       updateParentSize: (parentId, size) =>
-        set((state) => ({
-          parents: state.parents.map((p) => {
+        set((state) => {
+          const updatedParents = state.parents.map((p) => {
             if (p.id === parentId) {
               const newSize = { ...p.size };
               for (const [key, value] of Object.entries(size)) {
-                if (typeof newSize[key] !== 'object' || newSize[key] === null) {
-                  newSize[key] = {
-                    '4k': newSize[key],
-                    'l-laptop': newSize[key],
-                    laptop: newSize[key],
-                    tablet: newSize[key],
-                    mobile: newSize[key],
-                    'mobile-m': newSize[key],
-                    'mobile-s': newSize[key],
-                  };
-                }
+                newSize[key] = ensureResponsiveProperty(newSize[key]);
                 newSize[key][state.screenSize] = value;
               }
               return {
@@ -372,8 +449,14 @@ const useDivStore = create(
               };
             }
             return p;
-          }),
-        })),
+          });
+
+          // Auto-save to layouts for the current screen to persist backgrounds/heights
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(updatedParents) };
+
+          return { parents: updatedParents, layouts: newLayouts };
+        }),
 
       // RND actions inside a parent
       addRnd: (parentId) => {
@@ -420,8 +503,13 @@ const useDivStore = create(
               : p
           );
 
+          // Auto-save to layouts for the current screen to persist position/size
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
+
           return {
             parents: newParents,
+            layouts: newLayouts,
           };
         });
       },
@@ -441,8 +529,8 @@ const useDivStore = create(
       },
 
       updateRndCustomCode: (parentId, boxId, customCode) => {
-        set((state) => ({
-          parents: state.parents.map((p) =>
+        set((state) => {
+          const newParents = state.parents.map((p) =>
             p.id === parentId
               ? {
                   ...p,
@@ -451,8 +539,17 @@ const useDivStore = create(
                   ),
                 }
               : p
-          ),
-        }));
+          );
+
+          // Auto-save to layouts
+          const newLayouts = deepClone(state.layouts);
+          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
+
+          return {
+            parents: newParents,
+            layouts: newLayouts,
+          };
+        });
         toast.success('Custom code updated!');
       },
 
@@ -551,6 +648,16 @@ const useDivStore = create(
                   backgroundColor: 'transparent',
                   border: '1px solid #ddd',
                 },
+              });
+              break;
+            case 'custom-code':
+              Object.assign(newElement, {
+                width: { '4k': 200, laptop: 200 },
+                height: { '4k': 150, laptop: 150 },
+                customHtml: '<p>Your custom HTML here</p>',
+                customCss: 'p { color: blue; }',
+                padding: { top: 10, right: 10, bottom: 10, left: 10 },
+                overflow: 'auto',
               });
               break;
             default:
@@ -696,19 +803,22 @@ const useDivStore = create(
           );
           if (!parentToDuplicate) return state;
 
-          const { parents: processedParents } = generateUniqueIds(
-            { parents: [parentToDuplicate] },
+          // Perform a deep clone to prevent shared references
+          const clonedParent = deepClone(parentToDuplicate);
+
+          const { parents: processedParents, nextIds } = generateUniqueIds(
+            { parents: [clonedParent] }, // Use the cloned parent
             {
               parentId: nextParentId,
               boxId: nextBoxId,
               elementId: nextElementId,
             }
           );
-          nextParentId += 1;
-          nextBoxId += parentToDuplicate.rnds.length;
-          parentToDuplicate.rnds.forEach(
-            (rnd) => (nextElementId += rnd.elements.length)
-          );
+
+          // Update nextIds based on the duplicated content
+          nextParentId = nextIds.parentId;
+          nextBoxId = nextIds.boxId;
+          nextElementId = nextIds.elementId;
 
           return {
             parents: [...state.parents, ...processedParents],
@@ -833,12 +943,10 @@ const useDivStore = create(
       saveState: () => {
         set((state) => {
           const { screenSize, parents, layouts } = state;
-          const newLayouts = { ...layouts };
-          const currentLayout = newLayouts[screenSize] || { parents: [] };
-          const mergedParents = mergeParents(currentLayout.parents, parents);
-          newLayouts[screenSize] = { parents: mergedParents };
+          const newLayouts = deepClone(layouts);
+          newLayouts[screenSize] = { parents: deepClone(parents) };
 
-          return { layouts: newLayouts, parents: mergedParents };
+          return { layouts: newLayouts };
         });
         toast.success('Your work has been saved!');
       },
@@ -1136,6 +1244,7 @@ const useDivStore = create(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layouts: state.layouts,
+        parents: state.parents, // Persist live parents
       }),
     }
   )

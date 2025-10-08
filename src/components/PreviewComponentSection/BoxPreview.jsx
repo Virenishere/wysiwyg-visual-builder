@@ -26,9 +26,25 @@ export default function BoxPreview({ box, screenSize }) {
         left: `${left}px`,
         width: `${width}px`,
         height: `${height}px`,
-        overflow: 'hidden', // Ensure elements stay within bounds in preview too
+        overflow: 'hidden',
       }}
     >
+      {/* Render custom CSS */}
+      {box.customCss && <style>{box.customCss}</style>}
+
+      {/* Render custom HTML */}
+      {box.customHtml && (
+        <div
+          dangerouslySetInnerHTML={{ __html: box.customHtml }}
+          style={{
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden', // Allow scrolling if content overflows
+          }}
+        />
+      )}
+
+      {/* Render standard elements */}
       {box.elements?.map((element) => (
         <ElementRenderer
           key={element.id}

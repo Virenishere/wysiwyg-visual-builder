@@ -6,13 +6,19 @@ import toast from 'react-hot-toast';
 
 export default function SaveTemplateModal({ onClose }) {
   const [templateName, setTemplateName] = useState('');
-  const { layouts } = useDivStore();
+  const { layouts, saveState } = useDivStore();
 
   const handleSave = () => {
     if (templateName.trim() === '') {
       toast.error('Please enter a template name.');
       return;
     }
+
+    // First, save the current state to update layouts
+    saveState();
+
+    // Get the latest layouts after saving
+    const updatedLayouts = useDivStore.getState().layouts;
 
     const savedTemplates = JSON.parse(
       localStorage.getItem('savedTemplates') || '{}'
@@ -23,7 +29,7 @@ export default function SaveTemplateModal({ onClose }) {
       description: 'A custom saved template.',
       thumbnail:
         'https://images.unsplash.com/photo-1621155346337-7d1947ea715d?w=200&h=150&fit=crop',
-      layouts: layouts, // Save the entire layouts object
+      layouts: updatedLayouts, // Save the entire layouts object
     };
     localStorage.setItem('savedTemplates', JSON.stringify(savedTemplates));
     toast.success(`Template "${templateName}" saved successfully!`);

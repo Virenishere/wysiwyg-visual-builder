@@ -29,13 +29,13 @@ export const generateUniqueIds = (templateData, startIds = {}) => {
   }
 
   const processedParents = templateData.parents.map((parent) => ({
-    ...parent,
+    ...deepClone(parent), // ensure deep clone to avoid shared references
     id: parentId++,
     rnds: parent.rnds.map((rnd) => ({
-      ...rnd,
+      ...deepClone(rnd),
       id: boxId++,
       elements: rnd.elements.map((element) => ({
-        ...element,
+        ...deepClone(element),
         id: elementId++,
       })),
     })),

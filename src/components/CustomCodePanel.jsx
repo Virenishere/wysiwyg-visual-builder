@@ -4,12 +4,13 @@ import useDivStore from '@/store/UseDivStore';
 import { IoArrowBack } from 'react-icons/io5';
 
 export default function CustomCodePanel({ box, parentId, onBack }) {
-  const { updateRndCustomCode } = useDivStore();
+  const { updateRndCustomCode, saveState } = useDivStore();
   const [html, setHtml] = useState(box.customHtml || '');
   const [css, setCss] = useState(box.customCss || '');
 
   const handleSave = () => {
     updateRndCustomCode(parentId, box.id, { customHtml: html, customCss: css });
+    saveState();
     onBack();
   };
 

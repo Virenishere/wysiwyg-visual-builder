@@ -1,12 +1,76 @@
 'use client';
 import React from 'react';
 import useDivStore from '@/store/UseDivStore';
-import ParentPreview from './PreviewComponentSection/ParentPreview';
+import { getResponsiveValue } from '@/utils/screen';
+import ElementRenderer from './PreviewComponentSection/ElementRenderer';
+
+const BoxPreview = ({ box, screenSize }) => {
+  const width = getResponsiveValue(box.width, screenSize);
+  const height = getResponsiveValue(box.height, screenSize);
+  const x = getResponsiveValue(box.x, screenSize);
+  const y = getResponsiveValue(box.y, screenSize);
+  const zIndex = box.zIndex || 1;
+
+  const boxStyles = {
+    position: 'absolute',
+    width: `${width}px`,
+    height: `${height}px`,
+    left: `${x}px`,
+    top: `${y}px`,
+    zIndex: zIndex,
+  };
+
+  return (
+    <div style={boxStyles}>
+      {box.customCss && <style>{box.customCss}</style>}
+      {box.customHtml && (
+        <div
+          dangerouslySetInnerHTML={{ __html: box.customHtml }}
+          style={{
+            width: '100%',
+            height: '100%',
+            overflow: 'auto',
+          }}
+        />
+      )}
+      {box.elements?.map((element) => (
+        <ElementRenderer
+          key={element.id}
+          element={element}
+          screenSize={screenSize}
+        />
+      ))}
+    </div>
+  );
+};
+
+const ParentPreview = ({ parent, screenSize }) => {
+  const height = getResponsiveValue(parent.height, screenSize) || 'auto';
+
+  const parentStyle = {
+    position: 'relative',
+    height: height === 'auto' ? 'auto' : `${height}px`,
+    backgroundColor: parent.backgroundColor || 'transparent',
+    backgroundImage: parent.backgroundImage
+      ? `url(${parent.backgroundImage})`
+      : 'none',
+    backgroundSize: parent.backgroundSize || 'cover',
+    backgroundPosition: parent.backgroundPosition || 'center',
+    backgroundRepeat: parent.backgroundRepeat || 'no-repeat',
+  };
+
+  return (
+    <section style={parentStyle}>
+      {parent.rnds?.map((box) => (
+        <BoxPreview key={box.id} box={box} screenSize={screenSize} />
+      ))}
+    </section>
+  );
+};
 
 export default function PreviewComponent({ parents: parentsProp, screenSize }) {
   const { parents: parentsFromStore, layouts } = useDivStore();
 
-  // Use prop parents first, then store parents, then fallback to current screen layout
   const parents =
     parentsProp || parentsFromStore || layouts[screenSize]?.parents || [];
 

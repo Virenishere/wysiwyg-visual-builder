@@ -120,6 +120,13 @@ export default function DraggableElement({
         return <LineElement element={element} />; // Pass the whole element
       case 'div':
         return <DivElement id={element.id} style={element.style} />;
+      case 'custom-code':
+        return (
+          <div
+            dangerouslySetInnerHTML={{ __html: element.customHtml }}
+            style={{ width: '100%', height: '100%', overflow: 'auto' }}
+          />
+        );
       default:
         return <UnknownElement element={element} />;
     }

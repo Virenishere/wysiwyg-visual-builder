@@ -14,10 +14,11 @@ export default function SiteActionsPanel({ onClose }) {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const templateName = useDivStore((state) => state.templateName);
   const saveState = useDivStore((state) => state.saveState);
+  const screenSize = useDivStore((state) => state.screenSize);
 
   const handleDownload = () => {
     const { parents } = useDivStore.getState();
-    const { html } = generateHtmlCss(parents);
+    const { html } = generateHtmlCss(parents, screenSize);
     downloadFile('index.html', html);
     setIsDownloadModalOpen(false);
   };
