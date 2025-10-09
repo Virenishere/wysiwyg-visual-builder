@@ -1,4 +1,5 @@
 // utils/screen.js
+import { getFallbackChain } from './screenConfig';
 
 export const screenSizes = {
   '4k': '100%', // Desktop - full width
@@ -10,14 +11,27 @@ export const screenSizes = {
   'mobile-s': '280px', // Mobile small
 };
 
-export const getResponsiveValue = (value, screenSize) => {
-  if (typeof value === 'object' && value !== null) {
-    // Fallback chain: current screen size -> 4k (desktop) -> laptop -> null
-    return value[screenSize] ?? value['4k'] ?? value['laptop'] ?? null;
-  } else {
-    // Fallback for non-object values or null
-    return value ?? null;
+export const getResponsiveValue = (responsiveProp, screenSize) => {
+  if (
+    typeof responsiveProp !== 'object' ||
+    responsiveProp === null ||
+    Array.isArray(responsiveProp)
+  ) {
+    return responsiveProp;
   }
+
+  if (responsiveProp[screenSize] !== undefined) {
+    return responsiveProp[screenSize];
+  }
+
+  const fallbackChain = getFallbackChain(screenSize);
+  for (const fallbackScreen of fallbackChain) {
+    if (responsiveProp[fallbackScreen] !== undefined) {
+      return responsiveProp[fallbackScreen];
+    }
+  }
+
+  return undefined;
 };
 
 // Get the target pixel width for a screen size

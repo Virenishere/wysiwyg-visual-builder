@@ -50,7 +50,6 @@ export const generateUniqueIds = (templateData, startIds = {}) => {
 export const responsiveUpdater = (obj, updates, screenSize) => {
   const newObj = deepClone(obj);
 
-  // Properties that should NOT be made responsive
   const nonResponsiveProperties = [
     'imageUrl',
     'content',
@@ -67,28 +66,16 @@ export const responsiveUpdater = (obj, updates, screenSize) => {
 
   for (const [key, value] of Object.entries(updates)) {
     if (nonResponsiveProperties.includes(key)) {
-      // Keep these properties as simple values
       newObj[key] = value;
-    } else if (
-      typeof newObj[key] === 'object' &&
-      newObj[key] !== null &&
-      !Array.isArray(newObj[key])
-    ) {
-      // Update existing responsive object
-      newObj[key] = { ...newObj[key], [screenSize]: value };
     } else {
-      // Convert to responsive object if it's not already
-      const currentValue = newObj[key];
-      newObj[key] = {
-        '4k': currentValue,
-        'l-laptop': currentValue,
-        laptop: currentValue,
-        tablet: currentValue,
-        mobile: currentValue,
-        'mobile-m': currentValue,
-        'mobile-s': currentValue,
-        [screenSize]: value,
-      };
+      if (
+        typeof newObj[key] !== 'object' ||
+        newObj[key] === null ||
+        Array.isArray(newObj[key])
+      ) {
+        newObj[key] = {};
+      }
+      newObj[key][screenSize] = value;
     }
   }
   return newObj;

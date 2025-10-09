@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
 import useDivStore from '@/store/UseDivStore';
 import DraggableElement from './DraggableElement';
@@ -27,9 +27,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
     setSelectedParent,
   } = useDivStore();
 
-  // const isSelected = selectedBoxId === box.id;
-
-  // Check if this specific box is selected
   const isBoxSelected = selectedBoxId === box.id;
 
   const handleElementSelect = (elementId) => {
@@ -37,16 +34,12 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
     setSelectedBox(box.id);
   };
 
-  // Determine border style based on selection state
   const getBorderStyle = () => {
     if (isBoxSelected) {
-      // Box is specifically selected - strongest highlight
       return '3px solid #6f56f9';
     } else if (isSectionSelected) {
-      // Parent section is selected - subtle highlight
-      return '2px solid #a78bfa'; // Lighter purple
+      return '2px solid #a78bfa';
     } else {
-      // Nothing selected - default
       return '1px solid #e5e7eb';
     }
   };
@@ -60,18 +53,34 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
     return 'none';
   };
 
-  // Get responsive values with fallbacks
-  const width = parseInt(getResponsiveValue(box.width, screenSize), 10) || 150;
-  const height =
+  const initialWidth =
+    parseInt(getResponsiveValue(box.width, screenSize), 10) || 150;
+  const initialHeight =
     parseInt(getResponsiveValue(box.height, screenSize), 10) || 150;
-  const x = parseInt(getResponsiveValue(box.x, screenSize), 10) || 0;
-  const y = parseInt(getResponsiveValue(box.y, screenSize), 10) || 0;
+  const initialX = parseInt(getResponsiveValue(box.x, screenSize), 10) || 0;
+  const initialY = parseInt(getResponsiveValue(box.y, screenSize), 10) || 0;
 
-  //container bounds for this RND box (for element indicators)
+  const [size, setSize] = useState({
+    width: initialWidth,
+    height: initialHeight,
+  });
+  const [position, setPosition] = useState({ x: initialX, y: initialY });
+
+  useEffect(() => {
+    setSize({
+      width: parseInt(getResponsiveValue(box.width, screenSize), 10) || 150,
+      height: parseInt(getResponsiveValue(box.height, screenSize), 10) || 150,
+    });
+    setPosition({
+      x: parseInt(getResponsiveValue(box.x, screenSize), 10) || 0,
+      y: parseInt(getResponsiveValue(box.y, screenSize), 10) || 0,
+    });
+  }, [box.width, box.height, box.x, box.y, screenSize]);
+
   const boxBounds = {
-    width: width,
-    height: height,
-    x: 0, //relative to the box
+    width: size.width,
+    height: size.height,
+    x: 0,
     y: 0,
   };
 
@@ -90,41 +99,25 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
       const bottom = elY + elHeight;
 
       return {
-        minWidth: Math.max(acc.minWidth, right + 10), // Add padding
-        minHeight: Math.max(acc.minHeight, bottom + 10), // Add padding
+        minWidth: Math.max(acc.minWidth, right + 10),
+        minHeight: Math.max(acc.minHeight, bottom + 10),
       };
     },
-    { minWidth: 50, minHeight: 50 } // Minimum box size
+    { minWidth: 50, minHeight: 50 }
   );
 
-  // Check if the active drag item is an element within this box
   const isActiveDragElementInThisBox =
     activeDragItem &&
-    activeDragItem.type && // elements have type, boxes don't
+    activeDragItem.type &&
     boxElements.some((element) => element.id === activeDragItem.id);
 
-  // Check if any element is selected in this box
   const hasSelectedElement =
     selectedElementId && boxElements.some((el) => el.id === selectedElementId);
 
-  useEffect(() => {
-    // This effect runs once after the component mounts.
-    // It triggers a state update with the component's current dimensions and position.
-    // This helps to resolve positioning glitches that can happen during the initial render,
-    // especially when complex CSS like `top: -30px` is applied to child containers.
-    // It essentially mimics the recalculation that happens on a resize.
-    updateRnd(parentId, box.id, {
-      width,
-      height,
-      x,
-      y,
-    });
-  }, []); // The empty dependency array ensures this runs only once.
-
   return (
     <Rnd
-      size={{ width: width, height: height }}
-      position={{ x: x, y: y }}
+      size={size}
+      position={position}
       bounds="parent"
       enableResizing={{
         top: true,
@@ -140,7 +133,8 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         e.stopPropagation();
       }}
       onDrag={(e, d) => {
-        setActiveDragItem({ ...box, x: d.x, y: d.y, width, height });
+        setPosition({ x: d.x, y: d.y });
+        setActiveDragItem({ ...box, x: d.x, y: d.y, ...size });
       }}
       onDragStop={(e, d) => {
         updateRnd(parentId, box.id, { x: d.x, y: d.y });
@@ -151,30 +145,22 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         setIsResizing(true);
       }}
       onResize={(e, direction, ref, delta, pos) => {
-        const newWidth = ref.offsetWidth;
-        const newHeight = ref.offsetHeight;
-        const newX = pos.x;
-        const newY = pos.y;
-
+        setSize({ width: ref.offsetWidth, height: ref.offsetHeight });
+        setPosition({ x: pos.x, y: pos.y });
         setActiveDragItem({
           ...box,
-          width: newWidth,
-          height: newHeight,
-          x: newX,
-          y: newY,
+          width: ref.offsetWidth,
+          height: ref.offsetHeight,
+          x: pos.x,
+          y: pos.y,
         });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
-        const newWidth = ref.offsetWidth;
-        const newHeight = ref.offsetHeight;
-        const newX = pos.x;
-        const newY = pos.y;
-
         updateRnd(parentId, box.id, {
-          width: newWidth,
-          height: newHeight,
-          x: newX,
-          y: newY,
+          width: ref.offsetWidth,
+          height: ref.offsetHeight,
+          x: pos.x,
+          y: pos.y,
         });
         setActiveDragItem(null);
         setIsResizing(false);
@@ -193,8 +179,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
           ? 'rgba(59, 130, 246, 0.05)'
           : 'rgba(0, 0, 0, 0.02)',
         zIndex: isBoxSelected ? 5 : 1,
-        // pointerEvents: isSelected ? 'auto' : 'none',
-        // Add visual containment indicator
         boxSizing: 'border-box',
       }}
       minWidth={minConstraints.minWidth}
@@ -202,7 +186,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
       className="rnd-box"
       data-id={box.id}
     >
-      {/* Visual bounds indicator when selected */}
       {isBoxSelected && (
         <div
           style={{
@@ -218,7 +201,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
           }}
         />
       )}
-      {/* Drag handle area - positioned to not interfere with elements */}
       <div
         className="rnd-drag-handle absolute inset-0"
         style={{
@@ -227,7 +209,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         }}
       />
 
-      {/* Box label - show when box is selected OR section is selected */}
       {(isBoxSelected || isSectionSelected) && (
         <div
           className={`absolute -top-6 left-0 px-2 py-1 rounded text-xs font-medium z-50 ${
@@ -241,30 +222,27 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         </div>
       )}
 
-      {/* Add element button - adjust positioning to not interfere with containment */}
       {isBoxSelected && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             setLeftPanel('AddElementPanel');
           }}
-          className="absolute bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative"
+          className="absolute bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition-all duration-200 z-20 cursor-pointer group relative z-[-1]"
           style={{
-            top: '-37px', // Always position outside the box
+            top: '-37px',
             left: '56px',
           }}
           aria-label="Add element"
         >
           <FaPlus />
 
-          {/* Tooltip */}
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
             Add element
           </span>
         </button>
       )}
 
-      {/* Delete box button - adjust positioning to not interfere with containment */}
       {isBoxSelected && (
         <button
           onClick={(e) => {
@@ -275,21 +253,19 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
           }}
           className="absolute bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all duration-200 z-20 cursor-pointer group relative"
           style={{
-            top: '-37px', // Always position outside the box
+            top: '-37px',
             left: '88px',
           }}
           aria-label="Delete box"
         >
           <FaTrash />
 
-          {/* Tooltip */}
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
             Delete box
           </span>
         </button>
       )}
 
-      {/* Copy box button - adjust positioning to not interfere with containment */}
       {isBoxSelected && (
         <button
           onClick={(e) => {
@@ -298,7 +274,7 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
           }}
           className="absolute bg-blue-500 text-white p-1 rounded-full hover:bg-blue-600 transition-all duration-200 z-20 cursor-pointer group relative"
           style={{
-            top: '-37px', // Always position outside the box
+            top: '-37px',
             left: '120px',
           }}
           aria-label="Copy box"
@@ -310,7 +286,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         </button>
       )}
 
-      {/* Centering indicator for elements within this box */}
       {activeDragItem && isActiveDragElementInThisBox && (
         <CenterDivIndicator
           activeBox={activeDragItem}
@@ -318,7 +293,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         />
       )}
 
-      {/* Alignment indicator for elements within this box */}
       {activeDragItem && isActiveDragElementInThisBox && (
         <AlignIndicator
           activeItem={activeDragItem}
@@ -328,7 +302,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         />
       )}
 
-      {/* Render custom HTML and CSS */}
       {box.customCss && <style>{box.customCss}</style>}
       {box.customHtml && (
         <div
@@ -344,7 +317,6 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         />
       )}
 
-      {/* Render elements inside this box with proper absolute positioning */}
       <div
         style={{
           position: 'absolute',
@@ -353,7 +325,7 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
           width: '100%',
           height: '100%',
           zIndex: 3,
-          pointerEvents: 'none', // Allow clicks to pass through to elements
+          pointerEvents: 'none',
         }}
         className="rnd-box-container"
       >
@@ -367,8 +339,8 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
             onSelect={() => handleElementSelect(element.id)}
             duplicateElement={duplicateElement}
             containerBounds={{
-              width: width,
-              height: height,
+              width: size.width,
+              height: size.height,
               x: 0,
               y: 0,
             }}

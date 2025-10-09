@@ -9,6 +9,7 @@ import {
   mergeParents,
 } from './storeUtils';
 import { getResponsiveValue } from '@/utils/screen';
+import { getFallbackChain } from '@/utils/screenConfig';
 import toast from 'react-hot-toast';
 
 let nextParentId = 1;
@@ -123,25 +124,22 @@ const useDivStore = create(
       setPreviewContainerWidth: (width) =>
         set({ previewContainerWidth: width }),
 
-      // Action to set the screen size
+      // Action to set the screen size with Figma-style fallback
       setScreenSize: (screenSize) => {
         const { layouts, parents, screenSize: oldScreenSize } = get();
 
-        // Save current work to the old screen size layout
+        // 1. Save the current state (with all its responsive values) to the old screen's layout slot.
         const newLayouts = deepClone(layouts);
         newLayouts[oldScreenSize] = { parents: deepClone(parents) };
 
-        // Load new screen size layout, fallback to desktop (4k) if not exists
-        const newParents = deepClone(
-          newLayouts[screenSize]?.parents ||
-            newLayouts['4k']?.parents ||
-            initialLayout.parents
-        );
+        // 2. The new `parents` object for the new screen should be the one we were just working on.
+        //    The `getResponsiveValue` function will handle picking the correct values for the new screen size.
+        const newParents = deepClone(parents);
 
         set({
-          screenSize,
-          parents: newParents,
-          layouts: newLayouts,
+          screenSize, // Just change the screen size
+          parents: newParents, // And keep the current, most up-to-date parents
+          layouts: newLayouts, // And persist the saved layout for the old screen
           selectedParentId: null,
           selectedBoxId: null,
           selectedElementId: null,
@@ -149,130 +147,37 @@ const useDivStore = create(
       },
 
       copyCurrentScreenToAll: () => {
-        const { layouts, parents, screenSize } = get();
-        const sourceLayout = { parents: deepClone(parents) };
+        set((state) => {
+          const { parents, screenSize } = state;
 
-        const screenSizes = [
-          '4k',
-          'l-laptop',
-          'laptop',
-          'tablet',
-          'mobile',
-          'mobile-m',
-          'mobile-s',
-        ];
+          const screenSizes = [
+            '4k',
+            'l-laptop',
+            'laptop',
+            'tablet',
+            'mobile',
+            'mobile-m',
+            'mobile-s',
+          ];
+          const newLayouts = {};
+          const sourceParents = deepClone(parents);
 
-        const nonResponsiveProperties = [
-          'imageUrl',
-          'content',
-          'link',
-          'type',
-          'id',
-          'customHtml',
-          'customCss',
-          'customClassName',
-        ];
+          // Create a simple, non-responsive layout object for the current screen's state
+          const layoutToCopy = { parents: sourceParents };
 
-        const makePropertiesResponsive = (obj) => {
-          if (typeof obj !== 'object' || obj === null) {
-            return obj;
-          }
-
-          if (Array.isArray(obj)) {
-            return obj.map(makePropertiesResponsive);
-          }
-
-          const newObj = {};
-          for (const key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-              const value = obj[key];
-              if (nonResponsiveProperties.includes(key)) {
-                newObj[key] = value;
-              } else if (typeof value !== 'object' || value === null) {
-                newObj[key] = {
-                  '4k': value,
-                  'l-laptop': value,
-                  laptop: value,
-                  tablet: value,
-                  mobile: value,
-                  'mobile-m': value,
-                  'mobile-s': value,
-                };
-              } else {
-                newObj[key] = makePropertiesResponsive(value);
-              }
-            }
-          }
-          return newObj;
-        };
-
-        const responsiveLayout = makePropertiesResponsive(sourceLayout);
-
-        // Scale map to reduce sizes for smaller screens
-        const scaleByScreen = {
-          '4k': 1,
-          'l-laptop': 0.95,
-          laptop: 0.9,
-          tablet: 0.75,
-          mobile: 0.6,
-          'mobile-m': 0.55,
-          'mobile-s': 0.5,
-        };
-
-        const scaleResponsiveMetric = (metricObj) => {
-          if (typeof metricObj !== 'object' || metricObj === null)
-            return metricObj;
-          const scaled = { ...metricObj };
-          Object.keys(scaleByScreen).forEach((scr) => {
-            const val = scaled[scr];
-            if (typeof val === 'number') {
-              scaled[scr] = Math.max(0, Math.round(val * scaleByScreen[scr]));
-            }
+          screenSizes.forEach((size) => {
+            newLayouts[size] = deepClone(layoutToCopy);
           });
-          return scaled;
-        };
 
-        // Apply scaling and centering to boxes and elements
-        responsiveLayout.parents.forEach((parent) => {
-          const sectionWidth = parent.size?.width || 800; // Use a fallback width
+          toast.success(
+            `Layout from ${screenSize} copied to all other screen sizes.`
+          );
 
-          parent.rnds.forEach((box) => {
-            box.width = scaleResponsiveMetric(box.width);
-            box.height = scaleResponsiveMetric(box.height);
-            box.x = scaleResponsiveMetric(box.x);
-            box.y = scaleResponsiveMetric(box.y);
-
-            // Center boxes on mobile
-            ['mobile', 'mobile-m', 'mobile-s'].forEach((size) => {
-              const boxWidth = box.width[size];
-              if (boxWidth) {
-                box.x[size] = Math.max(0, (sectionWidth - boxWidth) / 2);
-              }
-            });
-
-            box.elements.forEach((el) => {
-              el.width = scaleResponsiveMetric(el.width);
-              el.height = scaleResponsiveMetric(el.height);
-              el.x = scaleResponsiveMetric(el.x);
-              el.y = scaleResponsiveMetric(el.y);
-              if (typeof el.fontSize === 'object') {
-                el.fontSize = scaleResponsiveMetric(el.fontSize);
-              }
-            });
-          });
+          return {
+            layouts: newLayouts,
+            // parents state remains the same
+          };
         });
-
-        const newLayouts = {};
-        screenSizes.forEach((size) => {
-          newLayouts[size] = deepClone(responsiveLayout);
-        });
-
-        set({
-          layouts: newLayouts,
-          parents: deepClone(responsiveLayout.parents),
-        });
-
-        toast.success('Current layout copied to all screen sizes!');
       },
 
       // Image actions
@@ -419,19 +324,22 @@ const useDivStore = create(
 
       // Parent actions
       addParent: (height) => {
-        set((state) => ({
-          parents: [
-            ...state.parents,
-            {
-              id: nextParentId++,
-              size: {
-                height: ensureResponsiveProperty(height || 300),
-                background: ensureResponsiveProperty('#f8f8f8'),
+        set((state) => {
+          const { screenSize } = state;
+          return {
+            parents: [
+              ...state.parents,
+              {
+                id: nextParentId++,
+                size: {
+                  height: { [screenSize]: height || 300 },
+                  background: { [screenSize]: '#f8f8f8' },
+                },
+                rnds: [],
               },
-              rnds: [],
-            },
-          ],
-        }));
+            ],
+          };
+        });
         toast.success('New section added!');
       },
 
@@ -453,28 +361,30 @@ const useDivStore = create(
         toast.success('Section removed.', { icon: '🗑️' });
       },
 
-      updateParentSize: (parentId, size) =>
+      updateParentSize: (parentId, sizeUpdates) =>
         set((state) => {
+          const { screenSize } = state;
           const updatedParents = state.parents.map((p) => {
             if (p.id === parentId) {
-              const newSize = { ...p.size };
-              for (const [key, value] of Object.entries(size)) {
-                newSize[key] = ensureResponsiveProperty(newSize[key]);
-                newSize[key][state.screenSize] = value;
+              const newParent = deepClone(p);
+              if (!newParent.size) newParent.size = {};
+
+              for (const [key, value] of Object.entries(sizeUpdates)) {
+                if (
+                  typeof newParent.size[key] !== 'object' ||
+                  newParent.size[key] === null ||
+                  Array.isArray(newParent.size[key])
+                ) {
+                  newParent.size[key] = {};
+                }
+                newParent.size[key][screenSize] = value;
               }
-              return {
-                ...p,
-                size: newSize,
-              };
+              return newParent;
             }
             return p;
           });
 
-          // Auto-save to layouts for the current screen to persist backgrounds/heights
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(updatedParents) };
-
-          return { parents: updatedParents, layouts: newLayouts };
+          return { parents: updatedParents };
         }),
 
       // RND actions inside a parent
@@ -522,13 +432,8 @@ const useDivStore = create(
               : p
           );
 
-          // Auto-save to layouts for the current screen to persist position/size
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
-
           return {
             parents: newParents,
-            layouts: newLayouts,
           };
         });
       },
@@ -560,13 +465,8 @@ const useDivStore = create(
               : p
           );
 
-          // Auto-save to layouts
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
-
           return {
             parents: newParents,
-            layouts: newLayouts,
           };
         });
         toast.success('Custom code updated!');
@@ -740,13 +640,8 @@ const useDivStore = create(
               : p
           );
 
-          // Auto-save to layouts
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
-
           return {
             parents: newParents,
-            layouts: newLayouts,
             selectedElementId: newElementId,
           };
         });
@@ -975,13 +870,8 @@ const useDivStore = create(
             })),
           }));
 
-          // Auto-save to layouts when content is updated
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
-
           return {
             parents: newParents,
-            layouts: newLayouts,
           };
         });
       },
@@ -998,13 +888,8 @@ const useDivStore = create(
             })),
           }));
 
-          // Auto-save to layouts when position is updated
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
-
           return {
             parents: newParents,
-            layouts: newLayouts,
           };
         });
       },
@@ -1023,13 +908,8 @@ const useDivStore = create(
             })),
           }));
 
-          // Auto-save to layouts when size is updated
-          const newLayouts = deepClone(state.layouts);
-          newLayouts[state.screenSize] = { parents: deepClone(newParents) };
-
           return {
             parents: newParents,
-            layouts: newLayouts,
           };
         });
       },
@@ -1037,6 +917,18 @@ const useDivStore = create(
       setIsResizing: (status) => set({ isResizing: status }),
       setLeftPanel: (panel) => set({ leftPanel: panel }),
       setActiveDragItem: (item) => set({ activeDragItem: item }),
+
+      saveState: () => {
+        set((state) => {
+          const { layouts, parents, screenSize } = state;
+          const newLayouts = deepClone(layouts);
+          newLayouts[screenSize] = { parents: deepClone(parents) };
+          toast.success(`Saved layout for ${screenSize} screen.`);
+          return {
+            layouts: newLayouts,
+          };
+        });
+      },
 
       // Center functionality
       centerBox: (parentId, boxId) => {
