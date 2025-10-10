@@ -50,6 +50,17 @@ export const generateUniqueIds = (templateData, startIds = {}) => {
 export const responsiveUpdater = (obj, updates, screenSize) => {
   const newObj = deepClone(obj);
 
+  const screenOrder = [
+    '4k',
+    'l-laptop',
+    'laptop',
+    'tablet',
+    'mobile',
+    'mobile-m',
+    'mobile-s',
+  ];
+  const currentScreenIndex = screenOrder.indexOf(screenSize);
+
   const nonResponsiveProperties = [
     'imageUrl',
     'content',
@@ -75,7 +86,18 @@ export const responsiveUpdater = (obj, updates, screenSize) => {
       ) {
         newObj[key] = {};
       }
+      // Set the value for the current screen
       newObj[key][screenSize] = value;
+
+      // Clear the value for all smaller screens to ensure they inherit this change
+      if (currentScreenIndex !== -1) {
+        for (let i = currentScreenIndex + 1; i < screenOrder.length; i++) {
+          const smallerScreen = screenOrder[i];
+          if (newObj[key] && newObj[key][smallerScreen] !== undefined) {
+            delete newObj[key][smallerScreen];
+          }
+        }
+      }
     }
   }
   return newObj;

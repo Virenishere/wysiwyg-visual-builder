@@ -56,7 +56,7 @@ export default function SectionComponent({ parent, parentIndex }) {
         height: height,
         background: background,
         position: 'relative',
-        border: isSectionSelected ? '3px solid #6f56f9' : '1px solid #e5e7eb',
+        border: isSectionSelected ? '3px solid #6f56f9' : '2px solid #A9A9A9',
         boxSizing: 'border-box',
         overflow: 'visible',
       }}

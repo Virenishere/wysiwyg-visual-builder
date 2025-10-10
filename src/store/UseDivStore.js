@@ -16,6 +16,83 @@ let nextParentId = 1;
 let nextBoxId = 1;
 let nextElementId = 1;
 
+// Ordered list from largest to smallest for responsive cascading
+const SCREEN_ORDER = [
+  '4k',
+  'l-laptop',
+  'laptop',
+  'tablet',
+  'mobile',
+  'mobile-m',
+  'mobile-s',
+];
+
+// Determine if an object is a responsive map (has at least one screen key)
+const isResponsiveMap = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return SCREEN_ORDER.some((k) =>
+    Object.prototype.hasOwnProperty.call(value, k)
+  );
+};
+
+// Deeply copy responsive values from a source screen to all other screens (by setting or clearing)
+// If mode is 'force', set every screen's value to the source value.
+// If mode is 'cascade', set the source screen's value and delete all smaller screen overrides
+// so they inherit from the nearest larger breakpoint per fallback chain.
+const cascadeCopyParentsFromScreen = (
+  parents,
+  sourceScreen,
+  mode = 'cascade'
+) => {
+  const clone = deepClone(parents);
+
+  const visit = (node) => {
+    if (!node || typeof node !== 'object') return;
+
+    Object.keys(node).forEach((key) => {
+      const val = node[key];
+      if (isResponsiveMap(val)) {
+        const srcValue = val[sourceScreen];
+        if (mode === 'force') {
+          SCREEN_ORDER.forEach((size) => {
+            node[key][size] = srcValue;
+          });
+        } else {
+          // Ensure source value is set
+          node[key][sourceScreen] = srcValue;
+          // Clear all smaller screens so they inherit from larger ones
+          const startIdx = SCREEN_ORDER.indexOf(sourceScreen);
+          if (startIdx !== -1) {
+            for (let i = startIdx + 1; i < SCREEN_ORDER.length; i++) {
+              const s = SCREEN_ORDER[i];
+              if (node[key][s] !== undefined) {
+                delete node[key][s];
+              }
+            }
+          }
+        }
+      } else if (val && typeof val === 'object' && !Array.isArray(val)) {
+        visit(val);
+      }
+    });
+  };
+
+  // Traverse sections, rnds, and elements
+  clone.forEach((parent) => {
+    visit(parent);
+    if (Array.isArray(parent.rnds)) {
+      parent.rnds.forEach((rnd) => {
+        visit(rnd);
+        if (Array.isArray(rnd.elements)) {
+          rnd.elements.forEach((el) => visit(el));
+        }
+      });
+    }
+  });
+
+  return clone;
+};
+
 const initialLayout = {
   parents: [
     {
@@ -150,32 +227,26 @@ const useDivStore = create(
         set((state) => {
           const { parents, screenSize } = state;
 
-          const screenSizes = [
-            '4k',
-            'l-laptop',
-            'laptop',
-            'tablet',
-            'mobile',
-            'mobile-m',
-            'mobile-s',
-          ];
+          // Update live parents by cascading from current screen to all smaller screens
+          const updatedParents = cascadeCopyParentsFromScreen(
+            parents,
+            screenSize,
+            'cascade'
+          );
+
+          // Also reflect this as the saved layout for all screens (optional persistence symmetry)
           const newLayouts = {};
-          const sourceParents = deepClone(parents);
-
-          // Create a simple, non-responsive layout object for the current screen's state
-          const layoutToCopy = { parents: sourceParents };
-
-          screenSizes.forEach((size) => {
-            newLayouts[size] = deepClone(layoutToCopy);
+          SCREEN_ORDER.forEach((size) => {
+            newLayouts[size] = { parents: deepClone(updatedParents) };
           });
 
           toast.success(
-            `Layout from ${screenSize} copied to all other screen sizes.`
+            `Copied ${screenSize} changes to all smaller screens (cascade).`
           );
 
           return {
+            parents: updatedParents,
             layouts: newLayouts,
-            // parents state remains the same
           };
         });
       },
@@ -377,7 +448,18 @@ const useDivStore = create(
                 ) {
                   newParent.size[key] = {};
                 }
+                // Set current screen value
                 newParent.size[key][screenSize] = value;
+                // Clear smaller screen overrides so they inherit
+                const currIdx = SCREEN_ORDER.indexOf(screenSize);
+                if (currIdx !== -1) {
+                  for (let i = currIdx + 1; i < SCREEN_ORDER.length; i++) {
+                    const s = SCREEN_ORDER[i];
+                    if (newParent.size[key][s] !== undefined) {
+                      delete newParent.size[key][s];
+                    }
+                  }
+                }
               }
               return newParent;
             }
