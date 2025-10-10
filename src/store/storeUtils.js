@@ -107,18 +107,9 @@ export const responsiveUpdater = (obj, updates, screenSize) => {
  * Deep clone object to avoid reference issues
  */
 export const deepClone = (obj) => {
-  if (obj === null || typeof obj !== 'object') return obj;
-  if (obj instanceof Date) return new Date(obj);
-  if (obj instanceof Array) return obj.map((item) => deepClone(item));
-  if (typeof obj === 'object') {
-    const clonedObj = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        clonedObj[key] = deepClone(obj[key]);
-      }
-    }
-    return clonedObj;
-  }
+  // Use JSON.parse and JSON.stringify for a robust deep clone of JSON-serializable objects.
+  // This is generally safer and more performant for state objects than a recursive function.
+  return JSON.parse(JSON.stringify(obj));
 };
 
 /**
