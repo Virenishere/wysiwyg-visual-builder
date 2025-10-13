@@ -16,14 +16,20 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F5F7F7]">
+      <div
+        className="flex items-center justify-center bg-[#F5F7F7]"
+        style={{ minHeight: '100vh' }}
+      >
         <GlobalLoader />
       </div>
     );
   }
 
   return (
-    <div className="bg-[#F5F7F7] min-h-screen flex w-full gap-4 p-4 relative">
+    <div
+      className="bg-[#F5F7F7] flex w-full gap-4 p-4 relative"
+      style={{ minHeight: '100vh' }}
+    >
       <TemplatePreview />
     </div>
   );

@@ -50,7 +50,7 @@ const PreviewPage = ({ params }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-gray-100" style={{ minHeight: '100vh' }}>
       {/* Header with responsive switcher */}
       <div className="bg-white shadow-sm border-b border-gray-200 p-4">
         <div className="flex justify-between items-center max-w-7xl mx-auto">

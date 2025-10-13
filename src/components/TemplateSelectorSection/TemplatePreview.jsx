@@ -32,7 +32,10 @@ export default function TemplatePreview() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full justify-center items-center">
+    <div
+      className="flex flex-col w-full justify-center items-center"
+      style={{ minHeight: '100vh' }}
+    >
       <div className="w-full flex justify-end px-16 pt-4">
         <button
           onClick={handleCreateNew}

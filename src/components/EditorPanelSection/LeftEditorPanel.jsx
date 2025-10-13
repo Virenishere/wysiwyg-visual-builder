@@ -112,7 +112,7 @@ export default function LeftEditorPanel() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex" style={{ height: '100vh' }}>
       <div className="flex pb-4 md:pb-10 pt-4 md:pt-8 flex-col items-center w-12 md:w-16 justify-between bg-white shadow-[4px_0_10px_rgba(0,0,0,0.15)] z-20">
         {/* Top */}
         <div className="mt-2 md:mt-4">

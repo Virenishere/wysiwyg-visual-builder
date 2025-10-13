@@ -13,8 +13,12 @@ import ResponsivenessSwitcher from '@/components/EditorPanelSection/Responsivene
 import { screenSizes } from '@/utils/screen';
 // Remove the FaBars import since we don't need it anymore
 
+import ScreenSizeWarning from '@/components/ScreenSizeWarning';
+
 const TemplatePage = ({ params }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [showScreenSizeWarning, setShowScreenSizeWarning] = useState(false);
+  const [acknowledgedScreenSizes, setAcknowledgedScreenSizes] = useState([]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -27,6 +31,18 @@ const TemplatePage = ({ params }) => {
   const parents = useDivStore((state) => state.parents);
   const screenSize = useDivStore((state) => state.screenSize);
   const setScreenSize = useDivStore((state) => state.setScreenSize);
+
+  const handleScreenSizeChange = (newSize) => {
+    setScreenSize(newSize);
+    if (!acknowledgedScreenSizes.includes(newSize)) {
+      setShowScreenSizeWarning(true);
+    }
+  };
+
+  const handleScreenSizeWarningConfirm = () => {
+    setAcknowledgedScreenSizes([...acknowledgedScreenSizes, screenSize]);
+    setShowScreenSizeWarning(false);
+  };
 
   const messages = [
     'Loading template...',
@@ -138,7 +154,10 @@ const TemplatePage = ({ params }) => {
         </div>
 
         {/* Desktop Loading Screen */}
-        <div className="hidden md:flex flex-col items-center justify-center h-screen gap-6 bg-gray-100">
+        <div
+          className="hidden md:flex flex-col items-center justify-center gap-6 bg-gray-100"
+          style={{ height: '100vh' }}
+        >
           <GlobalLoader />
           <p className="text-lg font-medium text-gray-700 animate-pulse">
             {messages[step] || messages[messages.length - 1]}
@@ -200,7 +219,10 @@ const TemplatePage = ({ params }) => {
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden flex flex-col h-screen bg-gray-100">
+      <div
+        className="md:hidden flex flex-col bg-gray-100"
+        style={{ height: '100vh' }}
+      >
         <div className="flex-1 p-2">
           <div
             className="w-full h-full bg-white rounded-lg shadow-lg overflow-hidden"
@@ -219,14 +241,17 @@ const TemplatePage = ({ params }) => {
         <div className="p-2">
           <ResponsivenessSwitcher
             screenSize={screenSize}
-            setScreenSize={setScreenSize}
+            setScreenSize={handleScreenSizeChange}
             showSaveButton={true}
           />
         </div>
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:flex h-screen bg-gray-100 overflow-hidden">
+      <div
+        className="hidden md:flex bg-gray-100 overflow-hidden"
+        style={{ height: '100vh' }}
+      >
         <LeftEditorPanel />
 
         <main
@@ -266,7 +291,7 @@ const TemplatePage = ({ params }) => {
         <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
           <ResponsivenessSwitcher
             screenSize={screenSize}
-            setScreenSize={setScreenSize}
+            setScreenSize={handleScreenSizeChange}
             showSaveButton={true}
           />
         </div>
@@ -294,6 +319,13 @@ const TemplatePage = ({ params }) => {
               </button>
             </div>
           </div>
+        )}
+
+        {showScreenSizeWarning && (
+          <ScreenSizeWarning
+            onClose={() => setShowScreenSizeWarning(false)}
+            onConfirm={handleScreenSizeWarningConfirm}
+          />
         )}
       </div>
     </>

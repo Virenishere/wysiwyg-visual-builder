@@ -45,12 +45,14 @@ const BoxPreview = ({ box, screenSize }) => {
 };
 
 const ParentPreview = ({ parent, screenSize }) => {
-  const height = getResponsiveValue(parent.height, screenSize) || 'auto';
+  const height = getResponsiveValue(parent.size?.height, screenSize) || 'auto';
+  const backgroundColor =
+    getResponsiveValue(parent.size?.background, screenSize) || 'transparent';
 
   const parentStyle = {
     position: 'relative',
     height: height === 'auto' ? 'auto' : `${height}px`,
-    backgroundColor: parent.backgroundColor || 'transparent',
+    backgroundColor: backgroundColor,
     backgroundImage: parent.backgroundImage
       ? `url(${parent.backgroundImage})`
       : 'none',
