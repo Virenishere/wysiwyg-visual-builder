@@ -19,6 +19,8 @@ const TemplatePage = ({ params }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [showScreenSizeWarning, setShowScreenSizeWarning] = useState(false);
 
+  const [acknowledgedScreenSizes, setAcknowledgedScreenSizes] = useState([]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -31,9 +33,16 @@ const TemplatePage = ({ params }) => {
   const screenSize = useDivStore((state) => state.screenSize);
   const setScreenSize = useDivStore((state) => state.setScreenSize);
 
+  // const handleScreenSizeChange = (newSize) => {
+  //   setScreenSize(newSize);
+  //   setShowScreenSizeWarning(true);
+  // };
+
   const handleScreenSizeChange = (newSize) => {
     setScreenSize(newSize);
-    setShowScreenSizeWarning(true);
+    if (!acknowledgedScreenSizes.includes(newSize)) {
+      setShowScreenSizeWarning(true);
+    }
   };
 
   const messages = [
