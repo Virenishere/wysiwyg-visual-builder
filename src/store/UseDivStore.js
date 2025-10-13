@@ -1092,7 +1092,12 @@ const useDivStore = create(
             !isFinite(elementWidth) ||
             !isFinite(elementHeight)
           ) {
-            console.error('Cannot center element due to invalid dimensions.');
+            console.error('Cannot center element due to invalid dimensions.', {
+              boxWidth,
+              boxHeight,
+              elementWidth,
+              elementHeight,
+            });
             toast.error('Cannot center element due to invalid dimensions.');
             return state;
           }

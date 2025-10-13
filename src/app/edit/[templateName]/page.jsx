@@ -18,7 +18,6 @@ import ScreenSizeWarning from '@/components/ScreenSizeWarning';
 const TemplatePage = ({ params }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [showScreenSizeWarning, setShowScreenSizeWarning] = useState(false);
-  const [acknowledgedScreenSizes, setAcknowledgedScreenSizes] = useState([]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -34,14 +33,7 @@ const TemplatePage = ({ params }) => {
 
   const handleScreenSizeChange = (newSize) => {
     setScreenSize(newSize);
-    if (!acknowledgedScreenSizes.includes(newSize)) {
-      setShowScreenSizeWarning(true);
-    }
-  };
-
-  const handleScreenSizeWarningConfirm = () => {
-    setAcknowledgedScreenSizes([...acknowledgedScreenSizes, screenSize]);
-    setShowScreenSizeWarning(false);
+    setShowScreenSizeWarning(true);
   };
 
   const messages = [

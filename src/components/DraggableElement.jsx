@@ -1,7 +1,8 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import useDivStore from '@/store/UseDivStore';
+import throttle from '@/utils/throttle';
 
 // Sub-components (assuming these exist)
 import EditableTextElement from './DraggableElementSection/EditableTextElement';
@@ -35,6 +36,14 @@ export default function DraggableElement({
   const [isEditing, setIsEditing] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const fileInputRef = useRef(null);
+  const dragDataRef = useRef(null);
+
+  const throttledSetActiveDragItem = useCallback(
+    throttle((data) => {
+      setActiveDragItem(data);
+    }, 16), // Throttle to 60fps
+    [setActiveDragItem]
+  );
 
   // Get the actual editor container width for scaling calculations
   const editorContainerWidth =
@@ -244,23 +253,21 @@ export default function DraggableElement({
         }
         e.stopPropagation();
         setIsDragging(true);
-        setActiveDragItem({
-          ...element,
-          x: x,
-          y: y,
-          isElement: true,
-        });
+        const startData = { ...element, x, y, isElement: true };
+        dragDataRef.current = startData;
+        setActiveDragItem(startData);
       }}
       onDrag={(e, d) => {
         if (isEditing) return;
 
-        // Update active drag item with current position
-        setActiveDragItem({
+        const newDragData = {
           ...element,
           x: d.x,
           y: d.y,
           isElement: true,
-        });
+        };
+        dragDataRef.current = newDragData;
+        throttledSetActiveDragItem(newDragData);
       }}
       onDragStop={(e, d) => {
         if (isEditing) return;
@@ -282,6 +289,7 @@ export default function DraggableElement({
           y: newY,
         });
         setActiveDragItem(null);
+        dragDataRef.current = null;
       }}
       onResizeStart={(e) => {
         if (isEditing) {

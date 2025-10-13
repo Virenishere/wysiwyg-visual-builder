@@ -35,6 +35,9 @@ export default function ElementRenderer({ element, screenSize }) {
           key={element.id}
           style={{
             ...baseStyle,
+            backgroundColor:
+              getResponsiveValue(element.backgroundColor, screenSize) ||
+              'transparent',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
@@ -47,7 +50,12 @@ export default function ElementRenderer({ element, screenSize }) {
       return (
         <div
           key={element.id}
-          style={baseStyle}
+          style={{
+            ...baseStyle,
+            backgroundColor:
+              getResponsiveValue(element.backgroundColor, screenSize) ||
+              'transparent',
+          }}
           dangerouslySetInnerHTML={{ __html: element.content }}
         />
       );
@@ -58,6 +66,9 @@ export default function ElementRenderer({ element, screenSize }) {
           key={element.id}
           style={{
             ...baseStyle,
+            backgroundColor:
+              getResponsiveValue(element.backgroundColor, screenSize) ||
+              '#007bff',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
             fontWeight: '600',
@@ -78,6 +89,9 @@ export default function ElementRenderer({ element, screenSize }) {
           key={element.id}
           style={{
             ...baseStyle,
+            backgroundColor:
+              getResponsiveValue(element.backgroundColor, screenSize) ||
+              'transparent',
             padding: 0,
           }}
         >
@@ -124,7 +138,7 @@ export default function ElementRenderer({ element, screenSize }) {
             ...baseStyle,
             ...element.style, // Apply custom styles first
             backgroundColor:
-              element.backgroundColor ||
+              getResponsiveValue(element.backgroundColor, screenSize) ||
               element.style?.backgroundColor ||
               '#f8f9fa',
             border:
@@ -180,7 +194,7 @@ export default function ElementRenderer({ element, screenSize }) {
             ...baseStyle,
             // Ensure line is always visible
             backgroundColor:
-              element.backgroundColor ||
+              getResponsiveValue(element.backgroundColor, screenSize) ||
               element.style?.backgroundColor ||
               '#000000',
             // Set minimum height for visibility in editor
@@ -225,7 +239,9 @@ export default function ElementRenderer({ element, screenSize }) {
           key={element.id}
           style={{
             ...baseStyle,
-            backgroundColor: element.backgroundColor || 'transparent',
+            backgroundColor:
+              getResponsiveValue(element.backgroundColor, screenSize) ||
+              'transparent',
             border: element.border || '1px solid #ddd',
             // Apply any custom styles
             ...element.style,
