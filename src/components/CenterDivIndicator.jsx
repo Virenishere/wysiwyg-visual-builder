@@ -4,28 +4,12 @@ import { getResponsiveValue } from '@/utils/screen';
 
 export default function CenterDivIndicator({ activeBox, containerBounds }) {
   const indicatorContainerRef = useRef(null);
-  const [containerElement, setContainerElement] = useState(null);
   const screenSize = useDivStore((state) => state.screenSize);
 
-  useEffect(() => {
-    if (indicatorContainerRef.current) {
-      setContainerElement(indicatorContainerRef.current.parentElement);
-    }
-  }, []);
-
-  if (!activeBox || (!containerElement && !containerBounds)) {
+  if (!activeBox || !containerBounds) {
     return null;
   }
 
-  // use containerBounds if provide, otherwise use the container element
-  const bounds = containerBounds || {
-    width: containerElement.clientWidth,
-    height: containerElement.clientHeight,
-    x: 0,
-    y: 0,
-  };
-
-  // Fix: Ensure we get responsive values properly for all screen sizes
   const boxRect = {
     width: parseInt(getResponsiveValue(activeBox.width, screenSize), 10) || 150,
     height:
@@ -35,8 +19,8 @@ export default function CenterDivIndicator({ activeBox, containerBounds }) {
   };
 
   const containerCenter = {
-    x: bounds.width / 2,
-    y: bounds.height / 2,
+    x: containerBounds.width / 2,
+    y: containerBounds.height / 2,
   };
 
   const boxCenter = {
@@ -55,7 +39,7 @@ export default function CenterDivIndicator({ activeBox, containerBounds }) {
     <div
       ref={indicatorContainerRef}
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 100 }}
+      style={{ zIndex: 100, ...containerBounds }}
     >
       {/* Vertical center line */}
       {isCenteredHorizontally && (

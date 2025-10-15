@@ -134,6 +134,69 @@ export const EXPORT_FORMATS = {
   IMAGE: 'image',
 };
 
+export const SCREEN_ORDER = [
+  '4k',
+  'l-laptop',
+  'laptop',
+  'tablet',
+  'mobile',
+  'mobile-m',
+  'mobile-s',
+];
+
+export const initialLayout = {
+  parents: [
+    {
+      id: 1,
+      size: { height: 300, background: '#ffffff' },
+      rnds: [
+        {
+          id: 1,
+          width: {
+            '4k': 150,
+            'l-laptop': 150,
+            laptop: 150,
+            tablet: 150,
+            mobile: 150,
+            'mobile-m': 150,
+            'mobile-s': 150,
+          },
+          height: {
+            '4k': 150,
+            'l-laptop': 150,
+            laptop: 150,
+            tablet: 150,
+            mobile: 150,
+            'mobile-m': 150,
+            'mobile-s': 150,
+          },
+          x: {
+            '4k': 0,
+            'l-laptop': 0,
+            laptop: 0,
+            tablet: 0,
+            mobile: 0,
+            'mobile-m': 0,
+            'mobile-s': 0,
+          },
+          y: {
+            '4k': 0,
+            'l-laptop': 0,
+            laptop: 0,
+            tablet: 0,
+            mobile: 0,
+            'mobile-m': 0,
+            'mobile-s': 0,
+          },
+          elements: [],
+          customHtml: '',
+          customCss: '',
+        },
+      ],
+    },
+  ],
+};
+
 export default {
   ELEMENT_TYPES,
   DEFAULT_DIMENSIONS,

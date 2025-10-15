@@ -6,7 +6,7 @@ export default function AlignIndicator({
   activeItem,
   allItems = [],
   containerBounds,
-  tolerance = 2,
+  tolerance = 0,
 }) {
   const indicatorContainerRef = useRef(null);
   const [containerElement, setContainerElement] = useState(null);
@@ -37,7 +37,6 @@ export default function AlignIndicator({
   const generateAlignmentGuides = () => {
     const guides = { vertical: [], horizontal: [] };
 
-    // Fix: Ensure we get responsive values properly with fallbacks
     const activeWidth =
       parseInt(getResponsiveValue(activeItem.width, screenSize), 10) || 150;
     const activeHeight =
@@ -51,11 +50,12 @@ export default function AlignIndicator({
     const activeBottom = activeTop + activeHeight;
     const activeCenterY = activeTop + activeHeight / 2;
 
-    // Check alignment against other items
+    const verticalGuides = new Map();
+    const horizontalGuides = new Map();
+
     allItems.forEach((item) => {
       if (item.id === activeItem.id) return;
 
-      // Fix: Ensure we get responsive values properly with fallbacks for all items
       const itemWidth =
         parseInt(getResponsiveValue(item.width, screenSize), 10) || 150;
       const itemHeight =
@@ -68,117 +68,55 @@ export default function AlignIndicator({
       const itemBottom = itemTop + itemHeight;
       const itemCenterY = itemTop + itemHeight / 2;
 
-      // Vertical alignment checks (left, right, center)
-      if (Math.abs(activeLeft - itemLeft) < tolerance) {
-        guides.vertical.push({
+      // Vertical alignment
+      if (Math.abs(activeLeft - itemLeft) <= tolerance) {
+        verticalGuides.set(activeLeft, {
           x: activeLeft,
-          type: 'left-left',
           minY: Math.min(activeTop, itemTop),
           maxY: Math.max(activeBottom, itemBottom),
         });
       }
-      if (Math.abs(activeRight - itemRight) < tolerance) {
-        guides.vertical.push({
+      if (Math.abs(activeRight - itemRight) <= tolerance) {
+        verticalGuides.set(activeRight, {
           x: activeRight,
-          type: 'right-right',
           minY: Math.min(activeTop, itemTop),
           maxY: Math.max(activeBottom, itemBottom),
         });
       }
-      if (Math.abs(activeLeft - itemRight) < tolerance) {
-        guides.vertical.push({
-          x: activeLeft,
-          type: 'left-right',
-          minY: Math.min(activeTop, itemTop),
-          maxY: Math.max(activeBottom, itemBottom),
-        });
-      }
-      if (Math.abs(activeRight - itemLeft) < tolerance) {
-        guides.vertical.push({
-          x: activeRight,
-          type: 'right-left',
-          minY: Math.min(activeTop, itemTop),
-          maxY: Math.max(activeBottom, itemBottom),
-        });
-      }
-      if (Math.abs(activeCenterX - itemCenterX) < tolerance) {
-        guides.vertical.push({
+      if (Math.abs(activeCenterX - itemCenterX) <= tolerance) {
+        verticalGuides.set(activeCenterX, {
           x: activeCenterX,
-          type: 'center-center',
           minY: Math.min(activeTop, itemTop),
           maxY: Math.max(activeBottom, itemBottom),
         });
       }
 
-      // Horizontal alignment checks (top, bottom, center)
-      if (Math.abs(activeTop - itemTop) < tolerance) {
-        guides.horizontal.push({
+      // Horizontal alignment
+      if (Math.abs(activeTop - itemTop) <= tolerance) {
+        horizontalGuides.set(activeTop, {
           y: activeTop,
-          type: 'top-top',
           minX: Math.min(activeLeft, itemLeft),
           maxX: Math.max(activeRight, itemRight),
         });
       }
-      if (Math.abs(activeBottom - itemBottom) < tolerance) {
-        guides.horizontal.push({
+      if (Math.abs(activeBottom - itemBottom) <= tolerance) {
+        horizontalGuides.set(activeBottom, {
           y: activeBottom,
-          type: 'bottom-bottom',
           minX: Math.min(activeLeft, itemLeft),
           maxX: Math.max(activeRight, itemRight),
         });
       }
-      if (Math.abs(activeTop - itemBottom) < tolerance) {
-        guides.horizontal.push({
-          y: activeTop,
-          type: 'top-bottom',
-          minX: Math.min(activeLeft, itemLeft),
-          maxX: Math.max(activeRight, itemRight),
-        });
-      }
-      if (Math.abs(activeBottom - itemTop) < tolerance) {
-        guides.horizontal.push({
-          y: activeBottom,
-          type: 'bottom-top',
-          minX: Math.min(activeLeft, itemLeft),
-          maxX: Math.max(activeRight, itemRight),
-        });
-      }
-      if (Math.abs(activeCenterY - itemCenterY) < tolerance) {
-        guides.horizontal.push({
+      if (Math.abs(activeCenterY - itemCenterY) <= tolerance) {
+        horizontalGuides.set(activeCenterY, {
           y: activeCenterY,
-          type: 'center-center',
           minX: Math.min(activeLeft, itemLeft),
           maxX: Math.max(activeRight, itemRight),
         });
       }
     });
 
-    // Remove duplicates and ensure guides stay within bounds
-    guides.vertical = guides.vertical
-      .filter(
-        (guide, index, array) =>
-          array.findIndex((g) => g.x === guide.x) === index &&
-          guide.x >= bounds.x &&
-          guide.x <= bounds.x + bounds.width
-      )
-      .map((guide) => ({
-        ...guide,
-        minY: Math.max(guide.minY, bounds.y),
-        maxY: Math.min(guide.maxY, bounds.y + bounds.height),
-      }));
-
-    guides.horizontal = guides.horizontal
-      .filter(
-        (guide, index, array) =>
-          array.findIndex((g) => g.y === guide.y) === index &&
-          guide.y >= bounds.y &&
-          guide.y <= bounds.y + bounds.height
-      )
-      .map((guide) => ({
-        ...guide,
-        minX: Math.max(guide.minX, bounds.x),
-        maxX: Math.min(guide.maxX, bounds.x + bounds.width),
-      }));
+    guides.vertical = Array.from(verticalGuides.values());
+    guides.horizontal = Array.from(horizontalGuides.values());
 
     return guides;
   };
