@@ -18,6 +18,7 @@ import ScreenSizeWarning from '@/components/ScreenSizeWarning';
 const TemplatePage = ({ params }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [showScreenSizeWarning, setShowScreenSizeWarning] = useState(false);
+  const [disableAllWarnings, setDisableAllWarnings] = useState(false);
 
   const [acknowledgedScreenSizes, setAcknowledgedScreenSizes] = useState([]);
 
@@ -40,9 +41,14 @@ const TemplatePage = ({ params }) => {
 
   const handleScreenSizeChange = (newSize) => {
     setScreenSize(newSize);
-    if (!acknowledgedScreenSizes.includes(newSize)) {
+    if (!disableAllWarnings && !acknowledgedScreenSizes.includes(newSize)) {
       setShowScreenSizeWarning(true);
     }
+  };
+
+  const handleScreenSizeWarningConfirm = () => {
+    setShowScreenSizeWarning(false);
+    setAcknowledgedScreenSizes((prev) => [...prev, screenSize]);
   };
 
   const messages = [
@@ -326,6 +332,10 @@ const TemplatePage = ({ params }) => {
           <ScreenSizeWarning
             onClose={() => setShowScreenSizeWarning(false)}
             onConfirm={handleScreenSizeWarningConfirm}
+            onDisableAll={() => {
+              setDisableAllWarnings(true);
+              setShowScreenSizeWarning(false);
+            }}
           />
         )}
       </div>
