@@ -113,10 +113,19 @@ export default function SectionComponent({ parent, parentIndex }) {
               box={box}
               parentId={parent.id}
               isSectionSelected={isSectionSelected}
+              sectionWidth={sectionRef.current?.clientWidth}
             />
           ))
         ) : (
-          <div className="flex items-center justify-center h-full">
+          <div
+            className="flex items-center justify-center h-full cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedParent(parent.id);
+              setSelectedBox(null);
+              setSelectedElement(null);
+            }}
+          >
             <p className="text-gray-400">
               This section is empty. Add a box to get started.
             </p>
