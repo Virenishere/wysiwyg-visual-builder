@@ -42,7 +42,7 @@ export default function DraggableElement({
     throttle((data) => {
       setActiveDragItem(data);
     }, 16), // Throttle to 60fps
-    [setActiveDragItem]
+    [setActiveDragItem, throttle]
   );
 
   // Get the actual editor container width for scaling calculations
@@ -220,6 +220,18 @@ export default function DraggableElement({
     return styles;
   };
 
+  // Helper function to get default border for element types
+  const getDefaultBorder = () => {
+    if (
+      element.type === 'text' ||
+      element.type === 'paragraph' ||
+      element.type === 'card'
+    ) {
+      return '1px solid rgba(0, 0, 0, 0.1)'; // Mild border for text and card elements
+    }
+    return '1px solid transparent'; // Transparent for other elements
+  };
+
   const inlineStyles = buildInlineStyles();
 
   return (
@@ -260,10 +272,18 @@ export default function DraggableElement({
       onDrag={(e, d) => {
         if (isEditing) return;
 
+        // Validate bounds during drag to prevent going outside container
+        const validatedX = containerBounds
+          ? Math.max(0, Math.min(d.x, containerBounds.width - width))
+          : d.x;
+        const validatedY = containerBounds
+          ? Math.max(0, Math.min(d.y, containerBounds.height - height))
+          : d.y;
+
         const newDragData = {
           ...element,
-          x: d.x,
-          y: d.y,
+          x: validatedX,
+          y: validatedY,
           isElement: true,
         };
         dragDataRef.current = newDragData;
@@ -274,10 +294,21 @@ export default function DraggableElement({
 
         setIsDragging(false);
 
-        const newX = parseFloat(d.x);
-        const newY = parseFloat(d.y);
+        // Apply bounds validation before updating
+        const validatedX = containerBounds
+          ? Math.max(
+              0,
+              Math.min(parseFloat(d.x), containerBounds.width - width)
+            )
+          : parseFloat(d.x);
+        const validatedY = containerBounds
+          ? Math.max(
+              0,
+              Math.min(parseFloat(d.y), containerBounds.height - height)
+            )
+          : parseFloat(d.y);
 
-        if (isNaN(newX) || isNaN(newY)) {
+        if (isNaN(validatedX) || isNaN(validatedY)) {
           console.error('NaN detected on drag stop. Aborting update.');
           setActiveDragItem(null);
           return;
@@ -285,8 +316,8 @@ export default function DraggableElement({
 
         // Update element position on drag stop
         updateElement(parentId, boxId, element.id, {
-          x: newX,
-          y: newY,
+          x: validatedX,
+          y: validatedY,
         });
         setActiveDragItem(null);
         dragDataRef.current = null;
@@ -352,9 +383,7 @@ export default function DraggableElement({
       onClick={handleClick}
       style={{
         border:
-          isSelected && !isEditing
-            ? '2px solid #007bff'
-            : '1px solid transparent',
+          isSelected && !isEditing ? '2px solid #007bff' : getDefaultBorder(),
         borderRadius: '2px',
         zIndex:
           isDragging || isResizing || isSelected || isEditing
@@ -363,6 +392,7 @@ export default function DraggableElement({
         pointerEvents: 'auto',
         cursor: isEditing ? 'text' : 'move',
         touchAction: 'none',
+        userSelect: isEditing ? 'text' : 'none',
         ...inlineStyles,
       }}
       className={`element-rnd ${element.customClassName || ''} ${isEditing ? 'editing-text' : ''}`}
@@ -389,9 +419,16 @@ export default function DraggableElement({
         }
         .editing-text {
           cursor: text !important;
+          user-select: text !important;
         }
         .element-rnd {
           user-select: none;
+        }
+        .element-rnd.editing-text {
+          user-select: text !important;
+        }
+        .rich-text-editor {
+          user-select: text !important;
         }
       `}</style>
     </Rnd>

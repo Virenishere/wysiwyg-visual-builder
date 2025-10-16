@@ -119,201 +119,526 @@ const RichTextEditor = ({
     }
   }, [onChange]);
 
-  // Execute commands with proper text selection behavior
-  const execCommand = useCallback(
-    (command, value = null) => {
+  // Modern text formatting functions using Selection API
+  const applyFormatting = useCallback(
+    (tag, style = null) => {
       if (!editorRef.current) return;
 
-      // Ensure editor has focus
-      editorRef.current.focus();
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
 
-      // Restore selection if we have one saved
-      if (savedSelection.current) {
-        try {
-          const selection = window.getSelection();
-          selection.removeAllRanges();
-          selection.addRange(savedSelection.current);
-        } catch (e) {
-          // If restore fails, continue with current selection
-        }
-      }
+      const range = selection.getRangeAt(0);
 
-      const hasTextSelected = hasSelection();
-
-      // Commands that should apply to all text when no selection exists
-      // Now includes formatting commands (bold, italic, underline) as requested
-      const globalStyleCommands = [
-        'fontName',
-        'fontSize',
-        'foreColor',
-        'hiliteColor',
-        'backColor',
-        'bold',
-        'italic',
-        'underline',
-      ];
-
-      // Special handling for different command types
-      if (command === 'paste') {
-        try {
-          document.execCommand('paste');
-        } catch (e) {
-          console.warn('Paste failed:', e);
-        }
-      } else if (command === 'delete') {
-        if (hasTextSelected) {
-          const selection = window.getSelection();
-          const range = selection.getRangeAt(0);
-          range.deleteContents();
-        }
-      } else if (!hasTextSelected && globalStyleCommands.includes(command)) {
-        // Apply to all text when no selection for style and formatting commands
-        const selection = window.getSelection();
-        const currentRange =
-          selection.rangeCount > 0
-            ? selection.getRangeAt(0).cloneRange()
-            : null;
-
-        // Select all content temporarily
+      if (range.collapsed) {
+        // No selection - apply to all text
         const allRange = document.createRange();
         allRange.selectNodeContents(editorRef.current);
         selection.removeAllRanges();
         selection.addRange(allRange);
-
-        // Apply the command to all text
-        document.execCommand(command, false, value);
-
-        // Restore cursor position
-        if (currentRange) {
-          try {
-            selection.removeAllRanges();
-            selection.addRange(currentRange);
-          } catch (e) {
-            // If restore fails, place cursor at end
-            const endRange = document.createRange();
-            endRange.selectNodeContents(editorRef.current);
-            endRange.collapse(false);
-            selection.removeAllRanges();
-            selection.addRange(endRange);
-          }
-        }
-      } else {
-        // For all other cases - apply command normally
-        // This includes: selected text formatting, alignment, lists, etc.
-        document.execCommand(command, false, value);
       }
 
-      // Update content and save selection after a brief delay
-      setTimeout(() => {
-        handleInput();
-        saveSelection();
-      }, 10);
+      const selectedContent = range.extractContents();
+      const wrapper = document.createElement(tag);
+
+      if (style) {
+        Object.assign(wrapper.style, style);
+      }
+
+      wrapper.appendChild(selectedContent);
+      range.insertNode(wrapper);
+
+      // Restore selection to the newly created element
+      const newRange = document.createRange();
+      newRange.selectNodeContents(wrapper);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      handleInput();
+      saveSelection();
     },
-    [hasSelection, handleInput, saveSelection]
+    [handleInput, saveSelection]
+  );
+
+  const toggleInlineStyle = useCallback(
+    (property, value) => {
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      let range = selection.getRangeAt(0);
+
+      if (range.collapsed) {
+        // No selection - apply to all text
+        const allRange = document.createRange();
+        allRange.selectNodeContents(editorRef.current);
+        selection.removeAllRanges();
+        selection.addRange(allRange);
+        range = allRange; // Update range reference
+      }
+
+      const selectedContent = range.extractContents();
+      const span = document.createElement('span');
+      span.style[property] = value;
+      span.appendChild(selectedContent);
+
+      range.insertNode(span);
+
+      // Restore selection to the newly created span
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      handleInput();
+      saveSelection();
+    },
+    [handleInput, saveSelection]
+  );
+
+  const insertText = useCallback(
+    (text) => {
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+
+      // Move cursor after inserted text
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      handleInput();
+      saveSelection();
+    },
+    [handleInput, saveSelection]
+  );
+
+  const deleteSelection = useCallback(() => {
+    if (!editorRef.current) return;
+
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) {
+      range.deleteContents();
+      handleInput();
+      saveSelection();
+    }
+  }, [handleInput, saveSelection]);
+
+  const undoRedoStack = useRef({ undo: [], redo: [] });
+  const maxHistorySize = 50;
+
+  const saveToHistory = useCallback(() => {
+    if (!editorRef.current) return;
+
+    const content = editorRef.current.innerHTML;
+    const history = undoRedoStack.current;
+
+    // Don't save if content is the same as last entry
+    if (
+      history.undo.length > 0 &&
+      history.undo[history.undo.length - 1] === content
+    ) {
+      return;
+    }
+
+    history.undo.push(content);
+    history.redo = []; // Clear redo stack when new action is performed
+
+    // Limit history size
+    if (history.undo.length > maxHistorySize) {
+      history.undo.shift();
+    }
+  }, []);
+
+  const performUndo = useCallback(() => {
+    if (!editorRef.current) return;
+
+    const history = undoRedoStack.current;
+    if (history.undo.length <= 1) return; // Keep at least current state
+
+    const currentContent = history.undo.pop();
+    history.redo.push(currentContent);
+
+    const previousContent = history.undo[history.undo.length - 1];
+    editorRef.current.innerHTML = previousContent;
+
+    handleInput();
+    saveSelection();
+  }, [handleInput, saveSelection]);
+
+  const performRedo = useCallback(() => {
+    if (!editorRef.current) return;
+
+    const history = undoRedoStack.current;
+    if (history.redo.length === 0) return;
+
+    const nextContent = history.redo.pop();
+    history.undo.push(nextContent);
+
+    editorRef.current.innerHTML = nextContent;
+
+    handleInput();
+    saveSelection();
+  }, [handleInput, saveSelection]);
+
+  // Handle link insertion
+  const handleLinkInsertion = useCallback(
+    (url, text = null) => {
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+
+      if (range.collapsed) {
+        // No selection - insert link with provided text or URL
+        link.textContent = text || url;
+        range.insertNode(link);
+      } else {
+        // Wrap selected text in link
+        const selectedContent = selection.extractContents();
+        link.appendChild(selectedContent);
+        range.insertNode(link);
+      }
+
+      selection.removeAllRanges();
+      handleInput();
+      saveSelection();
+    },
+    [handleInput, saveSelection]
+  );
+
+  // Handle table insertion
+  const handleTableInsertion = useCallback(
+    (rows = 3, cols = 3) => {
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const table = document.createElement('table');
+      table.style.borderCollapse = 'collapse';
+      table.style.width = '100%';
+
+      for (let i = 0; i < rows; i++) {
+        const row = document.createElement('tr');
+        for (let j = 0; j < cols; j++) {
+          const cell = document.createElement(i === 0 ? 'th' : 'td');
+          cell.style.border = '1px solid #ccc';
+          cell.style.padding = '8px';
+          cell.textContent = i === 0 ? `Header ${j + 1}` : `Cell ${i},${j + 1}`;
+          row.appendChild(cell);
+        }
+        table.appendChild(row);
+      }
+
+      range.deleteContents();
+      range.insertNode(table);
+
+      selection.removeAllRanges();
+      handleInput();
+      saveSelection();
+    },
+    [handleInput, saveSelection]
   );
 
   // Handle toolbar actions
   const handleAction = useCallback(
     (action) => {
-      const commandMap = {
-        bold: 'bold',
-        italic: 'italic',
-        underline: 'underline',
-        justifyLeft: 'justifyLeft',
-        justifyCenter: 'justifyCenter',
-        justifyRight: 'justifyRight',
-        insertOrderedList: 'insertOrderedList',
-        insertUnorderedList: 'insertUnorderedList',
-        copy: 'copy',
-        cut: 'cut',
-        paste: 'paste',
-        delete: 'delete',
-        undo: 'undo',
-        redo: 'redo',
-      };
-
-      if (commandMap[action]) {
-        execCommand(commandMap[action]);
-      } else if (action === 'quote') {
-        execCommand('formatBlock', 'blockquote');
+      switch (action) {
+        case 'bold':
+          toggleInlineStyle('fontWeight', 'bold');
+          break;
+        case 'italic':
+          toggleInlineStyle('fontStyle', 'italic');
+          break;
+        case 'underline':
+          toggleInlineStyle('textDecoration', 'underline');
+          break;
+        case 'justifyLeft':
+          if (editorRef.current) {
+            editorRef.current.style.textAlign = 'left';
+            handleInput();
+          }
+          break;
+        case 'justifyCenter':
+          if (editorRef.current) {
+            editorRef.current.style.textAlign = 'center';
+            handleInput();
+          }
+          break;
+        case 'justifyRight':
+          if (editorRef.current) {
+            editorRef.current.style.textAlign = 'right';
+            handleInput();
+          }
+          break;
+        case 'insertOrderedList':
+          applyFormatting('ol');
+          break;
+        case 'insertUnorderedList':
+          applyFormatting('ul');
+          break;
+        case 'copy':
+          // Let browser handle copy naturally
+          break;
+        case 'cut':
+          // Let browser handle cut naturally
+          break;
+        case 'paste':
+          // Let browser handle paste naturally
+          break;
+        case 'delete':
+          deleteSelection();
+          break;
+        case 'undo':
+          performUndo();
+          break;
+        case 'redo':
+          performRedo();
+          break;
+        case 'quote':
+          applyFormatting('blockquote');
+          break;
+        default:
+          break;
       }
     },
-    [execCommand]
+    [
+      toggleInlineStyle,
+      applyFormatting,
+      deleteSelection,
+      performUndo,
+      performRedo,
+      handleInput,
+    ]
   );
 
   const handleFontChange = useCallback(
     (font) => {
-      execCommand('fontName', font);
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+
+      if (range.collapsed) {
+        // No selection - apply to all text
+        editorRef.current.style.fontFamily = font;
+      } else {
+        // Apply to selected text
+        const selectedContent = selection.extractContents();
+        const span = document.createElement('span');
+        span.style.fontFamily = font;
+        span.appendChild(selectedContent);
+        range.insertNode(span);
+        selection.removeAllRanges();
+      }
+
+      handleInput();
+      saveSelection();
     },
-    [execCommand]
+    [handleInput, saveSelection]
   );
 
   const handleHeadingChange = useCallback(
     (heading) => {
-      execCommand('formatBlock', heading);
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+
+      // Default heading sizes (standard HTML heading sizes)
+      const headingSizes = {
+        h1: '2em', // 32px (default browser size)
+        h2: '1.5em', // 24px
+        h3: '1.17em', // 18.72px
+        h4: '1em', // 16px
+        h5: '0.83em', // 13.28px
+        h6: '0.67em', // 10.72px
+      };
+
+      if (range.collapsed) {
+        // No selection - apply to all content
+        const content = editorRef.current.innerHTML;
+        const wrapper = document.createElement(heading);
+        wrapper.innerHTML = content;
+        // Apply default heading size
+        wrapper.style.fontSize = headingSizes[heading] || '1em';
+        wrapper.style.fontWeight = 'bold';
+        wrapper.style.margin = '0.67em 0';
+        editorRef.current.innerHTML = '';
+        editorRef.current.appendChild(wrapper);
+      } else {
+        // Apply to selected text
+        const selectedContent = selection.extractContents();
+        const headingElement = document.createElement(heading);
+        headingElement.appendChild(selectedContent);
+        // Apply default heading size
+        headingElement.style.fontSize = headingSizes[heading] || '1em';
+        headingElement.style.fontWeight = 'bold';
+        headingElement.style.margin = '0.67em 0';
+        range.insertNode(headingElement);
+
+        // Restore selection to the newly created heading
+        const newRange = document.createRange();
+        newRange.selectNodeContents(headingElement);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+
+      handleInput();
+      saveSelection();
     },
-    [execCommand]
+    [handleInput, saveSelection]
   );
 
   const handleFontSizeChange = useCallback(
     (size) => {
-      execCommand('fontSize', size);
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+
+      if (range.collapsed) {
+        // No selection - apply to all text in the editor
+        const allElements = editorRef.current.querySelectorAll('*');
+        if (allElements.length === 0) {
+          // If no child elements, apply to the editor itself
+          editorRef.current.style.fontSize = size;
+        } else {
+          // Apply to all text content
+          allElements.forEach((el) => {
+            if (el.nodeType === Node.ELEMENT_NODE) {
+              el.style.fontSize = size;
+            }
+          });
+          // Also apply to direct text nodes
+          editorRef.current.style.fontSize = size;
+        }
+      } else {
+        // Apply to selected text
+        const selectedContent = range.extractContents();
+        const span = document.createElement('span');
+        span.style.fontSize = size;
+        span.appendChild(selectedContent);
+        range.insertNode(span);
+
+        // Restore selection to the newly created span
+        const newRange = document.createRange();
+        newRange.selectNodeContents(span);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+
+      handleInput();
+      saveSelection();
     },
-    [execCommand]
+    [handleInput, saveSelection]
   );
 
   const handleColorChange = useCallback(
     (color) => {
-      execCommand('foreColor', color);
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+
+      if (range.collapsed) {
+        // No selection - apply to all text
+        editorRef.current.style.color = color;
+      } else {
+        // Apply to selected text
+        const selectedContent = selection.extractContents();
+        const span = document.createElement('span');
+        span.style.color = color;
+        span.appendChild(selectedContent);
+        range.insertNode(span);
+
+        // Restore selection to the newly created span
+        const newRange = document.createRange();
+        newRange.selectNodeContents(span);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+
+      handleInput();
+      saveSelection();
     },
-    [execCommand]
+    [handleInput, saveSelection]
   );
 
   const handleBackgroundColorChange = useCallback(
     (color) => {
-      execCommand('hiliteColor', color);
+      if (!editorRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+
+      if (range.collapsed) {
+        // No selection - apply to all text
+        editorRef.current.style.backgroundColor = color;
+      } else {
+        // Apply to selected text
+        const selectedContent = selection.extractContents();
+        const span = document.createElement('span');
+        span.style.backgroundColor = color;
+        span.appendChild(selectedContent);
+        range.insertNode(span);
+
+        // Restore selection to the newly created span
+        const newRange = document.createRange();
+        newRange.selectNodeContents(span);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+
+      handleInput();
+      saveSelection();
     },
-    [execCommand]
+    [handleInput, saveSelection]
   );
 
   const handleInsertLink = useCallback(() => {
     const url = prompt('Enter URL:');
     if (url) {
-      execCommand('createLink', url);
+      handleLinkInsertion(url);
     }
-  }, [execCommand]);
+  }, [handleLinkInsertion]);
 
   const handleInsertTable = useCallback(() => {
     const rows = prompt('Number of rows:', '2');
     const cols = prompt('Number of columns:', '2');
     if (rows && cols && !isNaN(rows) && !isNaN(cols)) {
-      let tableHTML = `
-        <table style="
-          border-collapse: collapse; 
-          width: 100%; 
-          margin: 10px 0;
-          border: 1px solid #ddd;
-        ">`;
-
-      for (let i = 0; i < parseInt(rows); i++) {
-        tableHTML += '<tr>';
-        for (let j = 0; j < parseInt(cols); j++) {
-          tableHTML += `<td style="
-            border: 1px solid #ddd; 
-            padding: 8px; 
-            min-width: 50px;
-            min-height: 20px;
-          ">&nbsp;</td>`;
-        }
-        tableHTML += '</tr>';
-      }
-      tableHTML += '</table>';
-
-      restoreSelection();
-      document.execCommand('insertHTML', false, tableHTML);
-      handleInput();
+      handleTableInsertion(parseInt(rows), parseInt(cols));
     }
-  }, [execCommand, restoreSelection, handleInput]);
+  }, [handleTableInsertion]);
 
   const handleFocus = useCallback(() => {
     setIsEditing(true);
@@ -356,6 +681,131 @@ const RichTextEditor = ({
     saveSelection();
   }, [saveSelection]);
 
+  // Handle mouse events to disable dragging during text selection
+  const handleMouseDown = useCallback(
+    (e) => {
+      // Enable editing mode when user starts interacting with text
+      if (setIsEditing) {
+        setIsEditing(true);
+      }
+    },
+    [setIsEditing]
+  );
+
+  const handleMouseUp = useCallback(
+    (e) => {
+      // Check if there's a text selection
+      const selection = window.getSelection();
+      const hasTextSelection = selection && selection.toString().length > 0;
+
+      // Keep editing mode active if there's text selection
+      if (hasTextSelection && setIsEditing) {
+        setIsEditing(true);
+      }
+
+      handleSelectionChange();
+    },
+    [setIsEditing, handleSelectionChange]
+  );
+
+  // Handle clipboard events
+  const handlePaste = useCallback(
+    (e) => {
+      // Save state for undo before paste
+      saveToHistory();
+
+      // Update content after paste (let browser handle the actual paste)
+      setTimeout(() => {
+        handleInput();
+        saveSelection();
+      }, 10);
+    },
+    [handleInput, saveSelection, saveToHistory]
+  );
+
+  const handleCopy = useCallback((e) => {
+    // Let the browser handle copy naturally - no interference
+  }, []);
+
+  const handleCut = useCallback(
+    (e) => {
+      // Save state for undo before cut
+      saveToHistory();
+
+      // Update content after cut (let browser handle the actual cut)
+      setTimeout(() => {
+        handleInput();
+        saveSelection();
+      }, 10);
+    },
+    [handleInput, saveSelection, saveToHistory]
+  );
+  const handleKeyDown = useCallback(
+    (e) => {
+      // Check for keyboard shortcuts first
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault();
+            toggleInlineStyle('fontWeight', 'bold');
+            return;
+          case 'i':
+            e.preventDefault();
+            toggleInlineStyle('fontStyle', 'italic');
+            return;
+          case 'u':
+            e.preventDefault();
+            toggleInlineStyle('textDecoration', 'underline');
+            return;
+          case 'v':
+            // Check for Ctrl+Shift+V (paste and clear formatting)
+            if (e.shiftKey) {
+              e.preventDefault();
+              // Clear all content and add default text
+              if (editorRef.current) {
+                editorRef.current.innerHTML = 'Type your text here...';
+                handleInput();
+                // Select all the default text
+                const range = document.createRange();
+                range.selectNodeContents(editorRef.current);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+              }
+              return;
+            }
+            // Let browser handle normal paste naturally
+            break;
+          case 'z':
+            e.preventDefault();
+            if (e.shiftKey) {
+              performRedo();
+            } else {
+              performUndo();
+            }
+            return;
+          case 'y':
+            e.preventDefault();
+            performRedo();
+            return;
+          case 'c':
+          case 'x':
+          case 'a':
+            // Let browser handle copy, cut, select all naturally
+            break;
+          default:
+            break;
+        }
+      }
+
+      // Save current state for undo/redo before making changes (for regular typing)
+      if (!e.ctrlKey && !e.metaKey && e.key.length === 1) {
+        saveToHistory();
+      }
+    },
+    [toggleInlineStyle, performUndo, performRedo, saveToHistory, handleInput]
+  );
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       {isEditing && (
@@ -391,11 +841,11 @@ const RichTextEditor = ({
         onInput={handleInput}
         onMouseUp={handleSelectionChange}
         onKeyUp={handleSelectionChange}
+        onKeyDown={handleKeyDown}
         style={{
           width: '100%',
           height: '100%',
           outline: 'none',
-          fontSize: `${fontSize || 16}px`,
           fontFamily: fontFamily || 'Arial, sans-serif',
           color: color || '#000000',
           backgroundColor: backgroundColor || 'transparent',
@@ -409,6 +859,8 @@ const RichTextEditor = ({
           textAlign: 'left',
           overflowWrap: 'break-word',
           lineHeight: '1.5',
+          userSelect: 'text',
+          cursor: 'text',
           // Remove custom border styling - let DraggableElement handle it
           ...element?.customStyles,
         }}

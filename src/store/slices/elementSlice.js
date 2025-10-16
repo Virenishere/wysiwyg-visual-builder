@@ -234,24 +234,248 @@ export const createElementSlice = (set, get) => ({
                 if (elementToDuplicate) {
                   const newElement = deepClone(elementToDuplicate);
                   newElement.id = newElementId;
+
+                  // Get element dimensions for boundary validation
+                  const elementWidth =
+                    parseInt(
+                      getResponsiveValue(elementToDuplicate.width, screenSize),
+                      10
+                    ) || 100; // default fallback
+                  const elementHeight =
+                    parseInt(
+                      getResponsiveValue(elementToDuplicate.height, screenSize),
+                      10
+                    ) || 50; // default fallback
+
+                  // Get box dimensions for boundary validation
+                  const boxWidth = parseInt(
+                    getResponsiveValue(box.width, screenSize),
+                    10
+                  );
+                  const boxHeight = parseInt(
+                    getResponsiveValue(box.height, screenSize),
+                    10
+                  );
+
+                  // Calculate current position
+                  const currentX =
+                    typeof elementToDuplicate.x === 'object'
+                      ? elementToDuplicate.x[screenSize] || 0
+                      : elementToDuplicate.x || 0;
+                  const currentY =
+                    typeof elementToDuplicate.y === 'object'
+                      ? elementToDuplicate.y[screenSize] || 0
+                      : elementToDuplicate.y || 0;
+
+                  // Smart positioning logic - always try to place adjacent with small position changes
+                  let newX = currentX;
+                  let newY = currentY;
+                  const spacing = 10; // Smaller spacing for elements
+                  const positionVariant = 8; // Small position change for visibility
+
+                  // Check available space in each direction
+                  const canPlaceRight =
+                    currentX + elementWidth + spacing + elementWidth <=
+                    boxWidth;
+                  const canPlaceLeft = currentX - elementWidth - spacing >= 0;
+                  const canPlaceBelow =
+                    currentY + elementHeight + spacing + elementHeight <=
+                    boxHeight;
+                  const canPlaceAbove = currentY - elementHeight - spacing >= 0;
+
+                  // Determine current position relative to box boundaries
+                  const distanceFromRight =
+                    boxWidth - (currentX + elementWidth);
+                  const distanceFromLeft = currentX;
+                  const distanceFromBottom =
+                    boxHeight - (currentY + elementHeight);
+                  const distanceFromTop = currentY;
+
+                  // Primary logic: Try to place to the right with position variant
+                  if (canPlaceRight) {
+                    newX = currentX + elementWidth + spacing;
+                    newY = Math.max(
+                      0,
+                      Math.min(
+                        currentY + positionVariant,
+                        boxHeight - elementHeight
+                      )
+                    );
+                  }
+                  // If at right extreme, place to the left
+                  else if (
+                    canPlaceLeft &&
+                    distanceFromRight < elementWidth + spacing
+                  ) {
+                    newX = currentX - elementWidth - spacing;
+                    newY = Math.max(
+                      0,
+                      Math.min(
+                        currentY + positionVariant,
+                        boxHeight - elementHeight
+                      )
+                    );
+                  }
+                  // If can't place horizontally, try vertically
+                  else if (canPlaceBelow) {
+                    newX = Math.max(
+                      0,
+                      Math.min(
+                        currentX + positionVariant,
+                        boxWidth - elementWidth
+                      )
+                    );
+                    newY = currentY + elementHeight + spacing;
+                  }
+                  // If at bottom extreme, place above
+                  else if (
+                    canPlaceAbove &&
+                    distanceFromBottom < elementHeight + spacing
+                  ) {
+                    newX = Math.max(
+                      0,
+                      Math.min(
+                        currentX + positionVariant,
+                        boxWidth - elementWidth
+                      )
+                    );
+                    newY = currentY - elementHeight - spacing;
+                  }
+                  // Corner and edge cases with intelligent positioning
+                  else {
+                    // Determine which edge/corner we're closest to
+                    const isAtRightEdge = distanceFromRight <= spacing * 2;
+                    const isAtLeftEdge = distanceFromLeft <= spacing * 2;
+                    const isAtBottomEdge = distanceFromBottom <= spacing * 2;
+                    const isAtTopEdge = distanceFromTop <= spacing * 2;
+
+                    if (isAtRightEdge && isAtBottomEdge) {
+                      // Bottom-right corner: place to the left with upward shift
+                      newX = Math.max(
+                        spacing,
+                        currentX - elementWidth - spacing
+                      );
+                      newY = Math.max(spacing, currentY - positionVariant * 2);
+                    } else if (isAtRightEdge && isAtTopEdge) {
+                      // Top-right corner: place to the left with downward shift
+                      newX = Math.max(
+                        spacing,
+                        currentX - elementWidth - spacing
+                      );
+                      newY = Math.min(
+                        boxHeight - elementHeight - spacing,
+                        currentY + positionVariant * 2
+                      );
+                    } else if (isAtLeftEdge && isAtBottomEdge) {
+                      // Bottom-left corner: place to the right with upward shift
+                      newX = Math.min(
+                        boxWidth - elementWidth - spacing,
+                        currentX + elementWidth + spacing
+                      );
+                      newY = Math.max(spacing, currentY - positionVariant * 2);
+                    } else if (isAtLeftEdge && isAtTopEdge) {
+                      // Top-left corner: place to the right with downward shift
+                      newX = Math.min(
+                        boxWidth - elementWidth - spacing,
+                        currentX + elementWidth + spacing
+                      );
+                      newY = Math.min(
+                        boxHeight - elementHeight - spacing,
+                        currentY + positionVariant * 2
+                      );
+                    } else if (isAtRightEdge) {
+                      // Right edge: place to the left with slight position change
+                      newX = Math.max(
+                        spacing,
+                        currentX - elementWidth - spacing
+                      );
+                      newY = Math.max(
+                        spacing,
+                        Math.min(
+                          currentY + positionVariant,
+                          boxHeight - elementHeight - spacing
+                        )
+                      );
+                    } else if (isAtLeftEdge) {
+                      // Left edge: place to the right with slight position change
+                      newX = Math.min(
+                        boxWidth - elementWidth - spacing,
+                        currentX + elementWidth + spacing
+                      );
+                      newY = Math.max(
+                        spacing,
+                        Math.min(
+                          currentY + positionVariant,
+                          boxHeight - elementHeight - spacing
+                        )
+                      );
+                    } else if (isAtBottomEdge) {
+                      // Bottom edge: place above with slight position change
+                      newX = Math.max(
+                        spacing,
+                        Math.min(
+                          currentX + positionVariant,
+                          boxWidth - elementWidth - spacing
+                        )
+                      );
+                      newY = Math.max(
+                        spacing,
+                        currentY - elementHeight - spacing
+                      );
+                    } else if (isAtTopEdge) {
+                      // Top edge: place below with slight position change
+                      newX = Math.max(
+                        spacing,
+                        Math.min(
+                          currentX + positionVariant,
+                          boxWidth - elementWidth - spacing
+                        )
+                      );
+                      newY = Math.min(
+                        boxHeight - elementHeight - spacing,
+                        currentY + elementHeight + spacing
+                      );
+                    } else {
+                      // Default: small offset from original position
+                      newX = Math.max(
+                        spacing,
+                        Math.min(
+                          currentX + positionVariant,
+                          boxWidth - elementWidth - spacing
+                        )
+                      );
+                      newY = Math.max(
+                        spacing,
+                        Math.min(
+                          currentY + positionVariant,
+                          boxHeight - elementHeight - spacing
+                        )
+                      );
+                    }
+                  }
+
+                  // Ensure final position is within bounds
+                  newX = Math.max(0, Math.min(newX, boxWidth - elementWidth));
+                  newY = Math.max(0, Math.min(newY, boxHeight - elementHeight));
+
                   if (typeof newElement.x === 'object') {
                     newElement.x = {
                       ...newElement.x,
-                      [screenSize]: (newElement.x[screenSize] || 0) + 20,
+                      [screenSize]: newX,
                     };
                   } else {
                     newElement.x = {
-                      [screenSize]: (newElement.x || 0) + 20,
+                      [screenSize]: newX,
                     };
                   }
                   if (typeof newElement.y === 'object') {
                     newElement.y = {
                       ...newElement.y,
-                      [screenSize]: (newElement.y[screenSize] || 0) + 20,
+                      [screenSize]: newY,
                     };
                   } else {
                     newElement.y = {
-                      [screenSize]: (newElement.y || 0) + 20,
+                      [screenSize]: newY,
                     };
                   }
                   return {

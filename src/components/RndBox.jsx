@@ -137,7 +137,14 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         setActiveDragItem({ ...box, x: d.x, y: d.y, ...size });
       }}
       onDragStop={(e, d) => {
-        updateRnd(parentId, box.id, { x: d.x, y: d.y });
+        // Validate bounds to ensure box stays within section
+        const validatedX = Math.max(0, d.x);
+        const validatedY = Math.max(0, d.y);
+
+        updateRnd(parentId, box.id, {
+          x: validatedX,
+          y: validatedY,
+        });
         setActiveDragItem(null);
       }}
       onResizeStart={(e) => {
@@ -156,11 +163,18 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         });
       }}
       onResizeStop={(e, direction, ref, delta, pos) => {
+        const newWidth = parseInt(ref.style.width) || ref.offsetWidth;
+        const newHeight = parseInt(ref.style.height) || ref.offsetHeight;
+
+        // Validate bounds to ensure box stays within section after resize
+        const validatedX = Math.max(0, pos.x);
+        const validatedY = Math.max(0, pos.y);
+
         updateRnd(parentId, box.id, {
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-          x: pos.x,
-          y: pos.y,
+          width: newWidth,
+          height: newHeight,
+          x: validatedX,
+          y: validatedY,
         });
         setActiveDragItem(null);
         setIsResizing(false);

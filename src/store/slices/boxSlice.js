@@ -96,6 +96,15 @@ export const createBoxSlice = (set, get) => ({
           if (rndToDuplicate) {
             const newRnd = deepClone(rndToDuplicate);
             newRnd.id = newBoxId;
+            console.log('Original RND data:', {
+              id: rndToDuplicate.id,
+              x: rndToDuplicate.x,
+              y: rndToDuplicate.y,
+              width: rndToDuplicate.width,
+              height: rndToDuplicate.height,
+              screenSize: screenSize,
+            });
+
             const currentX = parseInt(
               getResponsiveValue(rndToDuplicate.x, screenSize),
               10
@@ -104,15 +113,114 @@ export const createBoxSlice = (set, get) => ({
               getResponsiveValue(rndToDuplicate.y, screenSize),
               10
             );
-            if (typeof newRnd.x === 'object') {
-              newRnd.x[screenSize] = currentX + 20;
+
+            console.log('Parsed current position:', { currentX, currentY });
+
+            // Get box dimensions for boundary validation
+            const boxWidth = parseInt(
+              getResponsiveValue(rndToDuplicate.width, screenSize),
+              10
+            );
+            const boxHeight = parseInt(
+              getResponsiveValue(rndToDuplicate.height, screenSize),
+              10
+            );
+
+            // Get section bounds - use actual section dimensions or expand to fit current div
+            const sectionElement = document.querySelector(
+              `[data-section-id="${parentId}"]`
+            );
+            let sectionWidth = 1200; // larger default fallback
+            let sectionHeight = 800; // larger default fallback
+
+            if (sectionElement) {
+              const clientWidth = sectionElement.clientWidth;
+              const clientHeight = sectionElement.clientHeight;
+              // Ensure section bounds are large enough to contain the current div
+              sectionWidth = Math.max(
+                clientWidth - 20,
+                currentX + boxWidth + 200
+              ); // expand if needed
+              sectionHeight = Math.max(
+                clientHeight - 20,
+                currentY + boxHeight + 200
+              ); // expand if needed
+            }
+
+            console.log('Section element found:', !!sectionElement, 'Bounds:', {
+              sectionWidth,
+              sectionHeight,
+            });
+
+            // Smart positioning logic - check edges first, then place accordingly
+            let newX = currentX;
+            let newY = currentY;
+            const spacing = 20; // Small spacing for adjacency
+            const positionVariant = 5; // Very small position change for visibility
+
+            // Define edge thresholds - more aggressive detection for right edge
+            const rightEdgeThreshold = sectionWidth * 0.75; // 75% of section width
+            const bottomEdgeThreshold = sectionHeight * 0.75; // 75% of section height
+
+            // Check if we're near the right edge
+            const isNearRightEdge = currentX >= rightEdgeThreshold;
+            // Check if we're near the bottom edge
+            const isNearBottomEdge = currentY >= bottomEdgeThreshold;
+
+            console.log('Edge detection:', {
+              currentX,
+              currentY,
+              rightEdgeThreshold,
+              bottomEdgeThreshold,
+              isNearRightEdge,
+              isNearBottomEdge,
+              sectionWidth,
+              sectionHeight,
+            });
+
+            if (isNearRightEdge && isNearBottomEdge) {
+              // Near both right and bottom edges - place to the left and slightly up
+              newX = currentX - spacing - boxWidth;
+              newY = currentY - positionVariant;
+              console.log('Placing LEFT and UP (both edges)');
+            } else if (isNearRightEdge) {
+              // Near right edge only - place to the left with small vertical shift
+              newX = currentX - spacing - boxWidth;
+              newY = currentY + positionVariant;
+              console.log('Placing LEFT (right edge detected)');
+            } else if (isNearBottomEdge) {
+              // Near bottom edge only - place above with small horizontal shift
+              newX = currentX + positionVariant;
+              newY = currentY - spacing - boxHeight;
+              console.log('Placing ABOVE (bottom edge detected)');
             } else {
-              newRnd.x = { [screenSize]: currentX + 20 };
+              // Default case - place to the right with small vertical shift
+              newX = currentX + spacing + boxWidth;
+              newY = currentY + positionVariant;
+              console.log('Placing RIGHT (default)');
+            }
+
+            // Final boundary check to ensure the div stays within section limits
+            newX = Math.max(0, Math.min(newX, sectionWidth - boxWidth));
+            newY = Math.max(0, Math.min(newY, sectionHeight - boxHeight));
+
+            console.log('Duplication Debug:', {
+              originalPosition: { x: currentX, y: currentY },
+              newPosition: { x: newX, y: newY },
+              sectionBounds: { width: sectionWidth, height: sectionHeight },
+              boxDimensions: { width: boxWidth, height: boxHeight },
+              screenSize: screenSize,
+            });
+
+            if (typeof newRnd.x === 'object') {
+              newRnd.x[screenSize] = newX;
+            } else {
+              newRnd.x = { [screenSize]: newX };
             }
             if (typeof newRnd.y === 'object') {
-              newRnd.y[screenSize] = currentY + 20;
+              newRnd.y[screenSize] = newY;
             } else {
-              newRnd.y = { [screenSize]: currentY + 20 };
+              newRnd.y = { [screenSize]: newY };
             }
             const { elements, nextIds } = generateUniqueIds(
               { elements: newRnd.elements },
@@ -125,7 +233,11 @@ export const createBoxSlice = (set, get) => ({
         }
         return p;
       });
-      return { parents };
+      return {
+        ...state,
+        parents,
+        selectedBoxId: newBoxId,
+      };
     });
     toast.success('Div box duplicated!');
   },

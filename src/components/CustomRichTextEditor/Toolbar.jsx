@@ -17,6 +17,7 @@ import {
   FaCut,
   FaTrashAlt,
   FaChevronDown,
+  FaTextHeight,
 } from 'react-icons/fa';
 import { MdOutlineFormatColorText, MdFormatColorFill } from 'react-icons/md';
 import { LuHeading } from 'react-icons/lu';
@@ -214,7 +215,7 @@ const Dropdown = ({ options, onSelect, placeholder, icon }) => {
 };
 
 import { FONT_SIZES } from '@/utils/RichTextEditor/FontSize';
-import { FaTextHeight } from 'react-icons/fa';
+// import { FaTextHeight } from 'react-icons/fa';
 
 const Toolbar = ({
   onAction,

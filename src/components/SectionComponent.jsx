@@ -51,6 +51,7 @@ export default function SectionComponent({ parent, parentIndex }) {
     <div
       ref={sectionRef}
       data-id={parent.id}
+      data-section-id={parent.id}
       style={{
         ...parentBoundary,
         height: height,

@@ -1,6 +1,6 @@
 export const TEXT_FORMATS = [
   { value: 'div', label: 'Normal' },
-  { value: 'p', label: 'Paragraph' },
+  // { value: 'p', label: 'Paragraph' }, // Commented out - will check later
   { value: 'h1', label: 'Heading 1' },
   { value: 'h2', label: 'Heading 2' },
   { value: 'h3', label: 'Heading 3' },

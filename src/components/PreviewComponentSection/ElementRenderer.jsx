@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import Image from 'next/image';
 
 import { getResponsiveValue } from '@/utils/screen';
 import useDivStore from '@/store/UseDivStore';
@@ -25,6 +26,7 @@ export default function ElementRenderer({ element, screenSize }) {
     border: getResponsiveValue(element.border, screenSize) || 'none',
     boxSizing: 'border-box',
     zIndex: getResponsiveValue(element.zIndex, screenSize) || 0,
+    outline: 'none',
     ...element.customStyles,
   };
 
@@ -41,6 +43,12 @@ export default function ElementRenderer({ element, screenSize }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
+            wordWrap: 'break-word',
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'break-word',
+            lineHeight: '1.5',
+            textAlign: 'left',
+            direction: 'ltr',
           }}
           dangerouslySetInnerHTML={{ __html: element.content }}
         />
@@ -55,6 +63,12 @@ export default function ElementRenderer({ element, screenSize }) {
             backgroundColor:
               getResponsiveValue(element.backgroundColor, screenSize) ||
               'transparent',
+            wordWrap: 'break-word',
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'break-word',
+            lineHeight: '1.5',
+            textAlign: 'left',
+            direction: 'ltr',
           }}
           dangerouslySetInnerHTML={{ __html: element.content }}
         />
@@ -93,15 +107,15 @@ export default function ElementRenderer({ element, screenSize }) {
               getResponsiveValue(element.backgroundColor, screenSize) ||
               'transparent',
             padding: 0,
+            position: 'relative',
           }}
         >
           {element.imageUrl ? (
-            <img
+            <Image
               src={element.imageUrl}
               alt={element.content || 'Image'}
+              fill
               style={{
-                width: '100%',
-                height: '100%',
                 objectFit: 'cover',
                 borderRadius: `${element.borderRadius || 0}px`,
                 border: element.border || 'none',
