@@ -46,13 +46,35 @@ const BoxPreview = ({ box, screenSize }) => {
 
 const ParentPreview = ({ parent, screenSize }) => {
   const height = getResponsiveValue(parent.size?.height, screenSize) || 'auto';
-  const backgroundColor =
+  const backgroundValue =
     getResponsiveValue(parent.size?.background, screenSize) || 'transparent';
+
+  // Handle both solid colors and gradients properly
+  const getBackgroundStyle = (bgValue) => {
+    if (!bgValue || bgValue === 'transparent') {
+      return { backgroundColor: 'transparent' };
+    }
+
+    const bgString = String(bgValue);
+
+    // Check if it's a gradient
+    if (
+      bgString.startsWith('linear-gradient') ||
+      bgString.startsWith('radial-gradient')
+    ) {
+      return { background: bgString };
+    }
+
+    // Otherwise treat as solid color
+    return { backgroundColor: bgString };
+  };
+
+  const backgroundStyle = getBackgroundStyle(backgroundValue);
 
   const parentStyle = {
     position: 'relative',
     height: height === 'auto' ? 'auto' : `${height}px`,
-    backgroundColor: backgroundColor,
+    ...backgroundStyle,
     backgroundImage: parent.backgroundImage
       ? `url(${parent.backgroundImage})`
       : 'none',

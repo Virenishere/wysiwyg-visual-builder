@@ -58,7 +58,7 @@ const ResponsivenessSwitcher = ({
   };
 
   const handleZoomOut = () => {
-    setZoomLevel((prev) => Math.max(prev - 0.1, 0.3));
+    setZoomLevel((prev) => Math.max(prev - 0.1, 1));
   };
 
   const handleResetZoom = () => {
