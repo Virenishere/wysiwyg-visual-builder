@@ -5,14 +5,14 @@ const getElementStyle = (element, screenSize = '4k') => {
 
   // Base positioning and dimensions
   style += `  position: absolute;\n`;
-  style += `  left: ${getResponsiveValue(element.x, screenSize)}px;\n`;
-  style += `  top: ${getResponsiveValue(element.y, screenSize)}px;\n`;
-  style += `  width: ${getResponsiveValue(element.width, screenSize)}px;\n`;
-  style += `  height: ${getResponsiveValue(element.height, screenSize)}px;\n`;
+  style += `  left: ${getResponsiveValue(element.x, screenSize) || 0}px;\n`;
+  style += `  top: ${getResponsiveValue(element.y, screenSize) || 0}px;\n`;
+  style += `  width: ${getResponsiveValue(element.width, screenSize) || 100}px;\n`;
+  style += `  height: ${getResponsiveValue(element.height, screenSize) || 30}px;\n`;
   style += `  box-sizing: border-box;\n`;
 
   // Z-index
-  if (element.zIndex)
+  if (element.zIndex !== undefined && element.zIndex !== null)
     style += `  z-index: ${getResponsiveValue(element.zIndex, screenSize)};\n`;
 
   // Typography
@@ -20,18 +20,74 @@ const getElementStyle = (element, screenSize = '4k') => {
   style += `  font-family: ${getResponsiveValue(element.fontFamily, screenSize) || 'Arial, sans-serif'};\n`;
   style += `  color: ${getResponsiveValue(element.color, screenSize) || '#000000'};\n`;
 
+  // Text alignment
+  if (element.textAlign) {
+    style += `  text-align: ${getResponsiveValue(element.textAlign, screenSize)};\n`;
+  }
+
+  // Line height
+  if (element.lineHeight) {
+    style += `  line-height: ${getResponsiveValue(element.lineHeight, screenSize)};\n`;
+  }
+
   // Background and borders
   style += `  background-color: ${getResponsiveValue(element.backgroundColor, screenSize) || 'transparent'};\n`;
   style += `  border-radius: ${getResponsiveValue(element.borderRadius, screenSize) || 0}px;\n`;
   style += `  border: ${getResponsiveValue(element.border, screenSize) || 'none'};\n`;
 
+  // Image URL for image elements
+  if (element.type === 'image' && element.imageUrl) {
+    style += `  background-image: url(${element.imageUrl});\n`;
+    style += `  background-size: ${element.backgroundSize || 'cover'};\n`;
+    style += `  background-position: ${element.backgroundPosition || 'center'};\n`;
+    style += `  background-repeat: ${element.backgroundRepeat || 'no-repeat'};\n`;
+  }
+
+  // Custom styles from element.style object
+  if (element.style) {
+    Object.entries(element.style).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+        style += `  ${cssKey}: ${value};\n`;
+      }
+    });
+  }
+
+  // Custom styles from element.customStyles object
+  if (element.customStyles) {
+    Object.entries(element.customStyles).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+        style += `  ${cssKey}: ${value};\n`;
+      }
+    });
+  }
+
   // Margin and Padding
   if (element.margin) {
-    style += `  margin: ${getResponsiveValue(element.margin.top, screenSize) || 0}px ${getResponsiveValue(element.margin.right, screenSize) || 0}px ${getResponsiveValue(element.margin.bottom, screenSize) || 0}px ${getResponsiveValue(element.margin.left, screenSize) || 0}px;\n`;
+    const marginTop = getResponsiveValue(element.margin.top, screenSize) || 0;
+    const marginRight =
+      getResponsiveValue(element.margin.right, screenSize) || 0;
+    const marginBottom =
+      getResponsiveValue(element.margin.bottom, screenSize) || 0;
+    const marginLeft = getResponsiveValue(element.margin.left, screenSize) || 0;
+    style += `  margin: ${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px;\n`;
   }
 
   if (element.padding) {
-    style += `  padding: ${getResponsiveValue(element.padding.top, screenSize) || 5}px ${getResponsiveValue(element.padding.right, screenSize) || 10}px ${getResponsiveValue(element.padding.bottom, screenSize) || 5}px ${getResponsiveValue(element.padding.left, screenSize) || 10}px;\n`;
+    const paddingTop =
+      getResponsiveValue(element.padding.top, screenSize) ||
+      (element.type === 'image' ? 0 : 5);
+    const paddingRight =
+      getResponsiveValue(element.padding.right, screenSize) ||
+      (element.type === 'image' ? 0 : 10);
+    const paddingBottom =
+      getResponsiveValue(element.padding.bottom, screenSize) ||
+      (element.type === 'image' ? 0 : 5);
+    const paddingLeft =
+      getResponsiveValue(element.padding.left, screenSize) ||
+      (element.type === 'image' ? 0 : 10);
+    style += `  padding: ${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px;\n`;
   }
 
   // Type-specific styles
@@ -139,11 +195,11 @@ const generateElementHtml = (element) => {
     case 'image':
       if (element.imageUrl) {
         return `<div class="${className}">
-  <img src="${element.imageUrl}" alt="${element.content || 'Image'}" style="width: 100%; height: 100%; object-fit: cover; border-radius: ${element.borderRadius || 0}px; border: ${element.border || 'none'};" />
+  <img src="${element.imageUrl}" alt="${element.content || 'Image'}" style="width: 100%; height: 100%; object-fit: cover; border-radius: ${getResponsiveValue(element.borderRadius, screenSize) || 0}px; border: ${getResponsiveValue(element.border, screenSize) || 'none'};" />
 </div>`;
       } else {
         return `<div class="${className}">
-  <div style="width: 100%; height: 100%; background-color: #f0f0f0; border: 2px dashed #ccc; border-radius: ${element.borderRadius || 0}px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #999; font-size: 12px;">
+  <div style="width: 100%; height: 100%; background-color: #f0f0f0; border: 2px dashed #ccc; border-radius: ${getResponsiveValue(element.borderRadius, screenSize) || 0}px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #999; font-size: 12px;">
     <span style="font-size: 24px; margin-bottom: 8px;">🖼️</span>
     <span>No Image</span>
   </div>
@@ -173,6 +229,11 @@ const generateElementHtml = (element) => {
       }
       return `<div class="${className}">${divContent}</div>`;
 
+    case 'custom-code':
+      return (
+        element.customHtml || `<div class="${className}">Custom Code</div>`
+      );
+
     default:
       return `<div class="${className}">Unknown Element: ${element.type}</div>`;
   }
@@ -188,40 +249,69 @@ const generateStyleBlock = (parents, screenSize = '4k') => {
   css += `.btn-hover:active { transform: scale(0.95); }\n`;
   css += `.btn-hover { transition: all 0.3s ease; }\n`;
 
-  // Add smooth transitions for all elements
+  // Collect all keyframes and animations from custom CSS
   let keyframes = '';
+  let globalCustomCss = '';
+
   parents.forEach((parent) => {
     parent.rnds.forEach((box) => {
+      // Extract keyframes from box custom CSS
       if (box.customCss) {
         const keyframeRegex = /(@keyframes[\s\S]*?})/g;
         let match;
         while ((match = keyframeRegex.exec(box.customCss)) !== null) {
           keyframes += match[0] + '\n';
         }
+
+        // Extract non-keyframe CSS
+        const nonKeyframeCss = box.customCss
+          .replace(/@keyframes[\s\S]*?}/g, '')
+          .trim();
+        if (nonKeyframeCss) {
+          globalCustomCss += `/* Box ${box.id} Custom CSS */\n${nonKeyframeCss}\n\n`;
+        }
       }
+
       box.elements.forEach((element) => {
+        // Extract keyframes from element custom CSS
         if (element.customCss) {
           const keyframeRegex = /(@keyframes[\s\S]*?})/g;
           let match;
           while ((match = keyframeRegex.exec(element.customCss)) !== null) {
             keyframes += match[0] + '\n';
           }
+
+          // Extract non-keyframe CSS
+          const nonKeyframeCss = element.customCss
+            .replace(/@keyframes[\s\S]*?}/g, '')
+            .trim();
+          if (nonKeyframeCss) {
+            globalCustomCss += `/* Element ${element.id} Custom CSS */\n${nonKeyframeCss}\n\n`;
+          }
         }
       });
     });
   });
 
+  // Add keyframes first
   if (keyframes) {
     css += `\n/* Keyframes */\n`;
     css += keyframes;
     css += `\n`;
   }
 
+  // Add global custom CSS
+  if (globalCustomCss) {
+    css += `/* Custom CSS */\n`;
+    css += globalCustomCss;
+  }
+
   parents.forEach((parent) => {
     css += `#parent-${parent.id} {\n`;
     css += `  width: 100%;\n`;
-    css += `  height: ${getResponsiveValue(parent.size.height, screenSize)}px;\n`;
-    // Use responsive background if object, else raw value
+    css += `  height: ${getResponsiveValue(parent.size.height, screenSize) || 300}px;\n`;
+
+    // Handle background (solid colors and gradients)
     const bgVal =
       typeof parent.size.background === 'object'
         ? getResponsiveValue(parent.size.background, screenSize)
@@ -235,6 +325,15 @@ const generateStyleBlock = (parents, screenSize = '4k') => {
     } else {
       css += `  background-color: ${bgStr};\n`;
     }
+
+    // Add background image support with responsive values
+    if (parent.backgroundImage) {
+      css += `  background-image: url(${getResponsiveValue(parent.backgroundImage, screenSize) || parent.backgroundImage});\n`;
+      css += `  background-size: ${getResponsiveValue(parent.backgroundSize, screenSize) || parent.backgroundSize || 'cover'};\n`;
+      css += `  background-position: ${getResponsiveValue(parent.backgroundPosition, screenSize) || parent.backgroundPosition || 'center'};\n`;
+      css += `  background-repeat: ${getResponsiveValue(parent.backgroundRepeat, screenSize) || parent.backgroundRepeat || 'no-repeat'};\n`;
+    }
+
     css += `  position: relative;\n`;
     css += `  overflow: hidden;\n`;
     css += `}\n`;
@@ -242,18 +341,11 @@ const generateStyleBlock = (parents, screenSize = '4k') => {
     parent.rnds.forEach((box) => {
       css += `#box-${box.id} {\n`;
       css += `  position: absolute;\n`;
-      css += `  left: ${getResponsiveValue(box.x, screenSize)}px;\n`;
-      css += `  top: ${getResponsiveValue(box.y, screenSize)}px;\n`;
-      css += `  width: ${getResponsiveValue(box.width, screenSize)}px;\n`;
-      css += `  height: ${getResponsiveValue(box.height, screenSize)}px;\n`;
+      css += `  left: ${getResponsiveValue(box.x, screenSize) || 0}px;\n`;
+      css += `  top: ${getResponsiveValue(box.y, screenSize) || 0}px;\n`;
+      css += `  width: ${getResponsiveValue(box.width, screenSize) || 150}px;\n`;
+      css += `  height: ${getResponsiveValue(box.height, screenSize) || 150}px;\n`;
       css += `}\n`;
-
-      // Add custom CSS for boxes
-      if (box.customCss) {
-        css += `#box-${box.id} {\n`;
-        css += `  ${box.customCss}\n`;
-        css += `}\n`;
-      }
 
       box.elements.forEach((element) => {
         const className = element.customClassName || `element-${element.id}`;
@@ -263,10 +355,12 @@ const generateStyleBlock = (parents, screenSize = '4k') => {
         css += getElementStyle(element, screenSize);
         css += `}\n`;
 
-        // Add custom CSS for individual elements
-        if (element.customCss) {
-          css += `\n/* Custom CSS for element ${element.id} */\n`;
-          css += `${element.customCss}\n`;
+        // Add link styles for button elements with links
+        if (element.type === 'button' && element.link) {
+          css += `.${className} {\n`;
+          css += `  text-decoration: none;\n`;
+          css += `  display: inline-block;\n`;
+          css += `}\n`;
         }
 
         // Add hover effects for buttons and interactive elements
@@ -312,10 +406,10 @@ const generateStyleBlock = (parents, screenSize = '4k') => {
     css += `@media (max-width: ${screen.width}px) {\n`;
     parents.forEach((parent) => {
       css += `  #parent-${parent.id} {\n`;
-      css += `    height: ${getResponsiveValue(
-        parent.size.height,
-        screenSize
-      )}px;\n`;
+      css += `    height: ${
+        getResponsiveValue(parent.size.height, screenSize) || 300
+      }px;\n`;
+
       const bgV =
         typeof parent.size.background === 'object'
           ? getResponsiveValue(parent.size.background, screenSize)
@@ -330,14 +424,23 @@ const generateStyleBlock = (parents, screenSize = '4k') => {
           css += `    background-color: ${bgV};\n`;
         }
       }
+
+      // Add responsive background image support
+      if (parent.backgroundImage) {
+        css += `    background-image: url(${getResponsiveValue(parent.backgroundImage, screenSize) || parent.backgroundImage});\n`;
+        css += `    background-size: ${getResponsiveValue(parent.backgroundSize, screenSize) || parent.backgroundSize || 'cover'};\n`;
+        css += `    background-position: ${getResponsiveValue(parent.backgroundPosition, screenSize) || parent.backgroundPosition || 'center'};\n`;
+        css += `    background-repeat: ${getResponsiveValue(parent.backgroundRepeat, screenSize) || parent.backgroundRepeat || 'no-repeat'};\n`;
+      }
+
       css += `  }\n`;
 
       parent.rnds.forEach((box) => {
         css += `  #box-${box.id} {\n`;
-        css += `    left: ${getResponsiveValue(box.x, screenSize)}px;\n`;
-        css += `    top: ${getResponsiveValue(box.y, screenSize)}px;\n`;
-        css += `    width: ${getResponsiveValue(box.width, screenSize)}px;\n`;
-        css += `    height: ${getResponsiveValue(box.height, screenSize)}px;\n`;
+        css += `    left: ${getResponsiveValue(box.x, screenSize) || 0}px;\n`;
+        css += `    top: ${getResponsiveValue(box.y, screenSize) || 0}px;\n`;
+        css += `    width: ${getResponsiveValue(box.width, screenSize) || 150}px;\n`;
+        css += `    height: ${getResponsiveValue(box.height, screenSize) || 150}px;\n`;
         css += `  }\n`;
 
         box.elements.forEach((element) => {
@@ -363,13 +466,15 @@ const generateBoxHtml = (box) => {
     html += `  <style>\n    #box-${box.id} {\n      ${box.customCss.replace(/\n/g, '\n      ')}\n    }\n  </style>\n`;
   }
 
+  // Add custom HTML if it exists
   if (box.customHtml) {
     html += box.customHtml;
-  } else {
-    box.elements.forEach((element) => {
-      html += `  ${generateElementHtml(element)}\n`;
-    });
   }
+
+  // Add elements
+  box.elements.forEach((element) => {
+    html += `  ${generateElementHtml(element)}\n`;
+  });
 
   html += `</div>`;
   return html;
