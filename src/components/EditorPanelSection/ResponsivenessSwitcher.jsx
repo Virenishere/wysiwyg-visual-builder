@@ -257,7 +257,7 @@ const ResponsivenessSwitcher = ({
             onClick={handleZoomOut}
             className="p-1 md:p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
             title="Zoom Out"
-            disabled={zoomLevel <= 0.3}
+            disabled={zoomLevel <= 1}
           >
             <FaSearchMinus size={12} className="md:w-4 md:h-4" />
           </button>
