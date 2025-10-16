@@ -40,9 +40,6 @@ export default function ElementRenderer({ element, screenSize }) {
             backgroundColor:
               getResponsiveValue(element.backgroundColor, screenSize) ||
               'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
             wordWrap: 'break-word',
             whiteSpace: 'pre-wrap',
             overflowWrap: 'break-word',
@@ -66,9 +63,12 @@ export default function ElementRenderer({ element, screenSize }) {
             wordWrap: 'break-word',
             whiteSpace: 'pre-wrap',
             overflowWrap: 'break-word',
-            lineHeight: '1.5',
-            textAlign: 'left',
-            direction: 'ltr',
+            lineHeight:
+              getResponsiveValue(element.lineHeight, screenSize) || '1.5',
+            textAlign:
+              getResponsiveValue(element.textAlign, screenSize) || 'left',
+            direction:
+              getResponsiveValue(element.direction, screenSize) || 'ltr',
           }}
           dangerouslySetInnerHTML={{ __html: element.content }}
         />

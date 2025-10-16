@@ -24,6 +24,9 @@ const RichTextEditor = ({
     screenSize
   );
   const padding = getResponsiveValue(element?.padding, screenSize);
+  const textAlign = getResponsiveValue(element?.textAlign, screenSize);
+  const lineHeight = getResponsiveValue(element?.lineHeight, screenSize);
+  const direction = getResponsiveValue(element?.direction, screenSize);
 
   // Save current selection
   const saveSelection = useCallback(() => {
@@ -419,18 +422,45 @@ const RichTextEditor = ({
         case 'justifyLeft':
           if (editorRef.current) {
             editorRef.current.style.textAlign = 'left';
+            // Save alignment to element data
+            const { updateElement } = useDivStore.getState();
+            const parentId = element?.parentId;
+            const boxId = element?.boxId;
+            if (parentId && boxId && element?.id) {
+              updateElement(parentId, boxId, element.id, {
+                textAlign: 'left',
+              });
+            }
             handleInput();
           }
           break;
         case 'justifyCenter':
           if (editorRef.current) {
             editorRef.current.style.textAlign = 'center';
+            // Save alignment to element data
+            const { updateElement } = useDivStore.getState();
+            const parentId = element?.parentId;
+            const boxId = element?.boxId;
+            if (parentId && boxId && element?.id) {
+              updateElement(parentId, boxId, element.id, {
+                textAlign: 'center',
+              });
+            }
             handleInput();
           }
           break;
         case 'justifyRight':
           if (editorRef.current) {
             editorRef.current.style.textAlign = 'right';
+            // Save alignment to element data
+            const { updateElement } = useDivStore.getState();
+            const parentId = element?.parentId;
+            const boxId = element?.boxId;
+            if (parentId && boxId && element?.id) {
+              updateElement(parentId, boxId, element.id, {
+                textAlign: 'right',
+              });
+            }
             handleInput();
           }
           break;
@@ -962,10 +992,10 @@ const RichTextEditor = ({
           minHeight: '100%',
           wordWrap: 'break-word',
           whiteSpace: 'pre-wrap',
-          direction: 'ltr',
-          textAlign: 'left',
+          direction: direction || 'ltr',
+          textAlign: textAlign || 'left',
           overflowWrap: 'break-word',
-          lineHeight: '1.5',
+          lineHeight: lineHeight || '1.5',
           userSelect: 'text',
           cursor: 'text',
           // Remove custom border styling - let DraggableElement handle it
