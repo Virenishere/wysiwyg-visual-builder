@@ -169,26 +169,70 @@ const RichTextEditor = ({
       let range = selection.getRangeAt(0);
 
       if (range.collapsed) {
-        // No selection - apply to all text
-        const allRange = document.createRange();
-        allRange.selectNodeContents(editorRef.current);
+        // No selection - toggle style for all text
+        const currentValue = editorRef.current.style[property];
+        if (currentValue === value) {
+          // Remove the style
+          editorRef.current.style[property] = '';
+        } else {
+          // Apply the style
+          editorRef.current.style[property] = value;
+        }
+      } else {
+        // Check if selected text already has this style
+        let selectedContent = range.extractContents();
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(selectedContent.cloneNode(true));
+
+        // Check if the selection is already wrapped in a span with this style
+        const hasStyle =
+          tempDiv.querySelector(`span[style*="${property}: ${value}"]`) !==
+          null;
+
+        if (hasStyle) {
+          // Remove the style - extract content from styled spans
+          const walker = document.createTreeWalker(
+            selectedContent,
+            NodeFilter.SHOW_ELEMENT,
+            {
+              acceptNode: function (node) {
+                return node.tagName === 'SPAN' && node.style[property] === value
+                  ? NodeFilter.FILTER_ACCEPT
+                  : NodeFilter.FILTER_SKIP;
+              },
+            }
+          );
+
+          const styledSpans = [];
+          let node;
+          while ((node = walker.nextNode())) {
+            styledSpans.push(node);
+          }
+
+          // Replace styled spans with their content
+          styledSpans.forEach((span) => {
+            const parent = span.parentNode;
+            while (span.firstChild) {
+              parent.insertBefore(span.firstChild, span);
+            }
+            parent.removeChild(span);
+          });
+        } else {
+          // Apply the style
+          const span = document.createElement('span');
+          span.style[property] = value;
+          span.appendChild(selectedContent);
+          selectedContent = span;
+        }
+
+        range.insertNode(selectedContent);
+
+        // Clear selection and place cursor after the styled text
+        range.setStartAfter(selectedContent);
+        range.setEndAfter(selectedContent);
         selection.removeAllRanges();
-        selection.addRange(allRange);
-        range = allRange; // Update range reference
+        selection.addRange(range);
       }
-
-      const selectedContent = range.extractContents();
-      const span = document.createElement('span');
-      span.style[property] = value;
-      span.appendChild(selectedContent);
-
-      range.insertNode(span);
-
-      // Restore selection to the newly created span
-      const newRange = document.createRange();
-      newRange.selectNodeContents(span);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
 
       handleInput();
       saveSelection();
@@ -476,35 +520,64 @@ const RichTextEditor = ({
         h4: '1em', // 16px
         h5: '0.83em', // 13.28px
         h6: '0.67em', // 10.72px
+        normal: '1em', // Normal text size
       };
 
       if (range.collapsed) {
         // No selection - apply to all content
         const content = editorRef.current.innerHTML;
-        const wrapper = document.createElement(heading);
-        wrapper.innerHTML = content;
-        // Apply default heading size
-        wrapper.style.fontSize = headingSizes[heading] || '1em';
-        wrapper.style.fontWeight = 'bold';
-        wrapper.style.margin = '0.67em 0';
-        editorRef.current.innerHTML = '';
-        editorRef.current.appendChild(wrapper);
+
+        if (heading === 'normal') {
+          // Convert back to normal text - remove heading wrapper and reset styles
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = content;
+
+          // Extract text content and remove heading elements
+          const textContent = tempDiv.textContent || tempDiv.innerText || '';
+          editorRef.current.innerHTML = textContent;
+          editorRef.current.style.fontSize = '1em';
+          editorRef.current.style.fontWeight = 'normal';
+          editorRef.current.style.margin = '0';
+        } else {
+          // Apply heading
+          const wrapper = document.createElement(heading);
+          wrapper.innerHTML = content;
+          wrapper.style.fontSize = headingSizes[heading] || '1em';
+          wrapper.style.fontWeight = 'bold';
+          wrapper.style.margin = '0.67em 0';
+          editorRef.current.innerHTML = '';
+          editorRef.current.appendChild(wrapper);
+        }
       } else {
         // Apply to selected text
-        const selectedContent = selection.extractContents();
-        const headingElement = document.createElement(heading);
-        headingElement.appendChild(selectedContent);
-        // Apply default heading size
-        headingElement.style.fontSize = headingSizes[heading] || '1em';
-        headingElement.style.fontWeight = 'bold';
-        headingElement.style.margin = '0.67em 0';
-        range.insertNode(headingElement);
+        const selectedContent = range.extractContents();
 
-        // Restore selection to the newly created heading
-        const newRange = document.createRange();
-        newRange.selectNodeContents(headingElement);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
+        if (heading === 'normal') {
+          // Convert to normal text - just insert the content without special formatting
+          const span = document.createElement('span');
+          span.style.fontSize = '1em';
+          span.style.fontWeight = 'normal';
+          span.appendChild(selectedContent);
+          range.insertNode(span);
+        } else {
+          // Apply heading
+          const headingElement = document.createElement(heading);
+          headingElement.appendChild(selectedContent);
+          headingElement.style.fontSize = headingSizes[heading] || '1em';
+          headingElement.style.fontWeight = 'bold';
+          headingElement.style.margin = '0.67em 0';
+          range.insertNode(headingElement);
+        }
+
+        // Clear selection and place cursor after the styled text
+        const insertedElement =
+          range.startContainer.nextSibling || range.startContainer.lastChild;
+        if (insertedElement) {
+          range.setStartAfter(insertedElement);
+          range.setEndAfter(insertedElement);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
       }
 
       handleInput();
@@ -546,11 +619,11 @@ const RichTextEditor = ({
         span.appendChild(selectedContent);
         range.insertNode(span);
 
-        // Restore selection to the newly created span
-        const newRange = document.createRange();
-        newRange.selectNodeContents(span);
+        // Clear selection and place cursor after the styled text
+        range.setStartAfter(span);
+        range.setEndAfter(span);
         selection.removeAllRanges();
-        selection.addRange(newRange);
+        selection.addRange(range);
       }
 
       handleInput();
@@ -563,6 +636,9 @@ const RichTextEditor = ({
     (color) => {
       if (!editorRef.current) return;
 
+      // First try to restore any saved selection
+      restoreSelection();
+
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
 
@@ -573,30 +649,57 @@ const RichTextEditor = ({
         editorRef.current.style.color = color;
       } else {
         // Apply to selected text
-        const selectedContent = selection.extractContents();
-        const span = document.createElement('span');
-        span.style.color = color;
-        span.appendChild(selectedContent);
-        range.insertNode(span);
+        try {
+          const selectedContent = range.extractContents();
+          const span = document.createElement('span');
+          span.style.color = color;
+          span.appendChild(selectedContent);
+          range.insertNode(span);
 
-        // Restore selection to the newly created span
-        const newRange = document.createRange();
-        newRange.selectNodeContents(span);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
+          // Clear selection and place cursor after the styled text
+          range.setStartAfter(span);
+          range.setEndAfter(span);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } catch (error) {
+          console.error('Error applying color change:', error);
+        }
       }
 
       handleInput();
       saveSelection();
     },
-    [handleInput, saveSelection]
+    [handleInput, saveSelection, restoreSelection]
   );
 
   const handleBackgroundColorChange = useCallback(
     (color) => {
       if (!editorRef.current) return;
 
+      // Always try to restore selection first
+      restoreSelection();
+
       const selection = window.getSelection();
+
+      // If no selection after restore, try to get it from saved state
+      if (!selection.rangeCount && savedSelection.current) {
+        try {
+          const range = document.createRange();
+          range.setStart(
+            savedSelection.current.startContainer,
+            savedSelection.current.startOffset
+          );
+          range.setEnd(
+            savedSelection.current.endContainer,
+            savedSelection.current.endOffset
+          );
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } catch (error) {
+          console.log('Could not restore saved selection');
+        }
+      }
+
       if (!selection.rangeCount) return;
 
       const range = selection.getRangeAt(0);
@@ -606,23 +709,27 @@ const RichTextEditor = ({
         editorRef.current.style.backgroundColor = color;
       } else {
         // Apply to selected text
-        const selectedContent = selection.extractContents();
-        const span = document.createElement('span');
-        span.style.backgroundColor = color;
-        span.appendChild(selectedContent);
-        range.insertNode(span);
+        try {
+          const selectedContent = range.extractContents();
+          const span = document.createElement('span');
+          span.style.backgroundColor = color;
+          span.appendChild(selectedContent);
+          range.insertNode(span);
 
-        // Restore selection to the newly created span
-        const newRange = document.createRange();
-        newRange.selectNodeContents(span);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
+          // Clear selection and place cursor after the styled text
+          range.setStartAfter(span);
+          range.setEndAfter(span);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } catch (error) {
+          console.error('Error applying background color change:', error);
+        }
       }
 
       handleInput();
       saveSelection();
     },
-    [handleInput, saveSelection]
+    [handleInput, saveSelection, restoreSelection]
   );
 
   const handleInsertLink = useCallback(() => {
