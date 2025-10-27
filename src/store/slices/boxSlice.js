@@ -23,6 +23,7 @@ export const createBoxSlice = (set, get) => ({
                     height: { [screenSize]: 150 },
                     x: { [screenSize]: 50 },
                     y: { [screenSize]: 50 },
+                    backgroundColor: { [screenSize]: 'transparent' },
                     elements: [],
                     customHTML: '',
                     customCss: '',
@@ -255,7 +256,11 @@ export const createBoxSlice = (set, get) => ({
       const sectionWidth = sectionElement
         ? sectionElement.clientWidth - 20
         : 800;
+
       const boxWidth = getResponsiveValue(box.width, state.screenSize) || 150;
+
+      const boxHeight = getResponsiveValue(box.height, state.screenSize) || 150;
+
       const centerX = Math.max(0, (sectionWidth - boxWidth) / 2);
       const centerY = Math.max(0, (sectionHeight - boxHeight) / 2);
       const updates = {

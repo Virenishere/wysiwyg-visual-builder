@@ -10,6 +10,8 @@ const BoxPreview = ({ box, screenSize }) => {
   const x = getResponsiveValue(box.x, screenSize);
   const y = getResponsiveValue(box.y, screenSize);
   const zIndex = box.zIndex || 1;
+  const backgroundColor =
+    getResponsiveValue(box.backgroundColor, screenSize) || 'transparent';
 
   const boxStyles = {
     position: 'absolute',
@@ -18,6 +20,7 @@ const BoxPreview = ({ box, screenSize }) => {
     left: `${x}px`,
     top: `${y}px`,
     zIndex: zIndex,
+    backgroundColor: backgroundColor,
   };
 
   return (
@@ -47,7 +50,7 @@ const BoxPreview = ({ box, screenSize }) => {
 const ParentPreview = ({ parent, screenSize }) => {
   const height = getResponsiveValue(parent.size?.height, screenSize) || 'auto';
   const backgroundValue =
-    getResponsiveValue(parent.size?.background, screenSize) || 'transparent';
+    getResponsiveValue(parent.size?.background, screenSize) || '#fff';
 
   // Handle both solid colors and gradients properly
   const getBackgroundStyle = (bgValue) => {
@@ -74,14 +77,19 @@ const ParentPreview = ({ parent, screenSize }) => {
   const parentStyle = {
     position: 'relative',
     height: height === 'auto' ? 'auto' : `${height}px`,
-    ...backgroundStyle,
-    backgroundImage: parent.backgroundImage
-      ? `url(${parent.backgroundImage})`
-      : 'none',
-    backgroundSize: parent.backgroundSize || 'cover',
-    backgroundPosition: parent.backgroundPosition || 'center',
-    backgroundRepeat: parent.backgroundRepeat || 'no-repeat',
   };
+
+  if (backgroundStyle.background) {
+    parentStyle.background = backgroundStyle.background;
+  } else {
+    parentStyle.backgroundColor = backgroundStyle.backgroundColor;
+    parentStyle.backgroundImage = parent.backgroundImage
+      ? `url(${parent.backgroundImage})`
+      : 'none';
+    parentStyle.backgroundSize = parent.backgroundSize || 'cover';
+    parentStyle.backgroundPosition = parent.backgroundPosition || 'center';
+    parentStyle.backgroundRepeat = parent.backgroundRepeat || 'no-repeat';
+  }
 
   return (
     <section style={parentStyle}>
@@ -114,7 +122,7 @@ export default function PreviewComponent({ parents: parentsProp, screenSize }) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {parents.map((parent, index) => (
         <ParentPreview
           key={parent.id}

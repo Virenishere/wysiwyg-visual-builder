@@ -20,7 +20,8 @@ export default function ParentPreview({ parent, index, total, screenSize }) {
       style={{
         width: '100%',
         height: `${height}px`,
-        background: parent.size.background || '#fff',
+        background:
+          getResponsiveValue(parent.size.background, screenSize) || '#fff',
         position: 'relative',
         overflow: 'hidden',
         // borderBottom: index < total - 1 ? "1px solid #e0e0e0" : "none",

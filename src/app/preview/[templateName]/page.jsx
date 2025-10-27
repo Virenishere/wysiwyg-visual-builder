@@ -28,6 +28,18 @@ const PreviewPage = ({ params }) => {
     if (templateName && templateName !== 'new-template') {
       loadTemplate(templateName);
     }
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'div-store') {
+        loadTemplate(templateName);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [templateName, loadTemplate]);
 
   useEffect(() => {
@@ -74,7 +86,7 @@ const PreviewPage = ({ params }) => {
       {/* Preview container with proper width constraints */}
       <div className="flex justify-center p-4">
         <div
-          className="bg-white shadow-lg overflow-hidden transition-all duration-300"
+          className="shadow-lg overflow-hidden transition-all duration-300"
           style={{
             width: screenSizes[screenSize] || '100%',
             maxWidth: screenSize === '4k' ? '100%' : screenSizes[screenSize],

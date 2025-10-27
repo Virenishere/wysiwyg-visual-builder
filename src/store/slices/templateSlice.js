@@ -55,10 +55,15 @@ export const createTemplateSlice = (set, get) => ({
       newLayouts[screen] = { parents: processedParents };
       processedParents.forEach((parent) => {
         maxParentId = Math.max(maxParentId, parent.id);
-        if (parent.size && parent.size.background) {
-          parent.size.background = ensureResponsiveProperty(
-            parent.size.background
-          );
+        if (parent.size) {
+          if (parent.size.background) {
+            parent.size.background = ensureResponsiveProperty(
+              parent.size.background
+            );
+          }
+          if (parent.size.height) {
+            parent.size.height = ensureResponsiveProperty(parent.size.height);
+          }
         }
         parent.rnds.forEach((rnd) => {
           maxBoxId = Math.max(maxBoxId, rnd.id);

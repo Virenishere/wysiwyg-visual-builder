@@ -19,7 +19,24 @@ export const createLayoutSlice = (set, get) => ({
     const { layouts, parents, screenSize: oldScreenSize } = get();
     const newLayouts = deepClone(layouts);
     newLayouts[oldScreenSize] = { parents: deepClone(parents) };
-    const newParents = deepClone(parents);
+
+    let newParents = newLayouts[screenSize]?.parents;
+
+    if (!newParents) {
+      const currentScreenIndex = SCREEN_ORDER.indexOf(screenSize);
+      for (let i = currentScreenIndex - 1; i >= 0; i--) {
+        const fallbackScreen = SCREEN_ORDER[i];
+        if (newLayouts[fallbackScreen]?.parents) {
+          newParents = newLayouts[fallbackScreen]?.parents;
+          break;
+        }
+      }
+    }
+
+    if (!newParents) {
+      newParents = deepClone(parents);
+    }
+
     set({
       screenSize,
       parents: newParents,
