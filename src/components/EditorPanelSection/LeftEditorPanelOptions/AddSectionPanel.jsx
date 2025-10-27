@@ -7,8 +7,7 @@ import { RxCross1 } from 'react-icons/rx';
 
 export default function AddSectionPanel({ onClose }) {
   const {
-    layouts,
-    screenSize,
+    parents,
     selectedParentId,
     setSelectedParent,
     addParent,
@@ -17,7 +16,6 @@ export default function AddSectionPanel({ onClose }) {
     updateParentSize,
   } = useDivStore();
 
-  const parents = layouts[screenSize]?.parents || [];
   const selectedParent = parents.find((p) => p.id === selectedParentId);
 
   return (
@@ -37,7 +35,7 @@ export default function AddSectionPanel({ onClose }) {
 
       <div className="space-y-4">
         <button
-          onClick={addParent}
+          onClick={() => addParent()}
           className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
           <IoAdd />

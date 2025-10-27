@@ -4,11 +4,18 @@ import { generateUniqueIds } from '../storeUtils';
 import toast from 'react-hot-toast';
 
 let nextParentId = 1;
+let nextBoxId = 1;
+let nextElementId = 1;
 
 export const createParentSlice = (set, get) => ({
   parents: initialLayout.parents,
   addParent: (height) => {
     set((state) => {
+      let maxParentId = 0;
+      state.parents.forEach((p) => {
+        maxParentId = Math.max(maxParentId, p.id || 0);
+      });
+      nextParentId = maxParentId + 1;
       const { screenSize } = state;
       return {
         parents: [
@@ -78,6 +85,21 @@ export const createParentSlice = (set, get) => ({
     set((state) => {
       const parentToDuplicate = state.parents.find((p) => p.id === parentId);
       if (!parentToDuplicate) return state;
+      let maxParentId = 0;
+      let maxBoxId = 0;
+      let maxElementId = 0;
+      state.parents.forEach((p) => {
+        maxParentId = Math.max(maxParentId, p.id || 0);
+        p.rnds?.forEach((r) => {
+          maxBoxId = Math.max(maxBoxId, r.id || 0);
+          r.elements?.forEach((e) => {
+            maxElementId = Math.max(maxElementId, e.id || 0);
+          });
+        });
+      });
+      nextParentId = maxParentId + 1;
+      nextBoxId = maxBoxId + 1;
+      nextElementId = maxElementId + 1;
       const clonedParent = deepClone(parentToDuplicate);
       const { parents: processedParents, nextIds } = generateUniqueIds(
         { parents: [clonedParent] },
