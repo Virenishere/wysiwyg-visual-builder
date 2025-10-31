@@ -991,13 +991,14 @@ const RichTextEditor = ({
           }px ${padding?.bottom || 5}px ${padding?.left || 10}px`,
           minHeight: '100%',
           wordWrap: 'break-word',
-          whiteSpace: 'pre-wrap',
+          whiteSpace: 'pre',
           direction: direction || 'ltr',
           textAlign: textAlign || 'left',
           overflowWrap: 'break-word',
-          lineHeight: lineHeight || '1.5',
+          lineHeight: lineHeight || '1.iso',
           userSelect: 'text',
           cursor: 'text',
+          overflow: 'auto',
           // Remove custom border styling - let DraggableElement handle it
           ...element?.customStyles,
         }}

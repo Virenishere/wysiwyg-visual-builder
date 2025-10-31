@@ -18,7 +18,10 @@ export default function DivComponent() {
   }
 
   return (
-    <div className="w-full h-screen" style={{ overflowY: 'auto' }}>
+    <div
+      className="w-full h-screen"
+      style={{ overflowY: 'auto', overflowX: 'scroll' }}
+    >
       {parents.map((parent, parentIndex) => {
         if (!parent || !parent.id) {
           console.warn(`Invalid parent at index ${parentIndex}:`, parent);
