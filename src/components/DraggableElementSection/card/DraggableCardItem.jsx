@@ -204,6 +204,9 @@ export default function DraggableCardItem({
       }`}
     >
       <div
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseDownCapture={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         className={`w-full h-full relative ${
@@ -215,8 +218,7 @@ export default function DraggableCardItem({
         }`}
         style={{
           borderRadius: 4,
-          backgroundColor:
-            item.type === 'text' ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
+          backgroundColor: item.style?.backgroundColor ?? 'transparent',
           boxShadow: item.shadow ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none',
           overflow: 'hidden',
           cursor: isDragging ? 'grabbing' : 'grab',

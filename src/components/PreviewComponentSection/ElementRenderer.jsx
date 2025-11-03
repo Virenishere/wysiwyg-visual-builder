@@ -243,7 +243,7 @@ export default function ElementRenderer({
             ...element.style,
           }}
         >
-          {/* Add content indicator for cards */}
+          {/* Optional card label */}
           {element.content && (
             <div
               style={{
@@ -258,7 +258,156 @@ export default function ElementRenderer({
               {element.content}
             </div>
           )}
-          {/* Visual indicator for empty/small cards */}
+
+          {/* Render card items without overlap (flow layout) */}
+          <div
+            className="card-flow-container"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'flex-start',
+              gap: 8,
+              padding: 8,
+              width: '100%',
+              height: '100%',
+              boxSizing: 'border-box',
+              overflow: 'auto',
+            }}
+            aria-label="Card content container"
+          >
+            {(Array.isArray(element.items)
+              ? element.items
+              : Array.isArray(element.items?.[screenSize])
+                ? element.items[screenSize]
+                : []
+            )
+              .slice()
+              .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
+              .map((it) => {
+                const containerWidthPx = rawW * scale;
+                const itemWidth =
+                  it.wPct != null
+                    ? Math.max(80, Math.round(it.wPct * containerWidthPx))
+                    : Math.min(it.width || 200, containerWidthPx);
+                const isText = it.type === 'text';
+
+                return (
+                  <div
+                    key={it.id}
+                    className={`card-flow-item ${isText ? 'card-text' : 'card-image'}`}
+                    style={{
+                      position: 'relative',
+                      zIndex: it.zIndex || 1,
+                      flex: '0 0 auto',
+                      width: itemWidth,
+                      maxWidth: '100%',
+                      borderRadius: 4,
+                      boxShadow: it.shadow
+                        ? '0 4px 6px rgba(0,0,0,0.1)'
+                        : 'none',
+                      border: '1px solid rgba(0,0,0,0.1)',
+                      backgroundColor: isText
+                        ? 'rgba(255,255,255,0.9)'
+                        : 'transparent',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {isText ? (
+                      <p
+                        aria-label="Card text"
+                        className="w-full h-full p-2"
+                        style={{
+                          fontSize: `${
+                            getResponsiveValue(
+                              it.style?.fontSize,
+                              screenSize
+                            ) ||
+                            it.style?.fontSize ||
+                            16
+                          }px`,
+                          fontFamily:
+                            getResponsiveValue(
+                              it.style?.fontFamily,
+                              screenSize
+                            ) ||
+                            it.style?.fontFamily ||
+                            'Arial, sans-serif',
+                          color:
+                            getResponsiveValue(it.style?.color, screenSize) ||
+                            it.style?.color ||
+                            '#222',
+                          fontStyle:
+                            getResponsiveValue(
+                              it.style?.fontStyle,
+                              screenSize
+                            ) ||
+                            it.style?.fontStyle ||
+                            'normal',
+                          fontWeight:
+                            getResponsiveValue(
+                              it.style?.fontWeight,
+                              screenSize
+                            ) ||
+                            it.style?.fontWeight ||
+                            'normal',
+                          textAlign:
+                            getResponsiveValue(
+                              it.style?.textAlign,
+                              screenSize
+                            ) ||
+                            it.style?.textAlign ||
+                            'left',
+                          textDecoration:
+                            getResponsiveValue(
+                              it.style?.textDecoration,
+                              screenSize
+                            ) ||
+                            it.style?.textDecoration ||
+                            'none',
+                          wordBreak: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                          margin: 0,
+                        }}
+                      >
+                        {it.content || 'Text'}
+                      </p>
+                    ) : (
+                      <figure
+                        role="group"
+                        aria-label="Card image"
+                        className="w-full"
+                        style={{ margin: 0 }}
+                      >
+                        {it.imageUrl ? (
+                          <img
+                            src={it.imageUrl}
+                            alt={it.content || 'Card Image'}
+                            className="w-full"
+                            style={{
+                              display: 'block',
+                              width: '100%',
+                              height: 'auto',
+                              objectFit: 'cover',
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-24 flex items-center justify-center text-gray-400 text-xs bg-gray-50">
+                            No image
+                          </div>
+                        )}
+                        {it.content && (
+                          <figcaption className="sr-only">
+                            {it.content}
+                          </figcaption>
+                        )}
+                      </figure>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+
+          {/* Empty/small indicator */}
           {!element.content && element.height <= 30 && (
             <div
               style={{

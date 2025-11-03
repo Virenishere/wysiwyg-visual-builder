@@ -262,6 +262,7 @@ export default function DraggableElement({
       }}
       disableDragging={isEditing}
       dragAxis="both"
+      cancel=".card-item"
       onDragStart={(e) => {
         if (isEditing) {
           e.preventDefault();

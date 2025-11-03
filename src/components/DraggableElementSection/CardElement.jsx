@@ -111,7 +111,11 @@ export default function CardElement({
   // Load items from element on mount/update
   useEffect(() => {
     const { w, h } = getContainerSize();
-    const source = Array.isArray(element.items) ? element.items : [];
+    const source = Array.isArray(element.items)
+      ? element.items
+      : Array.isArray(element.items?.[screenSize])
+        ? element.items[screenSize]
+        : [];
     // element.items may already be normalized (percentages)
     const loaded = source.map((it) => {
       const x = it.xPct != null ? pctToPx(it.xPct, w) : it.x || 0;
@@ -130,11 +134,20 @@ export default function CardElement({
         zIndex: it.zIndex ?? 1,
         shadow: it.shadow ?? true,
         lockAspect: it.lockAspect ?? true,
-        style: it.style || {}, // font etc
+        style: {
+          backgroundColor: it.style?.backgroundColor ?? 'transparent',
+          fontSize: it.style?.fontSize ?? 16,
+          fontFamily: it.style?.fontFamily ?? 'Arial, sans-serif',
+          color: it.style?.color ?? '#222',
+          fontStyle: it.style?.fontStyle ?? 'normal',
+          fontWeight: it.style?.fontWeight ?? 'normal',
+          textAlign: it.style?.textAlign ?? 'left',
+          textDecoration: it.style?.textDecoration ?? 'none',
+        },
       };
     });
     setItems(loaded);
-  }, [element.items]);
+  }, [element.items, screenSize]);
 
   // Utility: snapping and clamping
   const applySnap = (v) =>
@@ -163,6 +176,7 @@ export default function CardElement({
         fontFamily: 'Arial, sans-serif',
         fontStyle: 'normal',
         textAlign: 'left',
+        backgroundColor: 'transparent',
       },
     };
     const next = [...items, newItem];
@@ -720,16 +734,179 @@ export default function CardElement({
     <div
       ref={containerRef}
       className="relative w-full h-full"
+      style={{ border, borderRadius, backgroundColor }}
+      onMouseDown={() => setSelectedId(null)}
+      onTouchStart={() => setSelectedId(null)}
+    >
+      {/* Alignment guides (kept; do not affect layout) */}
+      {selectedItem && (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: 0,
+              right: 0,
+              height: 0,
+              borderTop: guides.h
+                ? '2px dashed rgba(99,102,241,0.9)'
+                : '1px dashed rgba(0,0,0,0.1)',
+              zIndex: 999,
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: 0,
+              bottom: 0,
+              width: 0,
+              borderLeft: guides.v
+                ? '2px dashed rgba(99,102,241,0.9)'
+                : '1px dashed rgba(0,0,0,0.1)',
+              zIndex: 999,
+              pointerEvents: 'none',
+            }}
+          />
+        </>
+      )}
+
+      {/* Flow layout to prevent overlapping */}
+      <div
+        className="card-flow-container"
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'flex-start',
+          gap: 8,
+          padding: 8,
+          width: '100%',
+          height: '100%',
+          boxSizing: 'border-box',
+          overflow: 'auto',
+        }}
+        aria-label="Card content container"
+      >
+        {items
+          .slice()
+          .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
+          .map((it) => {
+            const itemWidth = Math.min(it.width || 200, getContainerSize().w);
+            const isText = it.type === 'text';
+            return (
+              <div
+                key={it.id}
+                className={`card-flow-item ${isText ? 'card-text' : 'card-image'}`}
+                style={{
+                  flex: '0 0 auto',
+                  width: itemWidth,
+                  maxWidth: '100%',
+                  borderRadius: 4,
+                  boxShadow: it.shadow ? '0 4px 6px rgba(0,0,0,0.1)' : 'none',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  backgroundColor: isText
+                    ? 'rgba(255,255,255,0.9)'
+                    : 'transparent',
+                  overflow: 'hidden',
+                }}
+              >
+                {isText ? (
+                  <p
+                    aria-label="Card text"
+                    className="w-full h-full p-2"
+                    style={{
+                      fontSize: `${
+                        getResponsiveValue(it.style?.fontSize, screenSize) ||
+                        it.style?.fontSize ||
+                        16
+                      }px`,
+                      fontFamily:
+                        getResponsiveValue(it.style?.fontFamily, screenSize) ||
+                        it.style?.fontFamily ||
+                        'Arial, sans-serif',
+                      color:
+                        getResponsiveValue(it.style?.color, screenSize) ||
+                        it.style?.color ||
+                        '#222',
+                      fontStyle:
+                        getResponsiveValue(it.style?.fontStyle, screenSize) ||
+                        it.style?.fontStyle ||
+                        'normal',
+                      fontWeight:
+                        getResponsiveValue(it.style?.fontWeight, screenSize) ||
+                        it.style?.fontWeight ||
+                        'normal',
+                      textAlign:
+                        getResponsiveValue(it.style?.textAlign, screenSize) ||
+                        it.style?.textAlign ||
+                        'left',
+                      textDecoration:
+                        getResponsiveValue(
+                          it.style?.textDecoration,
+                          screenSize
+                        ) ||
+                        it.style?.textDecoration ||
+                        'none',
+                      wordBreak: 'break-word',
+                      whiteSpace: 'pre-wrap',
+                      margin: 0,
+                    }}
+                  >
+                    {it.content || 'Text'}
+                  </p>
+                ) : (
+                  <figure
+                    role="group"
+                    aria-label="Card image"
+                    className="w-full"
+                    style={{ margin: 0 }}
+                  >
+                    {it.imageUrl ? (
+                      <img
+                        src={it.imageUrl}
+                        alt={it.content || 'Card Image'}
+                        className="w-full"
+                        style={{
+                          display: 'block',
+                          width: '100%',
+                          height: 'auto',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-24 flex items-center justify-center text-gray-400 text-xs bg-gray-50">
+                        No image
+                      </div>
+                    )}
+                    {it.content && (
+                      <figcaption className="sr-only">{it.content}</figcaption>
+                    )}
+                  </figure>
+                )}
+              </div>
+            );
+          })}
+      </div>
+    </div>
+  );
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full h-full"
       style={{
-        border,
-        borderRadius,
-        backgroundColor,
+        border:
+          getResponsiveValue(element.border, screenSize) ||
+          '1px solid rgba(0,0,0,0.1)',
+        borderRadius: getResponsiveValue(element.borderRadius, screenSize) || 8,
+        backgroundColor:
+          getResponsiveValue(element.backgroundColor, screenSize) ||
+          'transparent',
       }}
       onMouseDown={() => setSelectedId(null)}
       onTouchStart={() => setSelectedId(null)}
     >
-      {/* Removed in-card toolbar; CardPropertiesPanel controls additions */}
-
       {/* Alignment guides */}
       {selectedItem && (
         <>
@@ -764,7 +941,7 @@ export default function CardElement({
         </>
       )}
 
-      {/* Items rendered via react-rnd component */}
+      {/* Draggable/resizable items with react-rnd */}
       {items
         .slice()
         .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
@@ -773,9 +950,14 @@ export default function CardElement({
             key={it.id}
             item={it}
             isSelected={selectedId === it.id}
-            onSelect={setSelectedId}
-            onUpdate={updateItem}
-            onEditText={(item) => setSelectedId(item.id)}
+            onSelect={(id) => {
+              setSelectedId(id);
+            }}
+            onUpdate={(id, patch) => {
+              // allow style updates including backgroundColor/font changes
+              updateItem(id, patch);
+            }}
+            onEditText={editText}
             screenSize={screenSize}
             containerBounds={{
               width: getContainerSize().w,
@@ -783,16 +965,12 @@ export default function CardElement({
             }}
             snapEnabled={snapEnabled}
             gridSize={gridSize}
-            onDragStart={() => {}}
-            onDragEnd={() => {
-              pushHistory(items);
-              persist(items);
+            onDragStart={(item) => {
+              // prevent parent drag/select
             }}
-            onResizeStart={() => {}}
-            onResizeEnd={() => {
-              pushHistory(items);
-              persist(items);
-            }}
+            onDragEnd={(item) => {}}
+            onResizeStart={(item) => {}}
+            onResizeEnd={(item) => {}}
           />
         ))}
     </div>

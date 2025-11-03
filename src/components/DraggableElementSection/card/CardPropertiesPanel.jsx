@@ -39,6 +39,7 @@ export default function CardPropertiesPanel({
     fontStyle: 'normal',
     textAlign: 'left',
     textDecoration: 'none',
+    backgroundColor: 'transparent',
   });
 
   const validateText = useCallback((text) => {

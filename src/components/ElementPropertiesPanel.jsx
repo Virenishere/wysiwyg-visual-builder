@@ -76,17 +76,14 @@ export default function ElementPropertiesPanel() {
         id: `text-${Date.now()}`,
         type: 'text',
         content: payload.content || 'Text',
-        x: Math.round(
-          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.1
-        ),
-        y: Math.round(
-          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.1
-        ),
+        // Positioning is now flow-based; these sizes guide item box width
+        x: 0,
+        y: 0,
         width: Math.round(
-          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.3
+          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.5
         ),
         height: Math.round(
-          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.2
+          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.25
         ),
         zIndex: existingItems.length + 1,
         shadow: true,
@@ -118,14 +115,11 @@ export default function ElementPropertiesPanel() {
         type: 'image',
         imageUrl: payload.imageUrl || '',
         content: payload.content || 'Image',
-        x: Math.round(
-          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.2
-        ),
-        y: Math.round(
-          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.2
-        ),
+        // Flow layout: use size hints, no absolute positions
+        x: 0,
+        y: 0,
         width: Math.round(
-          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.3
+          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.5
         ),
         height: Math.round(
           (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.3

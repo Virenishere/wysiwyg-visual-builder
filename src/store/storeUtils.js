@@ -73,6 +73,7 @@ export const responsiveUpdater = (obj, updates, screenSize) => {
     'inlineStyles',
     'elements',
     'zIndex', // ensure zIndex remains a plain number, not screen-specific
+    'items', // <- treat card items as plain array (non-responsive)
   ];
 
   for (const [key, value] of Object.entries(updates)) {
