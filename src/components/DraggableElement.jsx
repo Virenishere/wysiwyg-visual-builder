@@ -315,9 +315,14 @@ export default function DraggableElement({
         }
 
         // Update element position on drag stop
+        const { zIndexCounter, updateElement } = useDivStore.getState();
+        const newZIndex = zIndexCounter + 1;
+        useDivStore.setState({ zIndexCounter: newZIndex });
+
         updateElement(parentId, boxId, element.id, {
           x: validatedX,
           y: validatedY,
+          zIndex: newZIndex,
         });
         setActiveDragItem(null);
         dragDataRef.current = null;

@@ -148,7 +148,10 @@ export const createElementSlice = (set, get) => ({
                 box.id === boxId
                   ? {
                       ...box,
-                      elements: [...box.elements, newElement],
+                      elements: [
+                        ...(Array.isArray(box.elements) ? box.elements : []),
+                        newElement,
+                      ],
                     }
                   : box
               ),
@@ -172,7 +175,10 @@ export const createElementSlice = (set, get) => ({
               if (rnd.id === boxId) {
                 return {
                   ...rnd,
-                  elements: rnd.elements.map((el) => {
+                  elements: (Array.isArray(rnd.elements)
+                    ? rnd.elements
+                    : []
+                  ).map((el) => {
                     if (el.id === elementId) {
                       return {
                         ...responsiveUpdater(el, updates, state.screenSize),
@@ -204,9 +210,10 @@ export const createElementSlice = (set, get) => ({
                 box.id === boxId
                   ? {
                       ...box,
-                      elements: box.elements.filter(
-                        (element) => element.id !== elementId
-                      ),
+                      elements: (Array.isArray(box.elements)
+                        ? box.elements
+                        : []
+                      ).filter((element) => element.id !== elementId),
                     }
                   : box
               ),
@@ -228,9 +235,9 @@ export const createElementSlice = (set, get) => ({
             ...p,
             rnds: p.rnds.map((box) => {
               if (box.id === boxId) {
-                const elementToDuplicate = box.elements.find(
-                  (el) => el.id === elementId
-                );
+                const elementToDuplicate = (
+                  Array.isArray(box.elements) ? box.elements : []
+                ).find((el) => el.id === elementId);
                 if (elementToDuplicate) {
                   const newElement = deepClone(elementToDuplicate);
                   newElement.id = newElementId;
@@ -480,7 +487,10 @@ export const createElementSlice = (set, get) => ({
                   }
                   return {
                     ...box,
-                    elements: [...box.elements, newElement],
+                    elements: [
+                      ...(Array.isArray(box.elements) ? box.elements : []),
+                      newElement,
+                    ],
                   };
                 }
               }
@@ -500,8 +510,9 @@ export const createElementSlice = (set, get) => ({
         ...p,
         rnds: p.rnds.map((box) => ({
           ...box,
-          elements: box.elements.map((element) =>
-            element.id === elementId ? { ...element, content } : element
+          elements: (Array.isArray(box.elements) ? box.elements : []).map(
+            (element) =>
+              element.id === elementId ? { ...element, content } : element
           ),
         })),
       }));
@@ -516,8 +527,9 @@ export const createElementSlice = (set, get) => ({
         ...p,
         rnds: p.rnds.map((box) => ({
           ...box,
-          elements: box.elements.map((element) =>
-            element.id === elementId ? { ...element, x, y } : element
+          elements: (Array.isArray(box.elements) ? box.elements : []).map(
+            (element) =>
+              element.id === elementId ? { ...element, x, y } : element
           ),
         })),
       }));
@@ -532,8 +544,9 @@ export const createElementSlice = (set, get) => ({
         ...p,
         rnds: p.rnds.map((box) => ({
           ...box,
-          elements: box.elements.map((element) =>
-            element.id === elementId ? { ...element, width, height } : element
+          elements: (Array.isArray(box.elements) ? box.elements : []).map(
+            (element) =>
+              element.id === elementId ? { ...element, width, height } : element
           ),
         })),
       }));
@@ -546,7 +559,9 @@ export const createElementSlice = (set, get) => ({
     set((state) => {
       const parent = state.parents.find((p) => p.id === parentId);
       const box = parent?.rnds.find((b) => b.id === boxId);
-      const element = box?.elements.find((e) => e.id === elementId);
+      const element = (Array.isArray(box?.elements) ? box.elements : []).find(
+        (e) => e.id === elementId
+      );
       if (!element || !box) return state;
       const boxWidth = parseFloat(
         getResponsiveValue(box.width, state.screenSize)
@@ -589,7 +604,10 @@ export const createElementSlice = (set, get) => ({
                 rnd.id === boxId
                   ? {
                       ...rnd,
-                      elements: rnd.elements.map((el) =>
+                      elements: (Array.isArray(rnd.elements)
+                        ? rnd.elements
+                        : []
+                      ).map((el) =>
                         el.id === elementId
                           ? responsiveUpdater(el, updates, state.screenSize)
                           : el

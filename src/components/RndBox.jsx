@@ -84,9 +84,9 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
     y: 0,
   };
 
-  const boxElements = box.elements || [];
+  const boxElements = Array.isArray(box.elements) ? box.elements : [];
 
-  const minConstraints = box.elements.reduce(
+  const minConstraints = boxElements.reduce(
     (acc, el) => {
       const elWidth =
         parseInt(getResponsiveValue(el.width, screenSize), 10) || 100;
@@ -343,7 +343,7 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
         }}
         className="rnd-box-container"
       >
-        {box.elements?.map((element) => (
+        {boxElements.map((element) => (
           <DraggableElement
             key={`element-${element.id}`}
             element={element}

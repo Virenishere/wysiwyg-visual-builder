@@ -15,6 +15,7 @@ import { initialLayout } from '@/utils/constants';
 const useDivStore = create(
   persist(
     (set, get) => ({
+      zIndexCounter: 0,
       ...createLayoutSlice(set, get),
       ...createParentSlice(set, get),
       ...createBoxSlice(set, get),
@@ -30,6 +31,8 @@ const useDivStore = create(
       partialize: (state) => ({
         layouts: state.layouts,
         parents: state.parents,
+        screenSize: state.screenSize,
+        zIndexCounter: state.zIndexCounter,
       }),
     }
   )

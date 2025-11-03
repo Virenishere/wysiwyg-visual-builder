@@ -31,7 +31,7 @@ const PreviewPage = ({ params }) => {
 
     const handleStorageChange = (e) => {
       if (e.key === 'div-store') {
-        loadTemplate(templateName);
+        window.location.reload();
       }
     };
 

@@ -19,6 +19,7 @@ const getElementStyle = (element, screenSize = '4k') => {
   style += `  font-size: ${getResponsiveValue(element.fontSize, screenSize) || 16}px;\n`;
   style += `  font-family: ${getResponsiveValue(element.fontFamily, screenSize) || 'Arial, sans-serif'};\n`;
   style += `  color: ${getResponsiveValue(element.color, screenSize) || '#000000'};\n`;
+  style += `  font-weight: ${getResponsiveValue(element.fontWeight, screenSize) || 'normal'};\n`;
 
   // Text alignment
   if (element.textAlign) {
@@ -31,9 +32,16 @@ const getElementStyle = (element, screenSize = '4k') => {
   }
 
   // Background and borders
-  style += `  background-color: ${getResponsiveValue(element.backgroundColor, screenSize) || 'transparent'};\n`;
-  style += `  border-radius: ${getResponsiveValue(element.borderRadius, screenSize) || 0}px;\n`;
-  style += `  border: ${getResponsiveValue(element.border, screenSize) || 'none'};\n`;
+  if (element.type === 'card') {
+    style += `  background-color: ${getResponsiveValue(element.backgroundColor, screenSize) || '#f8f9fa'};\n`;
+    style += `  border: ${getResponsiveValue(element.border, screenSize) || '1px solid #e9ecef'};\n`;
+    style += `  border-radius: ${getResponsiveValue(element.borderRadius, screenSize) || 8}px;\n`;
+    style += `  box-shadow: ${getResponsiveValue(element.boxShadow, screenSize) || '0 2px 4px rgba(0,0,0,0.1)'};\n`;
+  } else {
+    style += `  background-color: ${getResponsiveValue(element.backgroundColor, screenSize) || 'transparent'};\n`;
+    style += `  border: ${getResponsiveValue(element.border, screenSize) || 'none'};\n`;
+    style += `  border-radius: ${getResponsiveValue(element.borderRadius, screenSize) || 0}px;\n`;
+  }
 
   // Image URL for image elements
   if (element.type === 'image' && element.imageUrl) {
@@ -175,7 +183,7 @@ const getElementStyle = (element, screenSize = '4k') => {
   return style;
 };
 
-const generateElementHtml = (element) => {
+const generateElementHtml = (element, screenSize) => {
   const className = element.customClassName || `element-${element.id}`;
 
   switch (element.type) {
@@ -458,7 +466,7 @@ const generateStyleBlock = (parents, screenSize = '4k') => {
   return css;
 };
 
-const generateBoxHtml = (box) => {
+const generateBoxHtml = (box, screenSize) => {
   let html = `<div id="box-${box.id}">\n`;
 
   // Add custom CSS as a style tag if it exists
@@ -473,17 +481,17 @@ const generateBoxHtml = (box) => {
 
   // Add elements
   box.elements.forEach((element) => {
-    html += `  ${generateElementHtml(element)}\n`;
+    html += `  ${generateElementHtml(element, screenSize)}\n`;
   });
 
   html += `</div>`;
   return html;
 };
 
-const generateParentHtml = (parent) => {
+const generateParentHtml = (parent, screenSize) => {
   let html = `<div id="parent-${parent.id}">\n`;
   parent.rnds.forEach((box) => {
-    html += `  ${generateBoxHtml(box)}\n`;
+    html += `  ${generateBoxHtml(box, screenSize)}\n`;
   });
   html += `</div>`;
   return html;
@@ -494,7 +502,7 @@ export const generateHtmlCss = (parents, screenSize = '4k') => {
   let html = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Generated Website</title>\n${styleBlock}\n</head>\n<body>\n`;
 
   parents.forEach((parent) => {
-    html += generateParentHtml(parent);
+    html += generateParentHtml(parent, screenSize);
   });
 
   html += `\n</body>\n</html>`;

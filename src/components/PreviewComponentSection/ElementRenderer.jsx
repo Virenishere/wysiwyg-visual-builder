@@ -3,22 +3,20 @@ import React from 'react';
 import Image from 'next/image';
 
 import { getResponsiveValue } from '@/utils/screen';
-import useDivStore from '@/store/UseDivStore';
 
 export default function ElementRenderer({ element, screenSize }) {
-  const { editorContainerWidth } = useDivStore();
-
   const baseStyle = {
     position: 'absolute',
-    left: `${getResponsiveValue(element.x, screenSize, editorContainerWidth)}px`,
-    top: `${getResponsiveValue(element.y, screenSize, editorContainerWidth)}px`,
-    width: `${getResponsiveValue(element.width, screenSize, editorContainerWidth)}px`,
-    height: `${getResponsiveValue(element.height, screenSize, editorContainerWidth)}px`,
+    left: `${getResponsiveValue(element.x, screenSize)}px`,
+    top: `${getResponsiveValue(element.y, screenSize)}px`,
+    width: `${getResponsiveValue(element.width, screenSize)}px`,
+    height: `${getResponsiveValue(element.height, screenSize)}px`,
     margin: `${getResponsiveValue(element.margin?.top, screenSize) || 0}px ${getResponsiveValue(element.margin?.right, screenSize) || 0}px ${getResponsiveValue(element.margin?.bottom, screenSize) || 0}px ${getResponsiveValue(element.margin?.left, screenSize) || 0}px`,
     padding: `${getResponsiveValue(element.padding?.top, screenSize) || 5}px ${getResponsiveValue(element.padding?.right, screenSize) || 10}px ${getResponsiveValue(element.padding?.bottom, screenSize) || 5}px ${getResponsiveValue(element.padding?.left, screenSize) || 10}px`,
     fontSize: `${getResponsiveValue(element.fontSize, screenSize) || 16}px`,
     fontFamily:
       getResponsiveValue(element.fontFamily, screenSize) || 'Arial, sans-serif',
+    fontWeight: getResponsiveValue(element.fontWeight, screenSize) || 'normal',
     color: getResponsiveValue(element.color, screenSize) || '#000000',
     backgroundColor:
       getResponsiveValue(element.backgroundColor, screenSize) || 'transparent',
@@ -150,20 +148,17 @@ export default function ElementRenderer({ element, screenSize }) {
           key={element.id}
           style={{
             ...baseStyle,
-            ...element.style, // Apply custom styles first
             backgroundColor:
               getResponsiveValue(element.backgroundColor, screenSize) ||
-              element.style?.backgroundColor ||
               '#f8f9fa',
             border:
-              element.border || element.style?.border || '1px solid #e9ecef',
-            borderRadius: `${
-              element.borderRadius || element.style?.borderRadius || 8
-            }px`,
+              getResponsiveValue(element.border, screenSize) ||
+              '1px solid #e9ecef',
+            borderRadius: `${getResponsiveValue(element.borderRadius, screenSize) || 8}px`,
             boxShadow:
-              element.boxShadow ||
-              element.style?.boxShadow ||
+              getResponsiveValue(element.boxShadow, screenSize) ||
               '0 2px 4px rgba(0,0,0,0.1)',
+            ...element.style,
           }}
         >
           {/* Add content indicator for cards */}

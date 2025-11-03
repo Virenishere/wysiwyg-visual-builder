@@ -18,23 +18,9 @@ export default function SiteActionsPanel({ onClose }) {
 
   const handleDownload = () => {
     const state = useDivStore.getState();
-    const { parents, layouts, screenSize: currentScreenSize } = state;
+    const { parents, screenSize: currentScreenSize } = state;
 
-    // Get the most up-to-date parents data
-    const currentParents = parents || layouts[currentScreenSize]?.parents || [];
-
-    console.log('Exporting data:', {
-      parents: currentParents,
-      screenSize: currentScreenSize,
-      totalParents: currentParents.length,
-      totalElements: currentParents.reduce(
-        (acc, p) =>
-          acc + p.rnds.reduce((acc2, r) => acc2 + r.elements.length, 0),
-        0
-      ),
-    });
-
-    const { html } = generateHtmlCss(currentParents, currentScreenSize);
+    const { html } = generateHtmlCss(parents, currentScreenSize);
     downloadFile('index.html', html);
     setIsDownloadModalOpen(false);
   };

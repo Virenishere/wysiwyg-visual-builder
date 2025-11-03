@@ -781,22 +781,24 @@ const RichTextEditor = ({
     setIsEditing(true);
   }, [setIsEditing]);
 
-  const handleBlur = useCallback(
-    (e) => {
-      // Don't blur if clicking on toolbar
-      if (e.relatedTarget?.closest('[data-toolbar="true"]')) {
-        return;
-      }
+  useEffect(() => {
+    if (!isEditing) return;
 
-      // Small delay to allow toolbar interactions
-      setTimeout(() => {
-        if (!document.activeElement?.closest('[data-toolbar="true"]')) {
-          setIsEditing(false);
-        }
-      }, 100);
-    },
-    [setIsEditing]
-  );
+    const handleClickOutside = (event) => {
+      if (
+        editorRef.current &&
+        !editorRef.current.contains(event.target) &&
+        !event.target.closest('[data-toolbar="true"]')
+      ) {
+        setIsEditing(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditing, setIsEditing]);
 
   const handleToolbarMouseDown = useCallback(
     (e) => {
@@ -974,7 +976,6 @@ const RichTextEditor = ({
         contentEditable={isEditing}
         suppressContentEditableWarning={true}
         onFocus={handleFocus}
-        onBlur={handleBlur}
         onInput={handleInput}
         onMouseUp={handleSelectionChange}
         onKeyUp={handleSelectionChange}

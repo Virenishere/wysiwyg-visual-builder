@@ -71,8 +71,7 @@ export const responsiveUpdater = (obj, updates, screenSize) => {
     'customCss',
     'customClassName',
     'inlineStyles',
-    'margin',
-    'padding',
+    'elements',
   ];
 
   for (const [key, value] of Object.entries(updates)) {
