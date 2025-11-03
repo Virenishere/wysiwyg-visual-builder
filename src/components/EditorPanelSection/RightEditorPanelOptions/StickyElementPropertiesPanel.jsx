@@ -164,6 +164,58 @@ function PositionSize({
     },
   ];
 
+  const { parents, screenSize } = useDivStore();
+  const selectedParent = parents.find((p) => p.id === parentId);
+  const selectedBox = selectedParent?.rnds.find((b) => b.id === boxId);
+  const boxWidth =
+    parseInt(getResponsiveValue(selectedBox?.width, screenSize), 10) || 0;
+  const boxHeight =
+    parseInt(getResponsiveValue(selectedBox?.height, screenSize), 10) || 0;
+
+  const currentWidth =
+    parseInt(getResponsiveValue(selectedElement.width, screenSize), 10) || 0;
+  const currentHeight =
+    parseInt(getResponsiveValue(selectedElement.height, screenSize), 10) || 0;
+  const currentX =
+    parseInt(getResponsiveValue(selectedElement.x, screenSize), 10) || 0;
+  const currentY =
+    parseInt(getResponsiveValue(selectedElement.y, screenSize), 10) || 0;
+
+  const clampAndUpdate = (key, rawValue) => {
+    let val = Number.parseFloat(rawValue) || 0;
+    let nextWidth = currentWidth;
+    let nextHeight = currentHeight;
+    let nextX = currentX;
+    let nextY = currentY;
+
+    if (key === 'width') {
+      nextWidth = Math.max(0, Math.min(val, boxWidth));
+      nextX = Math.max(0, Math.min(nextX, Math.max(0, boxWidth - nextWidth)));
+    } else if (key === 'height') {
+      nextHeight = Math.max(0, Math.min(val, boxHeight));
+      nextY = Math.max(0, Math.min(nextY, Math.max(0, boxHeight - nextHeight)));
+    } else if (key === 'x') {
+      nextX = Math.max(0, Math.min(val, Math.max(0, boxWidth - currentWidth)));
+    } else if (key === 'y') {
+      nextY = Math.max(
+        0,
+        Math.min(val, Math.max(0, boxHeight - currentHeight))
+      );
+    }
+
+    const updates = {};
+    if (key === 'width') updates.width = nextWidth;
+    if (key === 'height') updates.height = nextHeight;
+    if (key === 'x') updates.x = nextX;
+    if (key === 'y') updates.y = nextY;
+
+    // also include dependent x/y when width/height changes to keep inside bounds
+    if (key === 'width') updates.x = nextX;
+    if (key === 'height') updates.y = nextY;
+
+    updateElement(parentId, boxId, elementId, updates);
+  };
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -176,46 +228,49 @@ function PositionSize({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {fields.map(({ label, key, icon, max }) => (
-          <div
-            key={key}
-            className="p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-100"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                {icon}
-                {label}
-              </label>
-              <span className="px-2 py-1 bg-white rounded-lg text-xs font-bold text-gray-600 border">
-                {selectedElement[key]}px
-              </span>
+        {fields.map(({ label, key, icon, max }) => {
+          const currentValue =
+            key === 'width'
+              ? currentWidth
+              : key === 'height'
+                ? currentHeight
+                : key === 'x'
+                  ? currentX
+                  : currentY;
+
+          return (
+            <div
+              key={key}
+              className="p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-100"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  {icon}
+                  {label}
+                </label>
+                <span className="px-2 py-1 bg-white rounded-lg text-xs font-bold text-gray-600 border">
+                  {currentValue}px
+                </span>
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min="0"
+                  max={max}
+                  value={currentValue}
+                  onChange={(e) => clampAndUpdate(key, e.target.value)}
+                  className="w-full h-2 bg-gradient-to-r from-orange-200 to-red-300 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <input
+                  type="number"
+                  value={currentValue}
+                  onChange={(e) => clampAndUpdate(key, e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 focus:outline-none"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <input
-                type="range"
-                min="0"
-                max={max}
-                value={selectedElement[key]}
-                onChange={(e) =>
-                  updateElement(parentId, boxId, elementId, {
-                    [key]: Number.parseInt(e.target.value) || 0,
-                  })
-                }
-                className="w-full h-2 bg-gradient-to-r from-orange-200 to-red-300 rounded-lg appearance-none cursor-pointer slider"
-              />
-              <input
-                type="number"
-                value={selectedElement[key]}
-                onChange={(e) =>
-                  updateElement(parentId, boxId, elementId, {
-                    [key]: Number.parseInt(e.target.value) || 0,
-                  })
-                }
-                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-all duration-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 focus:outline-none"
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

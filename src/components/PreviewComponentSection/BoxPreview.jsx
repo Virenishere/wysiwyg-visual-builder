@@ -8,25 +8,24 @@ import useDivStore from '@/store/UseDivStore';
 export default function BoxPreview({ box, screenSize }) {
   const { editorContainerWidth } = useDivStore();
 
-  const top = getResponsiveValue(box.y, screenSize, editorContainerWidth);
-  const left = getResponsiveValue(box.x, screenSize, editorContainerWidth);
-  const width = getResponsiveValue(box.width, screenSize, editorContainerWidth);
-  const height = getResponsiveValue(
-    box.height,
-    screenSize,
-    editorContainerWidth
-  );
+  const scale = getEditorToPreviewScale(editorContainerWidth, screenSize);
+
+  const rawTop = getResponsiveValue(box.y, screenSize) || 0;
+  const rawLeft = getResponsiveValue(box.x, screenSize) || 0;
+  const rawWidth = getResponsiveValue(box.width, screenSize) || 150;
+  const rawHeight = getResponsiveValue(box.height, screenSize) || 150;
 
   return (
     <div
       key={box.id}
       style={{
         position: 'absolute',
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${width}px`,
-        height: `${height}px`,
+        top: `${rawTop / scale}px`,
+        left: `${rawLeft / scale}px`,
+        width: `${rawWidth / scale}px`,
+        height: `${rawHeight / scale}px`,
         overflow: 'hidden',
+        boxSizing: 'border-box',
       }}
     >
       {/* Render custom CSS */}

@@ -34,11 +34,11 @@ const PreviewPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <GlobalLoader />
-        <p className="text-lg font-medium text-gray-700 animate-pulse">
-          {messages[step] || messages[messages.length - 1]}
-        </p>
+      <div className="flex items-center justify-center h-screen">
+        <GlobalLoader
+          message={messages[step] || messages[messages.length - 1]}
+          fullScreen={false}
+        />
       </div>
     );
   }

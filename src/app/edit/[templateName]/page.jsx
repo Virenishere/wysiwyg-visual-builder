@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, use, useRef } from 'react';
+import { useEffect, useState, use, useRef, useMemo } from 'react';
 import * as templates from '@/templates';
 import GlobalLoader from '@/components/GlobalLoader';
 import DivComponent from '@/components/DivComponent';
@@ -15,7 +15,7 @@ import { screenSizes } from '@/utils/screen';
 
 import ScreenSizeWarning from '@/components/ScreenSizeWarning';
 
-const TemplatePage = ({ params }) => {
+function TemplatePage({ params }) {
   const [isMounted, setIsMounted] = useState(false);
   const [showScreenSizeWarning, setShowScreenSizeWarning] = useState(false);
   const [disableAllWarnings, setDisableAllWarnings] = useState(false);
@@ -34,15 +34,18 @@ const TemplatePage = ({ params }) => {
   const screenSize = useDivStore((state) => state.screenSize);
   const setScreenSize = useDivStore((state) => state.setScreenSize);
 
-  // const handleScreenSizeChange = (newSize) => {
-  //   setScreenSize(newSize);
-  //   setShowScreenSizeWarning(true);
-  // };
+  // Derive all RND boxes across parents for AlignIndicator (declare ONCE)
+  const allBoxesMemo = useMemo(() => {
+    if (!parents || parents.length === 0) return [];
+    return parents.flatMap((parent) => parent.rnds || []);
+  }, [parents]);
 
+  // Screen size change handler (declare ONCE; remove any duplicate earlier version)
   const handleScreenSizeChange = (newSize) => {
     setScreenSize(newSize);
     if (!disableAllWarnings && !acknowledgedScreenSizes.includes(newSize)) {
       setShowScreenSizeWarning(true);
+      setAcknowledgedScreenSizes((prev) => [...prev, newSize]);
     }
   };
 
@@ -66,6 +69,7 @@ const TemplatePage = ({ params }) => {
   // Remove the mobileMenuOpen state since we don't need it anymore
   const mainContainerRef = useRef(null);
   const [containerRect, setContainerRect] = useState(null);
+  // Remove unused allBoxes state if present
   const [allBoxes, setAllBoxes] = useState([]);
 
   useEffect(() => {
@@ -111,7 +115,6 @@ const TemplatePage = ({ params }) => {
   }, [screenSize]); // Add screenSize as dependency to recalculate when screen size changes
 
   useEffect(() => {
-    // get all boxes from all parents
     const boxes = parents.flatMap((p) => p.rnds);
     setAllBoxes(boxes);
   }, [parents]);
@@ -150,13 +153,11 @@ const TemplatePage = ({ params }) => {
         {/* Mobile/Tablet Loading Screen */}
         <div className="md:hidden flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
           <div className="text-center max-w-md mx-auto">
-            <GlobalLoader />
-            <p className="text-lg font-medium text-gray-700 animate-pulse mt-6">
-              {messages[step] || messages[messages.length - 1]}
-            </p>
-            <p className="text-sm text-gray-500 mt-4">
-              Please switch to desktop for full editor experience
-            </p>
+            <GlobalLoader
+              message={messages[step] || messages[messages.length - 1]}
+              subtext="Please switch to desktop for full editor experience"
+              fullScreen={false}
+            />
           </div>
         </div>
 
@@ -165,10 +166,10 @@ const TemplatePage = ({ params }) => {
           className="hidden md:flex flex-col items-center justify-center gap-6 bg-gray-100"
           style={{ height: '100vh' }}
         >
-          <GlobalLoader />
-          <p className="text-lg font-medium text-gray-700 animate-pulse">
-            {messages[step] || messages[messages.length - 1]}
-          </p>
+          <GlobalLoader
+            message={messages[step] || messages[messages.length - 1]}
+            fullScreen={false}
+          />
         </div>
       </>
     );
@@ -276,7 +277,6 @@ const TemplatePage = ({ params }) => {
             }}
           >
             <DivComponent key={templateName} />
-            {/* Show indicators only when dragging a box */}
             {activeDragItem && !activeDragItem.type && (
               <>
                 <CenterDivIndicator
@@ -285,7 +285,7 @@ const TemplatePage = ({ params }) => {
                 />
                 <AlignIndicator
                   activeItem={activeDragItem}
-                  allItems={allBoxes}
+                  allItems={allBoxesMemo}
                   containerBounds={containerRect}
                   tolerance={2}
                 />
@@ -341,6 +341,6 @@ const TemplatePage = ({ params }) => {
       </div>
     </>
   );
-};
+}
 
 export default TemplatePage;

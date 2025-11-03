@@ -2,15 +2,33 @@
 import React from 'react';
 import Image from 'next/image';
 
-import { getResponsiveValue } from '@/utils/screen';
+import {
+  getResponsiveValue,
+  getPanelScaleFromContainers,
+} from '@/utils/screen';
+import useDivStore from '@/store/UseDivStore';
 
-export default function ElementRenderer({ element, screenSize }) {
+export default function ElementRenderer({
+  element,
+  screenSize,
+  previewContentWidth,
+}) {
+  const { editorContainerWidth } = useDivStore();
+  const scale = getPanelScaleFromContainers(
+    editorContainerWidth,
+    previewContentWidth
+  );
+
+  const rawX = getResponsiveValue(element.x, screenSize) || 0;
+  const rawY = getResponsiveValue(element.y, screenSize) || 0;
+  const rawW = getResponsiveValue(element.width, screenSize) || 100;
+  const rawH = getResponsiveValue(element.height, screenSize) || 30;
   const baseStyle = {
     position: 'absolute',
-    left: `${getResponsiveValue(element.x, screenSize)}px`,
-    top: `${getResponsiveValue(element.y, screenSize)}px`,
-    width: `${getResponsiveValue(element.width, screenSize)}px`,
-    height: `${getResponsiveValue(element.height, screenSize)}px`,
+    left: `${rawX * scale}px`,
+    top: `${rawY * scale}px`,
+    width: `${rawW * scale}px`,
+    height: `${rawH * scale}px`,
     margin: `${getResponsiveValue(element.margin?.top, screenSize) || 0}px ${getResponsiveValue(element.margin?.right, screenSize) || 0}px ${getResponsiveValue(element.margin?.bottom, screenSize) || 0}px ${getResponsiveValue(element.margin?.left, screenSize) || 0}px`,
     padding: `${getResponsiveValue(element.padding?.top, screenSize) || 5}px ${getResponsiveValue(element.padding?.right, screenSize) || 10}px ${getResponsiveValue(element.padding?.bottom, screenSize) || 5}px ${getResponsiveValue(element.padding?.left, screenSize) || 10}px`,
     fontSize: `${getResponsiveValue(element.fontSize, screenSize) || 16}px`,
@@ -25,7 +43,21 @@ export default function ElementRenderer({ element, screenSize }) {
     boxSizing: 'border-box',
     zIndex: getResponsiveValue(element.zIndex, screenSize) || 0,
     outline: 'none',
-    ...element.customStyles,
+    // Merge and normalize element style sources
+    ...(() => {
+      const inline = element.inlineStyles || {};
+      const extra = element.style || {};
+      const custom = element.customStyles || {};
+      const merged = { ...extra, ...inline, ...custom };
+      // Vendor-prefixed normalization
+      return {
+        ...merged,
+        WebkitTransform: merged.transform,
+        msTransform: merged.transform,
+        WebkitFilter: merged.filter,
+        WebkitTransition: merged.transition,
+      };
+    })(),
   };
 
   switch (element.type) {
@@ -95,10 +127,27 @@ export default function ElementRenderer({ element, screenSize }) {
         </button>
       );
 
-    case 'image':
+    case 'image': {
+      const className = element.customClassName || `element-${element.id}`;
+      const hasValidImage = Boolean(element.imageUrl);
+
+      const border = getResponsiveValue(element.border, screenSize) || 'none';
+      const borderRadius = `${getResponsiveValue(element.borderRadius, screenSize) || 0}px`;
+      const boxShadow =
+        getResponsiveValue(element.boxShadow, screenSize) || undefined;
+
+      const objectFit = element.objectFit || 'cover';
+      const objectPosition = element.objectPosition || 'center';
+      const filter = getResponsiveValue(element.filter, screenSize) || 'none';
+      const transform =
+        getResponsiveValue(element.transform, screenSize) || 'none';
+      const opacity = typeof element.opacity === 'number' ? element.opacity : 1;
+
       return (
         <div
           key={element.id}
+          id={element.domId}
+          className={className}
           style={{
             ...baseStyle,
             backgroundColor:
@@ -106,27 +155,59 @@ export default function ElementRenderer({ element, screenSize }) {
               'transparent',
             padding: 0,
             position: 'relative',
+            overflow: 'hidden',
+            border,
+            borderRadius,
+            boxShadow,
           }}
         >
-          {element.imageUrl ? (
-            <Image
-              src={element.imageUrl}
-              alt={element.content || 'Image'}
-              fill
-              style={{
-                objectFit: 'cover',
-                borderRadius: `${element.borderRadius || 0}px`,
-                border: element.border || 'none',
+          {element.customCss && (
+            <style
+              dangerouslySetInnerHTML={{
+                __html: element.customCss.includes(className)
+                  ? element.customCss
+                  : `.${className} { ${element.customCss} }`,
               }}
             />
-          ) : (
+          )}
+
+          {hasValidImage ? (
+            <img
+              src={element.imageUrl}
+              alt={element.content || 'Image'}
+              className="w-full h-full select-none"
+              style={{
+                objectFit,
+                objectPosition,
+                filter,
+                transform,
+                opacity,
+              }}
+              onContextMenu={(e) => e.preventDefault()}
+              draggable={false}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                const placeholder =
+                  e.currentTarget.parentElement?.querySelector(
+                    '.image-placeholder'
+                  );
+                if (placeholder) placeholder.style.display = 'flex';
+              }}
+              onLoad={(e) => {
+                e.currentTarget.style.display = 'block';
+              }}
+            />
+          ) : null}
+
+          {!hasValidImage && (
             <div
+              className="image-placeholder"
               style={{
                 width: '100%',
                 height: '100%',
                 backgroundColor: '#f0f0f0',
                 border: '2px dashed #ccc',
-                borderRadius: `${element.borderRadius || 0}px`,
+                borderRadius,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -141,6 +222,7 @@ export default function ElementRenderer({ element, screenSize }) {
           )}
         </div>
       );
+    }
 
     case 'card':
       return (

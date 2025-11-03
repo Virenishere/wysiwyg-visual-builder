@@ -139,3 +139,48 @@ export const getEditorPreviewScale = (editorContainerWidth, screenSize) => {
   // Calculate scale factor
   return editorCanvasWidth / previewCanvasWidth;
 };
+
+export const getPanelScaleFromContainers = (
+  editorContentWidth,
+  previewContentWidth
+) => {
+  if (!editorContentWidth || !previewContentWidth) return 1;
+  return previewContentWidth / editorContentWidth;
+};
+
+export const measureContainer = (el) => {
+  if (!el || typeof window === 'undefined') {
+    return {
+      rect: { width: 0, height: 0 },
+      contentWidth: 0,
+      contentHeight: 0,
+      paddingLeft: 0,
+      paddingTop: 0,
+      borderLeft: 0,
+      borderTop: 0,
+    };
+  }
+  const rect = el.getBoundingClientRect();
+  const styles = window.getComputedStyle(el);
+  const paddingLeft = parseFloat(styles.paddingLeft) || 0;
+  const paddingRight = parseFloat(styles.paddingRight) || 0;
+  const paddingTop = parseFloat(styles.paddingTop) || 0;
+  const paddingBottom = parseFloat(styles.paddingBottom) || 0;
+  const borderLeft = parseFloat(styles.borderLeftWidth) || 0;
+  const borderRight = parseFloat(styles.borderRightWidth) || 0;
+  const borderTop = parseFloat(styles.borderTopWidth) || 0;
+  const borderBottom = parseFloat(styles.borderBottomWidth) || 0;
+  const contentWidth =
+    rect.width - paddingLeft - paddingRight - borderLeft - borderRight;
+  const contentHeight =
+    rect.height - paddingTop - paddingBottom - borderTop - borderBottom;
+  return {
+    rect,
+    contentWidth,
+    contentHeight,
+    paddingLeft,
+    paddingTop,
+    borderLeft,
+    borderTop,
+  };
+};

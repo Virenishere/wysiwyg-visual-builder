@@ -72,6 +72,7 @@ export const responsiveUpdater = (obj, updates, screenSize) => {
     'customClassName',
     'inlineStyles',
     'elements',
+    'zIndex', // ensure zIndex remains a plain number, not screen-specific
   ];
 
   for (const [key, value] of Object.entries(updates)) {

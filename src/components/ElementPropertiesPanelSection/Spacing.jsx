@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect, useRef } from 'react';
 import {
   FiBox,
   FiArrowUp,
@@ -46,8 +47,80 @@ export default function Spacing({
     updateElement(parentId, boxId, elementId, { [type]: newTypeValue });
   };
 
+  const initialMargin = getResponsiveValue(
+    selectedElement.margin,
+    screenSize
+  ) || { top: 0, right: 0, bottom: 0, left: 0 };
+  const initialPadding = getResponsiveValue(
+    selectedElement.padding,
+    screenSize
+  ) || { top: 5, right: 10, bottom: 5, left: 10 };
+
+  const [localMargin, setLocalMargin] = useState(initialMargin);
+  const [localPadding, setLocalPadding] = useState(initialPadding);
+
+  // Declare these ONCE here; remove any duplicate declarations further below
+  const marginDebounceRef = useRef(null);
+  const paddingDebounceRef = useRef(null);
+  const DEBOUNCE_MS = 120;
+
+  useEffect(() => {
+    setLocalMargin(
+      getResponsiveValue(selectedElement.margin, screenSize) || {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      }
+    );
+    setLocalPadding(
+      getResponsiveValue(selectedElement.padding, screenSize) || {
+        top: 5,
+        right: 10,
+        bottom: 5,
+        left: 10,
+      }
+    );
+  }, [selectedElement, screenSize]);
+
+  const commitType = (type, values) => {
+    updateElement(parentId, boxId, elementId, { [type]: values });
+  };
+
+  const scheduleCommit = (type) => {
+    if (type === 'margin') {
+      clearTimeout(marginDebounceRef.current);
+      marginDebounceRef.current = setTimeout(
+        () => commitType('margin', localMargin),
+        DEBOUNCE_MS
+      );
+    } else {
+      clearTimeout(paddingDebounceRef.current);
+      paddingDebounceRef.current = setTimeout(
+        () => commitType('padding', localPadding),
+        DEBOUNCE_MS
+      );
+    }
+  };
+
+  const handleLocalChange = (type, side, rawValue) => {
+    const value = Number.parseInt(rawValue, 10) || 0;
+    if (type === 'margin') {
+      setLocalMargin((prev) => {
+        const next = { ...prev, [side]: value };
+        return next;
+      });
+    } else {
+      setLocalPadding((prev) => {
+        const next = { ...prev, [side]: value };
+        return next;
+      });
+    }
+    scheduleCommit(type);
+  };
+
   const SpacingSection = ({ type, title, icon, gradientFrom, gradientTo }) => {
-    const spacingValues = getResponsiveValue(selectedElement[type], screenSize);
+    const values = type === 'margin' ? localMargin : localPadding;
 
     return (
       <div
@@ -59,34 +132,42 @@ export default function Spacing({
         </div>
 
         <div className="grid grid-cols-4 gap-2">
-          {sides.map(({ key, label, icon }) => {
-            const value =
-              getResponsiveValue(spacingValues?.[key], screenSize) || 0;
-            return (
-              <div key={key} className="text-center">
-                <label className="text-xs text-gray-600 block mb-1 flex items-center justify-center gap-1">
-                  {icon}
-                  {label}
-                </label>
-                <div className="space-y-1">
-                  <input
-                    type="range"
-                    min="0"
-                    max="50"
-                    value={value}
-                    onChange={(e) => handleChange(type, key, e.target.value)}
-                    className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-small"
-                  />
-                  <input
-                    type="number"
-                    value={value}
-                    onChange={(e) => handleChange(type, key, e.target.value)}
-                    className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-center text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 focus:outline-none"
-                  />
-                </div>
+          {sides.map(({ key, label, icon }) => (
+            <div key={key} className="text-center">
+              <label className="text-xs text-gray-600 block mb-1 flex items-center justify-center gap-1">
+                {icon}
+                {label}
+              </label>
+              <div className="space-y-1">
+                <input
+                  type="range"
+                  min="0"
+                  max="50"
+                  value={values?.[key] || 0}
+                  onChange={(e) => handleLocalChange(type, key, e.target.value)}
+                  onMouseUp={() =>
+                    commitType(
+                      type,
+                      type === 'margin' ? localMargin : localPadding
+                    )
+                  }
+                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-small"
+                />
+                <input
+                  type="number"
+                  value={values?.[key] || 0}
+                  onChange={(e) => handleLocalChange(type, key, e.target.value)}
+                  onBlur={() =>
+                    commitType(
+                      type,
+                      type === 'margin' ? localMargin : localPadding
+                    )
+                  }
+                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-center text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 focus:outline-none"
+                />
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     );

@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { FiImage, FiSettings } from 'react-icons/fi';
+import useDivStore from '@/store/UseDivStore';
+import { getResponsiveValue } from '@/utils/screen';
 
 export default function ImagePropertiesPanel({
   selectedElement,
@@ -33,6 +35,17 @@ export default function ImagePropertiesPanel({
     updateElement(parentId, boxId, elementId, { [property]: value });
   };
 
+  // screen-aware values
+  const { screenSize } = useDivStore();
+  const currentObjectFit =
+    getResponsiveValue(selectedElement.objectFit, screenSize) || 'cover';
+  const currentObjectPosition =
+    getResponsiveValue(selectedElement.objectPosition, screenSize) || 'center';
+  const currentOpacity =
+    getResponsiveValue(selectedElement.opacity, screenSize) ?? 1;
+  const currentFilter =
+    getResponsiveValue(selectedElement.filter, screenSize) || 'none';
+
   if (selectedElement.type !== 'image') return null;
 
   return (
@@ -53,7 +66,7 @@ export default function ImagePropertiesPanel({
             Object Fit
           </label>
           <select
-            value={selectedElement.objectFit || 'cover'}
+            value={currentObjectFit}
             onChange={(e) => handlePropertyChange('objectFit', e.target.value)}
             className="w-full px-4 py-2 bg-white border-2 border-gray-200 rounded-xl text-sm"
           >
@@ -71,7 +84,7 @@ export default function ImagePropertiesPanel({
             Object Position
           </label>
           <select
-            value={selectedElement.objectPosition || 'center'}
+            value={currentObjectPosition}
             onChange={(e) =>
               handlePropertyChange('objectPosition', e.target.value)
             }
@@ -88,14 +101,14 @@ export default function ImagePropertiesPanel({
         {/* Opacity */}
         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
           <label className="text-sm font-medium text-gray-700 mb-2 block">
-            Opacity: {Math.round((selectedElement.opacity || 1) * 100)}%
+            Opacity: {Math.round((Number(currentOpacity) || 1) * 100)}%
           </label>
           <input
             type="range"
             min="0"
             max="1"
             step="0.1"
-            value={selectedElement.opacity || 1}
+            value={Number(currentOpacity) || 1}
             onChange={(e) =>
               handlePropertyChange('opacity', parseFloat(e.target.value))
             }
@@ -111,65 +124,75 @@ export default function ImagePropertiesPanel({
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handlePropertyChange('filter', 'grayscale(100%)')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
+              className={`px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 ${
+                currentFilter === 'grayscale(100%)'
+                  ? 'ring-2 ring-blue-400'
+                  : ''
+              }`}
             >
               Grayscale
             </button>
             <button
               onClick={() => handlePropertyChange('filter', 'sepia(100%)')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
+              className={`px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 ${
+                currentFilter === 'sepia(100%)' ? 'ring-2 ring-blue-400' : ''
+              }`}
             >
               Sepia
             </button>
             <button
               onClick={() => handlePropertyChange('filter', 'blur(5px)')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
+              className={`px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 ${
+                currentFilter === 'blur(5px)' ? 'ring-2 ring-blue-400' : ''
+              }`}
             >
               Blur
             </button>
             <button
               onClick={() => handlePropertyChange('filter', 'brightness(150%)')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
+              className={`px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 ${
+                currentFilter === 'brightness(150%)'
+                  ? 'ring-2 ring-blue-400'
+                  : ''
+              }`}
             >
               Bright
             </button>
             <button
               onClick={() => handlePropertyChange('filter', 'contrast(150%)')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
+              className={`px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 ${
+                currentFilter === 'contrast(150%)' ? 'ring-2 ring-blue-400' : ''
+              }`}
             >
               Contrast
             </button>
             <button
               onClick={() => handlePropertyChange('filter', 'none')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
+              className={`px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 ${
+                currentFilter === 'none' ? 'ring-2 ring-blue-400' : ''
+              }`}
             >
               Reset
             </button>
           </div>
         </div>
 
-        {/* Custom Filter */}
-        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
-            Custom Filter (CSS)
-          </label>
-          <input
-            type="text"
-            value={selectedElement.filter || ''}
-            onChange={(e) => handlePropertyChange('filter', e.target.value)}
-            className="w-full px-4 py-2 bg-white border-2 border-gray-200 rounded-xl text-sm font-mono"
-            placeholder="e.g., blur(2px) brightness(120%)"
-          />
-        </div>
-
         {/* Transform */}
         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
           <label className="text-sm font-medium text-gray-700 mb-2 block">
             Transform (CSS)
+            <span
+              className="ml-2 inline-block px-2 py-0.5 text-xs rounded bg-gray-200 text-gray-700"
+              title="Use standard CSS transform functions. Examples: rotate(45deg), scale(1.2), translateX(10px). Multiple transforms can be space-separated."
+            >
+              i
+            </span>
           </label>
           <input
             type="text"
-            value={selectedElement.transform || ''}
+            value={
+              getResponsiveValue(selectedElement.transform, screenSize) || ''
+            }
             onChange={(e) => handlePropertyChange('transform', e.target.value)}
             className="w-full px-4 py-2 bg-white border-2 border-gray-200 rounded-xl text-sm font-mono"
             placeholder="e.g., rotate(45deg) scale(1.2)"

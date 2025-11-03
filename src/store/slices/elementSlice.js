@@ -173,12 +173,17 @@ export const createElementSlice = (set, get) => ({
   },
   updateElement: (parentId, boxId, elementId, updates) => {
     set((state) => {
+      const screenSize = state.screenSize;
       const newParents = state.parents.map((p) => {
         if (p.id === parentId) {
           return {
             ...p,
             rnds: p.rnds.map((rnd) => {
               if (rnd.id === boxId) {
+                const boxWidth =
+                  parseInt(getResponsiveValue(rnd.width, screenSize), 10) || 0;
+                const boxHeight =
+                  parseInt(getResponsiveValue(rnd.height, screenSize), 10) || 0;
                 return {
                   ...rnd,
                   elements: (Array.isArray(rnd.elements)
@@ -186,8 +191,67 @@ export const createElementSlice = (set, get) => ({
                     : []
                   ).map((el) => {
                     if (el.id === elementId) {
+                      const currentWidth =
+                        parseInt(
+                          getResponsiveValue(el.width, screenSize),
+                          10
+                        ) || 0;
+                      const currentHeight =
+                        parseInt(
+                          getResponsiveValue(el.height, screenSize),
+                          10
+                        ) || 0;
+                      const currentX =
+                        parseInt(getResponsiveValue(el.x, screenSize), 10) || 0;
+                      const currentY =
+                        parseInt(getResponsiveValue(el.y, screenSize), 10) || 0;
+
+                      let nextWidth =
+                        updates.width !== undefined
+                          ? parseFloat(updates.width)
+                          : currentWidth;
+                      let nextHeight =
+                        updates.height !== undefined
+                          ? parseFloat(updates.height)
+                          : currentHeight;
+                      nextWidth = Math.max(0, Math.min(nextWidth, boxWidth));
+                      nextHeight = Math.max(0, Math.min(nextHeight, boxHeight));
+
+                      let nextX =
+                        updates.x !== undefined
+                          ? parseFloat(updates.x)
+                          : currentX;
+                      let nextY =
+                        updates.y !== undefined
+                          ? parseFloat(updates.y)
+                          : currentY;
+                      nextX = Math.max(
+                        0,
+                        Math.min(nextX, Math.max(0, boxWidth - nextWidth))
+                      );
+                      nextY = Math.max(
+                        0,
+                        Math.min(nextY, Math.max(0, boxHeight - nextHeight))
+                      );
+
+                      const sanitizedUpdates = { ...updates };
+                      if (updates.width !== undefined)
+                        sanitizedUpdates.width = nextWidth;
+                      if (updates.height !== undefined)
+                        sanitizedUpdates.height = nextHeight;
+                      if (
+                        updates.x !== undefined ||
+                        updates.width !== undefined
+                      )
+                        sanitizedUpdates.x = nextX;
+                      if (
+                        updates.y !== undefined ||
+                        updates.height !== undefined
+                      )
+                        sanitizedUpdates.y = nextY;
+
                       return {
-                        ...responsiveUpdater(el, updates, state.screenSize),
+                        ...responsiveUpdater(el, sanitizedUpdates, screenSize),
                         version: (el.version || 0) + 1,
                       };
                     }
@@ -201,9 +265,7 @@ export const createElementSlice = (set, get) => ({
         }
         return p;
       });
-      return {
-        parents: newParents,
-      };
+      return { parents: newParents };
     });
   },
   removeElement: (parentId, boxId, elementId) => {

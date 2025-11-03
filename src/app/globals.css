@@ -21,8 +21,9 @@
   padding: 0px;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 10px;
-  margin-bottom: 30px;
+  /* Removed vertical margins to avoid top bias; centering handled by parent */
+  margin-top: 0;
+  margin-bottom: 0;
   position: relative;
 }
 

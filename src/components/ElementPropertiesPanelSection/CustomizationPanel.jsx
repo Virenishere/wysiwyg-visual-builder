@@ -68,27 +68,7 @@ export default function CustomizationPanel({
           />
         </div>
 
-        {/* Custom CSS */}
-        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
-            Custom Styles (JSON)
-          </label>
-          <textarea
-            value={customCss}
-            onChange={handleCustomCssChange}
-            className={`w-full px-4 py-2 bg-white border-2 rounded-xl text-sm font-mono ${
-              isValid ? 'border-gray-200' : 'border-red-500'
-            }`}
-            rows="5"
-            placeholder={`{
-  "transform": "rotate(10deg)",
-  "boxShadow": "10px 10px 5px 0px rgba(0,0,0,0.75)"
-}`}
-          />
-          {!isValid && (
-            <p className="text-xs text-red-500 mt-1">Invalid JSON format.</p>
-          )}
-        </div>
+        {/* Removed: Custom Styles (JSON) */}
       </div>
     </div>
   );

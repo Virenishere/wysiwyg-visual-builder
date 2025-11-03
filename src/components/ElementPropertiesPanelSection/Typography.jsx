@@ -17,7 +17,6 @@ export default function Typography({
   };
 
   const fontSize = getResponsiveValue(selectedElement.fontSize, screenSize);
-  const fontFamily = getResponsiveValue(selectedElement.fontFamily, screenSize);
   const color = getResponsiveValue(selectedElement.color, screenSize);
   const backgroundColor = getResponsiveValue(
     selectedElement.backgroundColor,
@@ -69,25 +68,7 @@ export default function Typography({
           </div>
         </div>
 
-        {/* Font Family */}
-        <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100">
-          <label className="text-sm font-medium text-gray-700 mb-3 block flex items-center gap-2">
-            <FiEdit3 className="w-4 h-4" />
-            Font Family
-          </label>
-          <select
-            value={fontFamily || 'Arial, sans-serif'}
-            onChange={(e) => handleUpdate('fontFamily', e.target.value)}
-            className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-all duration-300 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none hover:border-gray-300 cursor-pointer"
-          >
-            <option value="Arial, sans-serif">Arial (Sans-serif)</option>
-            <option value="Times, serif">Times New Roman (Serif)</option>
-            <option value="Courier, monospace">Courier (Monospace)</option>
-            <option value="Georgia, serif">Georgia (Serif)</option>
-            <option value="Verdana, sans-serif">Verdana (Sans-serif)</option>
-            <option value="Comic Sans MS, cursive">Comic Sans (Cursive)</option>
-          </select>
-        </div>
+        {/* Removed: Font Family */}
 
         {/* Colors */}
         <div className="grid grid-cols-2 gap-4">
@@ -107,36 +88,7 @@ export default function Typography({
             </div>
           </div>
 
-          <div className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-100">
-            <label className="text-sm font-medium text-gray-700 mb-3 block flex items-center gap-2">
-              <FiDroplet className="w-4 h-4" />
-              Background
-            </label>
-            <div className="flex gap-2">
-              <div className="relative group flex-1">
-                <input
-                  type="color"
-                  value={
-                    backgroundColor !== 'transparent'
-                      ? backgroundColor
-                      : '#ffffff'
-                  }
-                  onChange={(e) =>
-                    handleUpdate('backgroundColor', e.target.value)
-                  }
-                  className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-violet-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
-              <button
-                onClick={() => handleUpdate('backgroundColor', 'transparent')}
-                className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 active:scale-95"
-                title="Make transparent"
-              >
-                Clear
-              </button>
-            </div>
-          </div>
+          {/* Removed: Background color (duplicate control) */}
         </div>
       </div>
     </div>

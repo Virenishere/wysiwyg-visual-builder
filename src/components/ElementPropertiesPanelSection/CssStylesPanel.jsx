@@ -67,44 +67,43 @@ export default function CssStylesPanel({
         </h4>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation with icons */}
       <div className="flex mb-4 bg-gray-100 rounded-lg p-1">
         <button
           onClick={() => setActiveTab('classes')}
-          className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
+          className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all flex items-center justify-center gap-1 ${
             activeTab === 'classes'
               ? 'bg-white text-blue-600 shadow-sm'
               : 'text-gray-600 hover:text-gray-800'
           }`}
         >
-          Classes
+          <FiLayers className="w-3 h-3" /> Classes
         </button>
         <button
           onClick={() => setActiveTab('css')}
-          className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
+          className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all flex items-center justify-center gap-1 ${
             activeTab === 'css'
               ? 'bg-white text-blue-600 shadow-sm'
               : 'text-gray-600 hover:text-gray-800'
           }`}
         >
-          Custom CSS
+          <FiCode className="w-3 h-3" /> Custom CSS
         </button>
         <button
           onClick={() => setActiveTab('inline')}
-          className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
+          className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all flex items-center justify-center gap-1 ${
             activeTab === 'inline'
               ? 'bg-white text-blue-600 shadow-sm'
               : 'text-gray-600 hover:text-gray-800'
           }`}
         >
-          Inline Styles
+          <FiCode className="w-3 h-3" /> Inline Styles
         </button>
       </div>
 
       <div className="space-y-4">
         {activeTab === 'classes' && (
           <>
-            {/* CSS Classes */}
             <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 CSS Classes
@@ -117,80 +116,14 @@ export default function CssStylesPanel({
                 placeholder="e.g., my-custom-class hover:scale-105"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Add multiple classes separated by spaces
+                Use Tailwind or custom class names (space-separated).
               </p>
-            </div>
-
-            {/* Quick Animation Classes */}
-            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Quick Animations
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() =>
-                    handleClassChange({
-                      target: {
-                        value:
-                          (selectedElement.customClassName || '') +
-                          ' animate-pulse',
-                      },
-                    })
-                  }
-                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
-                >
-                  Pulse
-                </button>
-                <button
-                  onClick={() =>
-                    handleClassChange({
-                      target: {
-                        value:
-                          (selectedElement.customClassName || '') +
-                          ' animate-bounce',
-                      },
-                    })
-                  }
-                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
-                >
-                  Bounce
-                </button>
-                <button
-                  onClick={() =>
-                    handleClassChange({
-                      target: {
-                        value:
-                          (selectedElement.customClassName || '') +
-                          ' animate-spin',
-                      },
-                    })
-                  }
-                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
-                >
-                  Spin
-                </button>
-                <button
-                  onClick={() =>
-                    handleClassChange({
-                      target: {
-                        value:
-                          (selectedElement.customClassName || '') +
-                          ' hover:scale-110',
-                      },
-                    })
-                  }
-                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
-                >
-                  Hover Scale
-                </button>
-              </div>
             </div>
           </>
         )}
 
         {activeTab === 'css' && (
           <>
-            {/* Custom CSS */}
             <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Custom CSS
@@ -199,50 +132,19 @@ export default function CssStylesPanel({
                 value={selectedElement.customCss || ''}
                 onChange={handleCssChange}
                 className="w-full px-4 py-2 bg-white border-2 border-gray-200 rounded-xl text-sm font-mono"
-                rows="6"
-                placeholder={`.element-${elementId} {
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-  animation: pulse 2s infinite;
-  transition: all 0.3s ease;
-}
-
-.element-${elementId}:hover {
-  transform: scale(1.05);
-}`}
+                rows={6}
+                placeholder={`.my-class { color: #333; }\n.my-class:hover { transform: scale(1.02); }`}
               />
-            </div>
-
-            {/* Animation Presets */}
-            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Animation Presets
-              </label>
-              <div className="space-y-2">
-                {commonAnimations.map((animation, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      const currentCss = selectedElement.customCss || '';
-                      const newCss =
-                        currentCss +
-                        '\n\n' +
-                        animation.css +
-                        `\n.element-${elementId} { animation: ${animation.name.toLowerCase().replace(' ', '')} 2s infinite; }`;
-                      handleCssChange({ target: { value: newCss } });
-                    }}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs hover:bg-gray-50 text-left"
-                  >
-                    Add {animation.name}
-                  </button>
-                ))}
-              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Adds CSS applied to the current box/element. Supports standard
+                CSS selectors.
+              </p>
             </div>
           </>
         )}
 
         {activeTab === 'inline' && (
           <>
-            {/* Common Inline Styles */}
             <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Quick Styles

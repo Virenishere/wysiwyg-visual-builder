@@ -7,24 +7,21 @@ import useDivStore from '@/store/UseDivStore';
 
 export default function ParentPreview({ parent, index, total, screenSize }) {
   const { editorContainerWidth } = useDivStore();
-
-  const height = getResponsiveValue(
-    parent.size.height,
-    screenSize,
-    editorContainerWidth
-  );
+  const scale = getEditorToPreviewScale(editorContainerWidth, screenSize);
+  const rawHeight = getResponsiveValue(parent.size.height, screenSize);
+  const height = rawHeight ? rawHeight / scale : 'auto';
 
   return (
     <div
       key={parent.id}
       style={{
         width: '100%',
-        height: `${height}px`,
+        height: height === 'auto' ? 'auto' : `${height}px`,
         background:
           getResponsiveValue(parent.size.background, screenSize) || '#fff',
         position: 'relative',
         overflow: 'hidden',
-        // borderBottom: index < total - 1 ? "1px solid #e0e0e0" : "none",
+        boxSizing: 'border-box',
       }}
     >
       {parent.rnds.map((box) => (

@@ -1,14 +1,24 @@
 'use client';
 import React from 'react';
 import useDivStore from '@/store/UseDivStore';
-import { getResponsiveValue } from '@/utils/screen';
+import {
+  getResponsiveValue,
+  getPanelScaleFromContainers,
+  measureContainer,
+} from '@/utils/screen';
 import ElementRenderer from './PreviewComponentSection/ElementRenderer';
 
-const BoxPreview = ({ box, screenSize }) => {
-  const width = getResponsiveValue(box.width, screenSize);
-  const height = getResponsiveValue(box.height, screenSize);
-  const x = getResponsiveValue(box.x, screenSize);
-  const y = getResponsiveValue(box.y, screenSize);
+const BoxPreview = ({ box, screenSize, previewContentWidth }) => {
+  const { editorContainerWidth } = useDivStore();
+  const scale = getPanelScaleFromContainers(
+    editorContainerWidth,
+    previewContentWidth
+  );
+
+  const width = (getResponsiveValue(box.width, screenSize) || 150) * scale;
+  const height = (getResponsiveValue(box.height, screenSize) || 150) * scale;
+  const x = (getResponsiveValue(box.x, screenSize) || 0) * scale;
+  const y = (getResponsiveValue(box.y, screenSize) || 0) * scale;
   const zIndex = box.zIndex || 1;
   const backgroundColor =
     getResponsiveValue(box.backgroundColor, screenSize) || 'transparent';
@@ -19,8 +29,9 @@ const BoxPreview = ({ box, screenSize }) => {
     height: `${height}px`,
     left: `${x}px`,
     top: `${y}px`,
-    zIndex: zIndex,
-    backgroundColor: backgroundColor,
+    zIndex,
+    backgroundColor,
+    boxSizing: 'border-box',
   };
 
   return (
@@ -29,11 +40,7 @@ const BoxPreview = ({ box, screenSize }) => {
       {box.customHtml && (
         <div
           dangerouslySetInnerHTML={{ __html: box.customHtml }}
-          style={{
-            width: '100%',
-            height: '100%',
-            overflow: 'auto',
-          }}
+          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
         />
       )}
       {box.elements?.map((element) => (
@@ -41,42 +48,41 @@ const BoxPreview = ({ box, screenSize }) => {
           key={element.id}
           element={element}
           screenSize={screenSize}
+          previewContentWidth={previewContentWidth}
         />
       ))}
     </div>
   );
 };
 
-const ParentPreview = ({ parent, screenSize }) => {
-  const height = getResponsiveValue(parent.size?.height, screenSize) || 'auto';
+const ParentPreview = ({ parent, screenSize, previewContentWidth }) => {
+  const { editorContainerWidth } = useDivStore();
+  const scale = getPanelScaleFromContainers(
+    editorContainerWidth,
+    previewContentWidth
+  );
+
+  const rawHeight = getResponsiveValue(parent.size?.height, screenSize);
+  const height = rawHeight ? rawHeight * scale : 'auto';
   const backgroundValue =
     getResponsiveValue(parent.size?.background, screenSize) || '#fff';
 
-  // Handle both solid colors and gradients properly
   const getBackgroundStyle = (bgValue) => {
-    if (!bgValue || bgValue === 'transparent') {
+    if (!bgValue || bgValue === 'transparent')
       return { backgroundColor: 'transparent' };
-    }
-
-    const bgString = String(bgValue);
-
-    // Check if it's a gradient
-    if (
-      bgString.startsWith('linear-gradient') ||
-      bgString.startsWith('radial-gradient')
-    ) {
-      return { background: bgString };
-    }
-
-    // Otherwise treat as solid color
-    return { backgroundColor: bgString };
+    const s = String(bgValue);
+    if (s.startsWith('linear-gradient') || s.startsWith('radial-gradient'))
+      return { background: s };
+    return { backgroundColor: s };
   };
-
   const backgroundStyle = getBackgroundStyle(backgroundValue);
 
   const parentStyle = {
     position: 'relative',
+    width: '100%',
     height: height === 'auto' ? 'auto' : `${height}px`,
+    overflow: 'hidden',
+    boxSizing: 'border-box',
   };
 
   if (backgroundStyle.background) {
@@ -94,7 +100,12 @@ const ParentPreview = ({ parent, screenSize }) => {
   return (
     <section style={parentStyle}>
       {parent.rnds?.map((box) => (
-        <BoxPreview key={box.id} box={box} screenSize={screenSize} />
+        <BoxPreview
+          key={box.id}
+          box={box}
+          screenSize={screenSize}
+          previewContentWidth={previewContentWidth}
+        />
       ))}
     </section>
   );
@@ -105,6 +116,23 @@ export default function PreviewComponent({ parents: parentsProp, screenSize }) {
 
   const parents =
     parentsProp || parentsFromStore || layouts[screenSize]?.parents || [];
+  const previewRef = React.useRef(null);
+  const [previewContentWidth, setPreviewContentWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    const el = previewRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const m = measureContainer(el);
+      setPreviewContentWidth(m.contentWidth || el.clientWidth);
+    };
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   if (!parents || parents.length === 0) {
     return (
@@ -122,7 +150,7 @@ export default function PreviewComponent({ parents: parentsProp, screenSize }) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div ref={previewRef} className="min-h-screen">
       {parents.map((parent, index) => (
         <ParentPreview
           key={parent.id}
@@ -130,6 +158,7 @@ export default function PreviewComponent({ parents: parentsProp, screenSize }) {
           index={index}
           total={parents.length}
           screenSize={screenSize}
+          previewContentWidth={previewContentWidth}
         />
       ))}
     </div>
