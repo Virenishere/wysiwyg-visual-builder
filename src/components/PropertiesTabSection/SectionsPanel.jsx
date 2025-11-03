@@ -114,6 +114,8 @@ export default function SectionsPanel({
     <div className="h-screen w-full flex flex-col ">
       {/* Section List */}
       <div className="flex-1 px-3 py-4 overflow-y-auto">
+        {/* Optionally, for small screens only: overflow-y-auto md:overflow-y-visible */}
+        {/* e.g., <div className="flex-1 px-3 py-4 overflow-y-auto md:overflow-y-visible"> */}
         {parents.length > 0 ? (
           <div className="w-full space-y-3">
             {parents.map((parent, index) => {
@@ -185,9 +187,7 @@ export default function SectionsPanel({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm('Delete this section?')) {
-                            removeParent(parent.id);
-                          }
+                          removeParent(parent.id);
                         }}
                         className="p-2 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-200 cursor-pointer"
                         title="Delete Section"
