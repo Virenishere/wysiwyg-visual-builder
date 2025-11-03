@@ -11,6 +11,8 @@ import LineElementProperties from './ElementPropertiesPanelSection/LineElementPr
 import ImagePropertiesPanel from './ElementPropertiesPanelSection/ImagePropertiesPanel';
 import CssStylesPanel from './ElementPropertiesPanelSection/CssStylesPanel';
 import CustomizationPanel from './ElementPropertiesPanelSection/CustomizationPanel';
+import { getResponsiveValue } from '@/utils/screen';
+import CardPropertiesPanel from './DraggableElementSection/card/CardPropertiesPanel';
 
 export default function ElementPropertiesPanel() {
   const {
@@ -63,6 +65,82 @@ export default function ElementPropertiesPanel() {
     );
   }
 
+  // Handlers: add card text/image from properties panel
+  const addCardText = (payload) => {
+    const existingItems = Array.isArray(selectedElement.items)
+      ? selectedElement.items
+      : [];
+    const nextItems = [
+      ...existingItems,
+      {
+        id: `text-${Date.now()}`,
+        type: 'text',
+        content: payload.content || 'Text',
+        x: Math.round(
+          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.1
+        ),
+        y: Math.round(
+          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.1
+        ),
+        width: Math.round(
+          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.3
+        ),
+        height: Math.round(
+          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.2
+        ),
+        zIndex: existingItems.length + 1,
+        shadow: true,
+        lockAspect: false,
+        style: {
+          fontSize: payload.style?.fontSize ?? 18,
+          color: payload.style?.color ?? '#222',
+          fontFamily: payload.style?.fontFamily ?? 'Arial, sans-serif',
+          fontStyle: payload.style?.fontStyle ?? 'normal',
+          fontWeight: payload.style?.fontWeight ?? 'normal',
+          textAlign: payload.style?.textAlign ?? 'left',
+          textDecoration: payload.style?.textDecoration ?? 'none',
+        },
+      },
+    ];
+    updateElement(selectedParentId, selectedBoxId, selectedElementId, {
+      items: nextItems,
+    });
+  };
+
+  const addCardImage = (payload) => {
+    const existingItems = Array.isArray(selectedElement.items)
+      ? selectedElement.items
+      : [];
+    const nextItems = [
+      ...existingItems,
+      {
+        id: `image-${Date.now()}`,
+        type: 'image',
+        imageUrl: payload.imageUrl || '',
+        content: payload.content || 'Image',
+        x: Math.round(
+          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.2
+        ),
+        y: Math.round(
+          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.2
+        ),
+        width: Math.round(
+          (getResponsiveValue(selectedElement.width, screenSize) || 300) * 0.3
+        ),
+        height: Math.round(
+          (getResponsiveValue(selectedElement.height, screenSize) || 200) * 0.3
+        ),
+        zIndex: existingItems.length + 1,
+        shadow: true,
+        lockAspect: true,
+        style: {},
+      },
+    ];
+    updateElement(selectedParentId, selectedBoxId, selectedElementId, {
+      items: nextItems,
+    });
+  };
+
   return (
     <div className="relative">
       {/* Background decoration */}
@@ -103,6 +181,17 @@ export default function ElementPropertiesPanel() {
           boxId={selectedBoxId}
           elementId={selectedElementId}
         />
+
+        {/* Inject Card properties panel */}
+        {selectedElement?.type === 'card' && (
+          <div className="mt-4">
+            <CardPropertiesPanel
+              element={selectedElement}
+              onAddText={addCardText}
+              onAddImage={addCardImage}
+            />
+          </div>
+        )}
 
         {/* Position & Size */}
         <PositionSize

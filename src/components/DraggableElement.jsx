@@ -89,7 +89,7 @@ export default function DraggableElement({
   }
 
   const renderElementContent = () => {
-    switch (element.type) {
+    switch (element?.type) {
       case 'text':
       case 'paragraph':
         return (
@@ -120,12 +120,6 @@ export default function DraggableElement({
             fileInputRef={fileInputRef}
           />
         );
-      case 'card':
-        return (
-          <CardElement id={element.id} style={element.style}>
-            {element.content}
-          </CardElement>
-        );
       case 'line':
         return <LineElement element={element} />; // Pass the whole element
       case 'div':
@@ -135,6 +129,15 @@ export default function DraggableElement({
           <div
             dangerouslySetInnerHTML={{ __html: element.customHtml }}
             style={{ width: '100%', height: '100%', overflow: 'auto' }}
+          />
+        );
+      case 'card':
+        return (
+          <CardElement
+            element={element}
+            parentId={parentId}
+            boxId={boxId}
+            updateElement={updateElement}
           />
         );
       default:
