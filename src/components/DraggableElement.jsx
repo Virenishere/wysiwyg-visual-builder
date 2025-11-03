@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import useDivStore from '@/store/UseDivStore';
 import throttle from '@/utils/throttle';
@@ -33,8 +33,6 @@ export default function DraggableElement({
   } = useDivStore();
   const zIndexCounter = useDivStore((state) => state.zIndexCounter);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragLockReason, setDragLockReason] = useState(null);
-  const [isPointerDown, setIsPointerDown] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -237,38 +235,6 @@ export default function DraggableElement({
 
   const inlineStyles = buildInlineStyles();
 
-  // Ensure we release drag state if pointer leaves window or touch ends
-  useEffect(() => {
-    const handleGlobalUp = () => {
-      if (isDragging) {
-        setIsDragging(false);
-        setActiveDragItem(null);
-      }
-      setIsPointerDown(false);
-    };
-    window.addEventListener('mouseup', handleGlobalUp);
-    window.addEventListener('touchend', handleGlobalUp);
-    return () => {
-      window.removeEventListener('mouseup', handleGlobalUp);
-      window.removeEventListener('touchend', handleGlobalUp);
-    };
-  }, [isDragging, setActiveDragItem]);
-
-  // Compute lock reason for visual feedback and to block dragging
-  const computeDragLockReason = () => {
-    if (isEditing) return 'Editing mode';
-    if (containerBounds) {
-      if (width > containerBounds.width || height > containerBounds.height) {
-        return 'Exceeds container bounds';
-      }
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    setDragLockReason(computeDragLockReason());
-  }, [isEditing, containerBounds, width, height]);
-
   return (
     <Rnd
       size={{
@@ -279,6 +245,7 @@ export default function DraggableElement({
         x: Math.max(0, x || 0),
         y: Math.max(0, y || 0),
       }}
+      // Add bounds to prevent visual dragging outside parent
       bounds="parent"
       enableResizing={{
         top: !isEditing,
@@ -290,35 +257,10 @@ export default function DraggableElement({
         bottomLeft: !isEditing,
         topLeft: !isEditing,
       }}
-      disableDragging={isEditing || !!dragLockReason}
+      disableDragging={isEditing}
       dragAxis="both"
-      onMouseDown={(e) => {
-        // Bring to front before any drag starts
-        const current = useDivStore.getState();
-        const newZIndex = (current.zIndexCounter || 0) + 1;
-        useDivStore.setState({ zIndexCounter: newZIndex });
-
-        setIsPointerDown(true);
-        setDragLockReason(computeDragLockReason());
-        // Avoid text selection stealing drag in nested content
-        if (!isEditing) {
-          e.stopPropagation();
-          e.preventDefault();
-        }
-      }}
-      onMouseUp={() => {
-        setIsPointerDown(false);
-      }}
-      onMouseLeave={() => {
-        // Defensive: release if pointer leaves component
-        if (isDragging) {
-          setIsDragging(false);
-          setActiveDragItem(null);
-        }
-        setIsPointerDown(false);
-      }}
       onDragStart={(e) => {
-        if (isEditing || dragLockReason) {
+        if (isEditing) {
           e.preventDefault();
           return;
         }
@@ -329,8 +271,9 @@ export default function DraggableElement({
         setActiveDragItem(startData);
       }}
       onDrag={(e, d) => {
-        if (isEditing || dragLockReason) return;
+        if (isEditing) return;
 
+        // Validate bounds during drag to prevent going outside container
         const validatedX = containerBounds
           ? Math.max(0, Math.min(d.x, containerBounds.width - width))
           : d.x;
@@ -348,10 +291,11 @@ export default function DraggableElement({
         throttledSetActiveDragItem(newDragData);
       }}
       onDragStop={(e, d) => {
-        if (isEditing || dragLockReason) return;
+        if (isEditing) return;
 
         setIsDragging(false);
 
+        // Apply bounds validation before updating
         const validatedX = containerBounds
           ? Math.max(
               0,
@@ -371,23 +315,18 @@ export default function DraggableElement({
           return;
         }
 
-        try {
-          const { zIndexCounter, updateElement } = useDivStore.getState();
-          const newZIndex = (zIndexCounter || 0) + 1;
-          useDivStore.setState({ zIndexCounter: newZIndex });
+        // Update element position on drag stop
+        const { zIndexCounter, updateElement } = useDivStore.getState();
+        const newZIndex = zIndexCounter + 1;
+        useDivStore.setState({ zIndexCounter: newZIndex });
 
-          updateElement(parentId, boxId, element.id, {
-            x: validatedX,
-            y: validatedY,
-            zIndex: newZIndex,
-          });
-        } catch (err) {
-          console.error('Error updating element after drag:', err);
-        } finally {
-          setActiveDragItem(null);
-          dragDataRef.current = null;
-          setDragLockReason(computeDragLockReason());
-        }
+        updateElement(parentId, boxId, element.id, {
+          x: validatedX,
+          y: validatedY,
+          zIndex: newZIndex,
+        });
+        setActiveDragItem(null);
+        dragDataRef.current = null;
       }}
       onResizeStart={(e) => {
         if (isEditing) {
@@ -406,6 +345,7 @@ export default function DraggableElement({
       }}
       onResize={(e, direction, ref, delta, position) => {
         if (isEditing) return;
+        // Only update the active drag item for visual feedback
         setActiveDragItem({
           ...element,
           width: ref.offsetWidth,
@@ -436,19 +376,14 @@ export default function DraggableElement({
           newHeight
         );
 
-        try {
-          updateElement(parentId, boxId, element.id, {
-            width: validated.width,
-            height: validated.height,
-            x: validated.x,
-            y: validated.y,
-          });
-        } catch (err) {
-          console.error('Error updating element after resize:', err);
-        } finally {
-          setActiveDragItem(null);
-          setDragLockReason(computeDragLockReason());
-        }
+        updateElement(parentId, boxId, element.id, {
+          width: validated.width,
+          height: validated.height,
+          x: validated.x,
+          y: validated.y,
+        });
+
+        setActiveDragItem(null);
       }}
       onDoubleClick={() => setIsEditing(true)}
       onClick={handleClick}
@@ -469,26 +404,6 @@ export default function DraggableElement({
       }}
       className={`element-rnd ${element.customClassName || ''} ${isEditing ? 'editing-text' : ''}`}
     >
-      {/* Visual feedback for locked state */}
-      {dragLockReason && (
-        <div
-          style={{
-            position: 'absolute',
-            top: -18,
-            left: 0,
-            background: 'rgba(220,38,38,0.9)',
-            color: '#fff',
-            fontSize: 11,
-            padding: '2px 6px',
-            borderRadius: 4,
-            pointerEvents: 'none',
-            zIndex: 9999,
-          }}
-        >
-          Drag disabled: {dragLockReason}
-        </div>
-      )}
-
       {/* Apply custom CSS if provided */}
       {element.customCss && (
         <style

@@ -104,17 +104,14 @@ export default function Spacing({
   };
 
   const handleLocalChange = (type, side, rawValue) => {
-    const value = Number.parseInt(rawValue, 10) || 0;
+    const value = Math.max(
+      0,
+      Math.min(100, Number.parseInt(rawValue, 10) || 0)
+    );
     if (type === 'margin') {
-      setLocalMargin((prev) => {
-        const next = { ...prev, [side]: value };
-        return next;
-      });
+      setLocalMargin((prev) => ({ ...prev, [side]: value }));
     } else {
-      setLocalPadding((prev) => {
-        const next = { ...prev, [side]: value };
-        return next;
-      });
+      setLocalPadding((prev) => ({ ...prev, [side]: value }));
     }
     scheduleCommit(type);
   };
@@ -130,7 +127,6 @@ export default function Spacing({
           {icon}
           <label className="text-sm font-medium text-gray-700">{title}</label>
         </div>
-
         <div className="grid grid-cols-4 gap-2">
           {sides.map(({ key, label, icon }) => (
             <div key={key} className="text-center">
@@ -142,7 +138,8 @@ export default function Spacing({
                 <input
                   type="range"
                   min="0"
-                  max="50"
+                  max="100"
+                  step="1"
                   value={values?.[key] || 0}
                   onChange={(e) => handleLocalChange(type, key, e.target.value)}
                   onMouseUp={() =>
@@ -155,15 +152,12 @@ export default function Spacing({
                 />
                 <input
                   type="number"
+                  min={0}
+                  max={100}
+                  step={1}
                   value={values?.[key] || 0}
                   onChange={(e) => handleLocalChange(type, key, e.target.value)}
-                  onBlur={() =>
-                    commitType(
-                      type,
-                      type === 'margin' ? localMargin : localPadding
-                    )
-                  }
-                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-center text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 focus:outline-none"
+                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-xs"
                 />
               </div>
             </div>

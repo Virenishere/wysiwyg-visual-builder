@@ -9,7 +9,12 @@ import { FaPlus, FaTrash, FaCopy } from 'react-icons/fa';
 
 import { getResponsiveValue } from '@/utils/screen';
 
-export default function RndBox({ box, parentId, isSectionSelected }) {
+export default function RndBox({
+  box,
+  parentId,
+  isSectionSelected,
+  sectionWidth,
+}) {
   const {
     updateRnd,
     setSelectedBox,
@@ -326,7 +331,7 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
             pointerEvents: 'none',
             width: '100%',
             height: '100%',
-            overflow: 'auto',
+            overflow: 'auto', // content may scroll and obscure lower layers
           }}
         />
       )}
@@ -338,14 +343,14 @@ export default function RndBox({ box, parentId, isSectionSelected }) {
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 3,
-          pointerEvents: 'none',
+          zIndex: 3, // overlay above customHtml
+          pointerEvents: 'auto', // allow pointer events for children
         }}
         className="rnd-box-container"
       >
-        {boxElements.map((element) => (
+        {boxElements.map((element, index) => (
           <DraggableElement
-            key={`element-${element.id}`}
+            key={`box-${box.id}-element-${element.id}-${index}`}
             element={element}
             parentId={parentId}
             boxId={box.id}

@@ -1,5 +1,5 @@
 'use client';
-import { FiType, FiDroplet, FiEdit3 } from 'react-icons/fi';
+import { FiType, FiDroplet } from 'react-icons/fi';
 import useDivStore from '@/store/UseDivStore';
 import { getResponsiveValue } from '@/utils/screen';
 
@@ -12,16 +12,8 @@ export default function Typography({
 }) {
   const { screenSize } = useDivStore();
 
-  const handleUpdate = (key, value) => {
-    updateElement(parentId, boxId, elementId, { [key]: value });
-  };
-
   const fontSize = getResponsiveValue(selectedElement.fontSize, screenSize);
   const color = getResponsiveValue(selectedElement.color, screenSize);
-  const backgroundColor = getResponsiveValue(
-    selectedElement.backgroundColor,
-    screenSize
-  );
 
   return (
     <div className="mb-6">
@@ -77,18 +69,17 @@ export default function Typography({
               <FiDroplet className="w-4 h-4" />
               Text Color
             </label>
-            <div className="relative group">
-              <input
-                type="color"
-                value={color !== 'transparent' ? color : '#000000'}
-                onChange={(e) => handleUpdate('color', e.target.value)}
-                className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-cyan-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-            </div>
+            <input
+              type="color"
+              value={color !== 'transparent' ? color : '#000000'}
+              onChange={(e) =>
+                updateElement(parentId, boxId, elementId, {
+                  color: e.target.value,
+                })
+              }
+              className="w-full h-12 border-2 border-gray-200 rounded-xl cursor-pointer transition-all"
+            />
           </div>
-
-          {/* Removed: Background color (duplicate control) */}
         </div>
       </div>
     </div>

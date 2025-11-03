@@ -122,7 +122,7 @@ export default function ElementPropertiesPanel() {
           elementId={selectedElementId}
         />
 
-        {/* CSS Styles & Animation */}
+        {/* Styles (consolidated) */}
         <CssStylesPanel
           selectedElement={selectedElement}
           updateElement={updateElement}
@@ -131,7 +131,7 @@ export default function ElementPropertiesPanel() {
           elementId={selectedElementId}
         />
 
-        {/* Customization Panel */}
+        {/* Advanced */}
         <CustomizationPanel
           selectedElement={selectedElement}
           updateElement={updateElement}
@@ -150,6 +150,7 @@ export default function ElementPropertiesPanel() {
           />
         ) : (
           <>
+            {/* Spacing */}
             <Spacing
               selectedElement={selectedElement}
               updateElement={updateElement}
@@ -157,15 +158,8 @@ export default function ElementPropertiesPanel() {
               boxId={selectedBoxId}
               elementId={selectedElementId}
             />
-
-            <Typography
-              selectedElement={selectedElement}
-              updateElement={updateElement}
-              parentId={selectedParentId}
-              boxId={selectedBoxId}
-              elementId={selectedElementId}
-            />
-
+            {/* Removed: Typography font size controls to simplify UI */}
+            {/* Optional: keep Border Effects for non-line items if needed */}
             <BorderEffects
               selectedElement={selectedElement}
               updateElement={updateElement}

@@ -53,13 +53,14 @@ export default function SectionComponent({ parent, parentIndex }) {
       data-id={parent.id}
       data-section-id={parent.id}
       style={{
+        // Container styles affecting visibility
         ...parentBoundary,
         height: height,
         background: background,
         position: 'relative',
         border: isSectionSelected ? '3px solid #6f56f9' : '2px solid #A9A9A9',
         boxSizing: 'border-box',
-        overflow: 'visible',
+        overflow: 'visible', // elements can overflow section
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -103,7 +104,7 @@ export default function SectionComponent({ parent, parentIndex }) {
           position: 'relative',
           width: '100%',
           height: '100%',
-          overflow: 'visible', // Allow elements to move freely within boxes
+          overflow: 'visible', // boxes allow overflow within
         }}
       >
         {/* Render RND boxes */}
