@@ -74,7 +74,7 @@ export const createElementSlice = (set, get) => ({
           Object.assign(newElement, {
             width: { [screenSize]: 200 },
             height: { [screenSize]: 150 },
-            content: 'Card Content', // Default content for cards
+            content: '', // No default content for cards
             color: '#333333', // Default text color for cards
             backgroundColor: '#f8f9fa',
             borderRadius: 8,

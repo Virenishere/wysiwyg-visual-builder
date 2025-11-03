@@ -122,11 +122,9 @@ export default function DraggableElement({
         );
       case 'card':
         return (
-          <CardElement
-            id={element.id}
-            style={element.style}
-            content={element.content}
-          />
+          <CardElement id={element.id} style={element.style}>
+            {element.content}
+          </CardElement>
         );
       case 'line':
         return <LineElement element={element} />; // Pass the whole element
