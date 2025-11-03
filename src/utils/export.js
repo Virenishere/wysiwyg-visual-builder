@@ -233,7 +233,7 @@ const generateElementHtml = (element, screenSize) => {
     case 'div':
       let divContent = '';
       if (element.content) {
-        divContent = `<div style="padding: 4px; font-size: ${element.fontSize || 12}px; color: ${element.color || '#333'};">${element.content}</div>`;
+        divContent = `<div style="padding: 4px;">${element.content}</div>`;
       }
       return `<div class="${className}">${divContent}</div>`;
 

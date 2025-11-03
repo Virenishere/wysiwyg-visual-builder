@@ -38,6 +38,8 @@ export const createElementSlice = (set, get) => ({
             height: { [screenSize]: 30 },
             content: 'Sample Text',
             fontSize: 16,
+            color: '#333333', // Dark gray for better visibility
+            backgroundColor: 'transparent', // Explicitly transparent
           });
           break;
         case 'paragraph':
@@ -45,6 +47,8 @@ export const createElementSlice = (set, get) => ({
             width: { [screenSize]: 200 },
             height: { [screenSize]: 60 },
             content: '<p>Sample paragraph content</p>',
+            color: '#333333', // Dark gray for better visibility
+            backgroundColor: 'transparent', // Explicitly transparent
           });
           break;
         case 'button':
@@ -70,6 +74,8 @@ export const createElementSlice = (set, get) => ({
           Object.assign(newElement, {
             width: { [screenSize]: 200 },
             height: { [screenSize]: 150 },
+            content: 'Card Content', // Default content for cards
+            color: '#333333', // Default text color for cards
             backgroundColor: '#f8f9fa',
             borderRadius: 8,
             padding: { top: 15, right: 15, bottom: 15, left: 15 },

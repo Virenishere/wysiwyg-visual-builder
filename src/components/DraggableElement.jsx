@@ -31,6 +31,7 @@ export default function DraggableElement({
     screenSize,
     containerRect,
   } = useDivStore();
+  const zIndexCounter = useDivStore((state) => state.zIndexCounter);
   const [isDragging, setIsDragging] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -121,9 +122,11 @@ export default function DraggableElement({
         );
       case 'card':
         return (
-          <CardElement id={element.id} style={element.style}>
-            {element.children}
-          </CardElement>
+          <CardElement
+            id={element.id}
+            style={element.style}
+            content={element.content}
+          />
         );
       case 'line':
         return <LineElement element={element} />; // Pass the whole element
@@ -387,13 +390,14 @@ export default function DraggableElement({
       onDoubleClick={() => setIsEditing(true)}
       onClick={handleClick}
       style={{
+        position: 'absolute',
         border:
           isSelected && !isEditing ? '2px solid #007bff' : getDefaultBorder(),
         borderRadius: '2px',
         zIndex:
-          isDragging || isResizing || isSelected || isEditing
-            ? 10
-            : element.zIndex || 1,
+          isDragging || isResizing || isEditing
+            ? (zIndexCounter || 0) + 1
+            : (element.zIndex ?? 0),
         pointerEvents: 'auto',
         cursor: isEditing ? 'text' : 'move',
         touchAction: 'none',

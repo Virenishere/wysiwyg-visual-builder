@@ -10,6 +10,7 @@ import ContentInput from './ElementPropertiesPanelSection/ContentInput';
 import LineElementProperties from './ElementPropertiesPanelSection/LineElementProperties';
 import ImagePropertiesPanel from './ElementPropertiesPanelSection/ImagePropertiesPanel';
 import CssStylesPanel from './ElementPropertiesPanelSection/CssStylesPanel';
+import CustomizationPanel from './ElementPropertiesPanelSection/CustomizationPanel';
 
 export default function ElementPropertiesPanel() {
   const {
@@ -123,6 +124,15 @@ export default function ElementPropertiesPanel() {
 
         {/* CSS Styles & Animation */}
         <CssStylesPanel
+          selectedElement={selectedElement}
+          updateElement={updateElement}
+          parentId={selectedParentId}
+          boxId={selectedBoxId}
+          elementId={selectedElementId}
+        />
+
+        {/* Customization Panel */}
+        <CustomizationPanel
           selectedElement={selectedElement}
           updateElement={updateElement}
           parentId={selectedParentId}

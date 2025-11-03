@@ -251,7 +251,9 @@ export default function ElementRenderer({ element, screenSize }) {
             backgroundColor:
               getResponsiveValue(element.backgroundColor, screenSize) ||
               'transparent',
-            border: element.border || '1px solid #ddd',
+            border:
+              getResponsiveValue(element.border, screenSize) ||
+              '1px solid #ddd',
             // Apply any custom styles
             ...element.style,
           }}
@@ -261,8 +263,6 @@ export default function ElementRenderer({ element, screenSize }) {
             <div
               style={{
                 padding: '4px',
-                fontSize: element.fontSize || '12px',
-                color: element.color || '#333',
               }}
             >
               {element.content}
