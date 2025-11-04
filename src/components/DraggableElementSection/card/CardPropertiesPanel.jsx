@@ -21,6 +21,8 @@ export default function CardPropertiesPanel({
   selectedItem,
   onUpdateItem,
   onDeleteItem,
+  onClose,
+  onGoBack,
 }) {
   // REMOVE this duplicate local variable:
   // const selectedItem = null; // editing in panel is optional; card handles in-canvas edits
@@ -65,6 +67,27 @@ export default function CardPropertiesPanel({
     }
     return null;
   }, []);
+
+  // Auto-switch tabs based on selection, and hook up Back/Close buttons to reset local state
+  // Keep the panel state clean when navigating
+  const handleGoBack = useCallback(() => {
+    setActiveTab('add');
+    setValidationError('');
+    setUploadError('');
+    onGoBack && onGoBack();
+  }, [onGoBack]);
+
+  const handleClose = useCallback(() => {
+    setActiveTab('add');
+    setValidationError('');
+    setUploadError('');
+    onClose && onClose();
+  }, [onClose]);
+
+  // Sync tab with card item selection
+  React.useEffect(() => {
+    setActiveTab(selectedItem ? 'settings' : 'add');
+  }, [selectedItem]);
 
   const handleAddText = useCallback(() => {
     const error = validateText(textInput);
@@ -142,28 +165,29 @@ export default function CardPropertiesPanel({
   }, []);
 
   return (
-    <div className="space-y-4">
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-        <button
-          onClick={() => handleTabChange('add')}
-          className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-            activeTab === 'add'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Add Content
-        </button>
-        <button
-          onClick={() => handleTabChange('settings')}
-          className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-            activeTab === 'settings'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Settings
-        </button>
+    <div className="space-y-4 w-full max-w-full overflow-x-hidden">
+      <div className="flex items-center justify-between min-w-0">
+        <div className="text-sm font-medium text-gray-700 truncate">
+          Card Properties
+        </div>
+        <div className="flex gap-2">
+          {onGoBack && (
+            <button
+              onClick={handleGoBack}
+              className="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+            >
+              Back
+            </button>
+          )}
+          {onClose && (
+            <button
+              onClick={handleClose}
+              className="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+            >
+              Close
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Add tab stays unchanged */}
@@ -238,13 +262,13 @@ export default function CardPropertiesPanel({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Image URL
               </label>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 min-w-0">
                 <input
                   type="url"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://example.com/image.jpg"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <button
                   onClick={handleAddImageUrl}

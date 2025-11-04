@@ -13,6 +13,7 @@ import CssStylesPanel from './ElementPropertiesPanelSection/CssStylesPanel';
 import CustomizationPanel from './ElementPropertiesPanelSection/CustomizationPanel';
 import { getResponsiveValue } from '@/utils/screen';
 import CardPropertiesPanel from './DraggableElementSection/card/CardPropertiesPanel';
+import { useState } from 'react';
 
 export default function ElementPropertiesPanel() {
   const {
@@ -25,6 +26,7 @@ export default function ElementPropertiesPanel() {
     duplicateElement,
     copyDesktopToAllScreens,
     screenSize,
+    setSelectedElement, // <- use store to close panel
   } = useDivStore();
 
   const selectedParent = parents.find((p) => p.id === selectedParentId);
@@ -34,6 +36,27 @@ export default function ElementPropertiesPanel() {
   const selectedElement = selectedBox?.elements?.find(
     (el) => el.id === selectedElementId
   );
+
+  // Controls to show/hide Card properties and navigate back to element properties
+  const [showCardPanel, setShowCardPanel] = useState(true);
+  const closeCardPanel = () => setShowCardPanel(false);
+  const openCardPanel = () => setShowCardPanel(true);
+  const clearCardSelection = () => {
+    updateElement(selectedParentId, selectedBoxId, selectedElementId, {
+      selectedItemId: null,
+    });
+  };
+
+  // Back: exit Card view and go back to element properties
+  const handleBackFromCard = () => {
+    clearCardSelection();
+    setShowCardPanel(false);
+  };
+
+  // Close: close the entire ElementPropertiesPanel (deselect element)
+  const handleClosePanel = () => {
+    setSelectedElement(null);
+  };
 
   if (!selectedElement) {
     return (
@@ -175,11 +198,11 @@ export default function ElementPropertiesPanel() {
   };
 
   return (
-    <div>
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl opacity-50"></div>
+    <div className="relative">
+      {/* Background decoration must not block clicks */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl opacity-50 pointer-events-none z-0"></div>
 
-      <div className="relative p-6 mb-4 rounded-2xl border border-purple-200 shadow-xl bg-white/80 backdrop-blur-sm overflow-y-auto max-h-[calc(100vh-120px)] custom-scrollbar">
+      <div className="relative z-10 p-6 mb-4 rounded-2xl border border-purple-200 shadow-xl bg-white/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden max-h-[calc(100vh-120px)] custom-scrollbar">
         {/* Header */}
         <Header
           selectedElement={selectedElement}
@@ -217,24 +240,46 @@ export default function ElementPropertiesPanel() {
 
         {/* Inject Card properties panel */}
         {selectedElement?.type === 'card' && (
-          <div className="mt-4">
-            <CardPropertiesPanel
-              element={selectedElement}
-              onAddText={addCardText}
-              onAddImage={addCardImage}
-              selectedItem={selectedCardItem}
-              onUpdateItem={updateCardItem}
-              onDeleteItem={deleteCardItem}
-            />
-
-            {selectedCardItem && (
-              <div className="mt-4 border-t border-gray-200 pt-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                  <span className="mr-2">🔧</span>
-                  Advanced Item Properties
-                </h3>
-                <OtherPropertiesTab />
+          <div className="mt-4 overflow-x-hidden">
+            {/* Header row for Card section */}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">
+                Card Properties
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleBackFromCard}
+                  className="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleClosePanel}
+                  className="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+                >
+                  Close
+                </button>
               </div>
+            </div>
+
+            {showCardPanel ? (
+              <CardPropertiesPanel
+                element={selectedElement}
+                onAddText={addCardText}
+                onAddImage={addCardImage}
+                selectedItem={selectedCardItem}
+                onUpdateItem={updateCardItem}
+                onDeleteItem={deleteCardItem}
+                onClose={handleClosePanel}
+                onGoBack={handleBackFromCard}
+              />
+            ) : (
+              <button
+                onClick={openCardPanel}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+              >
+                Open Card Panel
+              </button>
             )}
           </div>
         )}
