@@ -13,6 +13,7 @@ import CardToolbar from './card/CardToolbar';
 import DraggableCardItem from './card/DraggableCardItem';
 import { applySnap, clamp, getPoint } from './card/cardUtils';
 import Image from 'next/image';
+import { Rnd } from 'react-rnd';
 
 export default function CardElement({
   element,

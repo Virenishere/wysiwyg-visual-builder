@@ -163,21 +163,19 @@ export default function ElementPropertiesPanel() {
     });
   };
 
-  const deleteCardItem = () => {
+  const deleteCardItem = (itemId) => {
     if (!selectedElement || selectedElement.type !== 'card') return;
-    const targetId = selectedElement.selectedItemId;
-    if (!targetId) return;
     const nextItems = (
       Array.isArray(selectedElement.items) ? selectedElement.items : []
-    ).filter((it) => it.id !== targetId);
+    ).filter((it) => it.id !== itemId);
     updateElement(selectedParentId, selectedBoxId, selectedElementId, {
       items: nextItems,
-      selectedItemId: null,
+      selectedItemId: null, // Clear selection when deleting
     });
   };
 
   return (
-    <div className="relative">
+    <div>
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl opacity-50"></div>
 
@@ -228,6 +226,16 @@ export default function ElementPropertiesPanel() {
               onUpdateItem={updateCardItem}
               onDeleteItem={deleteCardItem}
             />
+
+            {selectedCardItem && (
+              <div className="mt-4 border-t border-gray-200 pt-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                  <span className="mr-2">🔧</span>
+                  Advanced Item Properties
+                </h3>
+                <OtherPropertiesTab />
+              </div>
+            )}
           </div>
         )}
 
@@ -297,6 +305,228 @@ export default function ElementPropertiesPanel() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function OtherPropertiesTab() {
+  if (!selectedCardItem) return null;
+
+  const isImage = selectedCardItem.type === 'image';
+  const isText = selectedCardItem.type === 'text';
+
+  const onChange = (patch) => {
+    updateCardItem(patch);
+  };
+
+  return (
+    <div style={{ display: 'grid', gap: 12 }}>
+      {/* Border (applies to text and image items) */}
+      <div>
+        <h4 style={{ margin: '8px 0' }}>Border</h4>
+        <div style={{ display: 'grid', gap: 8 }}>
+          <label>
+            Border width (px)
+            <input
+              type="number"
+              min="0"
+              value={selectedCardItem.borderWidth ?? 0}
+              onChange={(e) =>
+                onChange({ borderWidth: Number(e.target.value) })
+              }
+            />
+          </label>
+          <label>
+            Border style
+            <select
+              value={selectedCardItem.borderStyle ?? 'solid'}
+              onChange={(e) => onChange({ borderStyle: e.target.value })}
+            >
+              <option value="none">none</option>
+              <option value="solid">solid</option>
+              <option value="dashed">dashed</option>
+              <option value="dotted">dotted</option>
+              <option value="double">double</option>
+              <option value="groove">groove</option>
+              <option value="ridge">ridge</option>
+              <option value="inset">inset</option>
+              <option value="outset">outset</option>
+            </select>
+          </label>
+          <label>
+            Border color
+            <input
+              type="color"
+              value={selectedCardItem.borderColor ?? '#000000'}
+              onChange={(e) => onChange({ borderColor: e.target.value })}
+            />
+          </label>
+          <label>
+            Border radius (px)
+            <input
+              type="number"
+              min="0"
+              value={selectedCardItem.borderRadius ?? 0}
+              onChange={(e) =>
+                onChange({ borderRadius: Number(e.target.value) })
+              }
+            />
+          </label>
+        </div>
+      </div>
+
+      {/* Manual size (width/height) with optional lock */}
+      <div>
+        <h4 style={{ margin: '8px 0' }}>Size</h4>
+        <div style={{ display: 'grid', gap: 8 }}>
+          <label>
+            Width (px)
+            <input
+              type="number"
+              min="0"
+              value={selectedCardItem.width ?? 0}
+              onChange={(e) => onChange({ width: Number(e.target.value) })}
+            />
+          </label>
+          <label>
+            Height (px)
+            <input
+              type="number"
+              min="0"
+              value={selectedCardItem.height ?? 0}
+              onChange={(e) => onChange({ height: Number(e.target.value) })}
+            />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={!!selectedCardItem.lockSizing}
+              onChange={(e) => onChange({ lockSizing: e.target.checked })}
+            />
+            Lock sizing to values above
+          </label>
+        </div>
+      </div>
+
+      {/* Image-only controls */}
+      {isImage && (
+        <div>
+          <h4 style={{ margin: '8px 0' }}>Image</h4>
+          <div style={{ display: 'grid', gap: 8 }}>
+            <label>
+              Object fit
+              <select
+                value={selectedCardItem.objectFit ?? 'cover'}
+                onChange={(e) => onChange({ objectFit: e.target.value })}
+              >
+                <option value="cover">cover</option>
+                <option value="contain">contain</option>
+                <option value="fill">fill</option>
+                <option value="none">none</option>
+                <option value="scale-down">scale-down</option>
+              </select>
+            </label>
+            <label>
+              Object position X (%)
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={selectedCardItem.objectPositionX ?? 50}
+                onChange={(e) =>
+                  onChange({ objectPositionX: Number(e.target.value) })
+                }
+              />
+            </label>
+            <label>
+              Object position Y (%)
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={selectedCardItem.objectPositionY ?? 50}
+                onChange={(e) =>
+                  onChange({ objectPositionY: Number(e.target.value) })
+                }
+              />
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={!!selectedCardItem.optimizeImage}
+                onChange={(e) => onChange({ optimizeImage: e.target.checked })}
+              />
+              Use Next.js image optimization
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Text-only controls */}
+      {isText && (
+        <div>
+          <h4 style={{ margin: '8px 0' }}>Text</h4>
+          <div style={{ display: 'grid', gap: 8 }}>
+            <label>
+              Content
+              <textarea
+                rows={4}
+                value={selectedCardItem.content ?? ''}
+                onChange={(e) => onChange({ content: e.target.value })}
+              />
+            </label>
+            <label>
+              White-space
+              <select
+                value={selectedCardItem.whiteSpace ?? 'normal'}
+                onChange={(e) => onChange({ whiteSpace: e.target.value })}
+              >
+                <option value="normal">normal</option>
+                <option value="nowrap">nowrap</option>
+                <option value="pre">pre</option>
+                <option value="pre-wrap">pre-wrap</option>
+                <option value="pre-line">pre-line</option>
+              </select>
+            </label>
+            <label>
+              Word-break
+              <select
+                value={selectedCardItem.wordBreak ?? 'normal'}
+                onChange={(e) => onChange({ wordBreak: e.target.value })}
+              >
+                <option value="normal">normal</option>
+                <option value="break-word">break-word</option>
+                <option value="break-all">break-all</option>
+                <option value="keep-all">keep-all</option>
+              </select>
+            </label>
+            <label>
+              Letter-spacing (px)
+              <input
+                type="number"
+                step="0.5"
+                value={selectedCardItem.letterSpacing ?? 0}
+                onChange={(e) =>
+                  onChange({ letterSpacing: Number(e.target.value) })
+                }
+              />
+            </label>
+            <label>
+              Line-height
+              <input
+                type="number"
+                step="0.1"
+                value={selectedCardItem.lineHeight ?? 1.4}
+                onChange={(e) =>
+                  onChange({ lineHeight: Number(e.target.value) })
+                }
+              />
+            </label>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
