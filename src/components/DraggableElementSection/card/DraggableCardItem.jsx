@@ -3,21 +3,26 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import { getResponsiveValue } from '@/utils/screen';
 
-export default function DraggableCardItem({
-  item,
-  isSelected,
-  onSelect,
-  onUpdate,
-  onEditText,
-  screenSize,
-  containerBounds,
-  snapEnabled = true,
-  gridSize = 8,
-  onDragStart,
-  onDragEnd,
-  onResizeStart,
-  onResizeEnd,
-}) {
+export default function DraggableCardItem(props) {
+  const {
+    item,
+    isSelected = false,
+    containerBounds = {
+      width: Number.POSITIVE_INFINITY,
+      height: Number.POSITIVE_INFINITY,
+    },
+    screenSize,
+    onSelect,
+    onUpdate,
+    onEditText,
+    onDragStart,
+    onDragEnd,
+    onResizeStart,
+    onResizeEnd,
+    snapEnabled = false,
+    gridSize = 8,
+  } = props;
+
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const rndRef = useRef(null);
@@ -29,13 +34,13 @@ export default function DraggableCardItem({
 
   const clampToBounds = useCallback(
     (x, y, width, height) => {
-      const maxX = Math.max(0, containerBounds.width - width);
-      const maxY = Math.max(0, containerBounds.height - height);
+      const maxX = Math.max(0, (containerBounds?.width ?? Infinity) - width);
+      const maxY = Math.max(0, (containerBounds?.height ?? Infinity) - height);
       return {
         x: Math.max(0, Math.min(x, maxX)),
         y: Math.max(0, Math.min(y, maxY)),
-        width: Math.min(width, containerBounds.width),
-        height: Math.min(height, containerBounds.height),
+        width: Math.min(width, containerBounds?.width ?? width),
+        height: Math.min(height, containerBounds?.height ?? height),
       };
     },
     [containerBounds]
@@ -44,7 +49,7 @@ export default function DraggableCardItem({
   const handleDragStart = useCallback(
     (e, data) => {
       setIsDragging(true);
-      onSelect(item.id);
+      onSelect?.(item.id);
       onDragStart?.(item, e, data);
     },
     [item, onSelect, onDragStart]
@@ -60,7 +65,7 @@ export default function DraggableCardItem({
         item.width,
         item.height
       );
-      onUpdate(item.id, { x: clamped.x, y: clamped.y });
+      onUpdate?.(item.id, { x: clamped.x, y: clamped.y });
     },
     [item, applySnap, clampToBounds, onUpdate]
   );
@@ -76,7 +81,7 @@ export default function DraggableCardItem({
         item.width,
         item.height
       );
-      onUpdate(item.id, { x: clamped.x, y: clamped.y });
+      onUpdate?.(item.id, { x: clamped.x, y: clamped.y });
       onDragEnd?.(item, e, data);
     },
     [item, applySnap, clampToBounds, onUpdate, onDragEnd]
@@ -85,7 +90,7 @@ export default function DraggableCardItem({
   const handleResizeStart = useCallback(
     (e, direction, ref) => {
       setIsResizing(true);
-      onSelect(item.id);
+      onSelect?.(item.id);
       onResizeStart?.(item, e, direction, ref);
     },
     [item, onSelect, onResizeStart]
@@ -98,7 +103,7 @@ export default function DraggableCardItem({
       const newX = applySnap(position.x);
       const newY = applySnap(position.y);
       const clamped = clampToBounds(newX, newY, newWidth, newHeight);
-      onUpdate(item.id, {
+      onUpdate?.(item.id, {
         x: clamped.x,
         y: clamped.y,
         width: clamped.width,
@@ -116,7 +121,7 @@ export default function DraggableCardItem({
       const newX = applySnap(position.x);
       const newY = applySnap(position.y);
       const clamped = clampToBounds(newX, newY, newWidth, newHeight);
-      onUpdate(item.id, {
+      onUpdate?.(item.id, {
         x: clamped.x,
         y: clamped.y,
         width: clamped.width,
@@ -134,7 +139,7 @@ export default function DraggableCardItem({
   const handleClick = useCallback(
     (e) => {
       e.stopPropagation();
-      onSelect(item.id);
+      onSelect?.(item.id);
     },
     [item.id, onSelect]
   );
@@ -199,23 +204,17 @@ export default function DraggableCardItem({
         zIndex,
         transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
       }}
-      className={`card-item ${isDragging ? 'dragging' : ''} ${
-        isResizing ? 'resizing' : ''
-      }`}
+      className={`card-item ${isDragging ? 'dragging' : ''} ${isResizing ? 'resizing' : ''}`}
     >
+      {/* Wrapper div must exist so attributes are applied to an element */}
       <div
-        onMouseDown={(e) => e.stopPropagation()}
-        onMouseDownCapture={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         className={`w-full h-full relative ${
           isSelected
             ? 'ring-2 ring-blue-500 ring-opacity-75'
             : 'ring-1 ring-gray-300'
-        } ${isDragging ? 'shadow-lg scale-105' : ''} ${
-          isResizing ? 'shadow-md' : ''
-        }`}
+        } ${isDragging ? 'shadow-lg scale-105' : ''} ${isResizing ? 'shadow-md' : ''}`}
         style={{
           borderRadius: 4,
           backgroundColor: item.style?.backgroundColor ?? 'transparent',

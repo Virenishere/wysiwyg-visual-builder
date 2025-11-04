@@ -135,6 +135,47 @@ export default function ElementPropertiesPanel() {
     });
   };
 
+  // Update/delete a selected card item (by selectedItemId on the card element)
+  const selectedCardItem =
+    selectedElement?.type === 'card' && Array.isArray(selectedElement.items)
+      ? selectedElement.items.find(
+          (it) => it.id === selectedElement.selectedItemId
+        )
+      : null;
+
+  const updateCardItem = (patch) => {
+    if (!selectedElement || selectedElement.type !== 'card') return;
+    const targetId = selectedElement.selectedItemId;
+    if (!targetId) return;
+    const nextItems = (
+      Array.isArray(selectedElement.items) ? selectedElement.items : []
+    ).map((it) =>
+      it.id === targetId
+        ? {
+            ...it,
+            ...patch,
+            style: patch.style ? { ...it.style, ...patch.style } : it.style,
+          }
+        : it
+    );
+    updateElement(selectedParentId, selectedBoxId, selectedElementId, {
+      items: nextItems,
+    });
+  };
+
+  const deleteCardItem = () => {
+    if (!selectedElement || selectedElement.type !== 'card') return;
+    const targetId = selectedElement.selectedItemId;
+    if (!targetId) return;
+    const nextItems = (
+      Array.isArray(selectedElement.items) ? selectedElement.items : []
+    ).filter((it) => it.id !== targetId);
+    updateElement(selectedParentId, selectedBoxId, selectedElementId, {
+      items: nextItems,
+      selectedItemId: null,
+    });
+  };
+
   return (
     <div className="relative">
       {/* Background decoration */}
@@ -183,6 +224,9 @@ export default function ElementPropertiesPanel() {
               element={selectedElement}
               onAddText={addCardText}
               onAddImage={addCardImage}
+              selectedItem={selectedCardItem}
+              onUpdateItem={updateCardItem}
+              onDeleteItem={deleteCardItem}
             />
           </div>
         )}

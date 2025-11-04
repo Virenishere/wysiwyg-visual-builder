@@ -18,9 +18,12 @@ export default function CardPropertiesPanel({
   element,
   onAddText,
   onAddImage,
+  selectedItem,
   onUpdateItem,
   onDeleteItem,
 }) {
+  // REMOVE this duplicate local variable:
+  // const selectedItem = null; // editing in panel is optional; card handles in-canvas edits
   const [activeTab, setActiveTab] = useState('add');
   const [textInput, setTextInput] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -29,7 +32,7 @@ export default function CardPropertiesPanel({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const selectedItem = null; // editing in panel is optional; card handles in-canvas edits
+  // const selectedItem = null; // editing in panel is optional; card handles in-canvas edits
 
   const [textFormat, setTextFormat] = useState({
     fontSize: 16,
@@ -151,8 +154,19 @@ export default function CardPropertiesPanel({
         >
           Add Content
         </button>
+        <button
+          onClick={() => handleTabChange('settings')}
+          className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeTab === 'settings'
+              ? 'bg-white text-blue-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Settings
+        </button>
       </div>
 
+      {/* Add tab stays unchanged */}
       {activeTab === 'add' && (
         <div className="space-y-4">
           <div className="border rounded-lg p-4 space-y-3">
@@ -249,6 +263,178 @@ export default function CardPropertiesPanel({
               <span className="text-sm text-red-700">
                 {validationError || uploadError}
               </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Settings tab for selected card item */}
+      {activeTab === 'settings' && (
+        <div className="space-y-4">
+          {!selectedItem ? (
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-700">
+              Select a text or image inside the card to edit its settings.
+            </div>
+          ) : selectedItem.type === 'text' ? (
+            <div className="border rounded-lg p-4 space-y-3">
+              <h3 className="font-medium text-gray-900">Text Settings</h3>
+
+              <textarea
+                defaultValue={selectedItem.content || ''}
+                onBlur={(e) => onUpdateItem({ content: e.target.value })}
+                placeholder="Text content"
+                className="w-full px-3 py-2 border rounded-md"
+              />
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs text-gray-600">Font Size</label>
+                  <input
+                    type="number"
+                    defaultValue={selectedItem.style?.fontSize || 16}
+                    onBlur={(e) =>
+                      onUpdateItem({
+                        style: { fontSize: parseInt(e.target.value) || 16 },
+                      })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">Color</label>
+                  <input
+                    type="color"
+                    defaultValue={selectedItem.style?.color || '#222222'}
+                    onChange={(e) =>
+                      onUpdateItem({ style: { color: e.target.value } })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">Align</label>
+                  <select
+                    defaultValue={selectedItem.style?.textAlign || 'left'}
+                    onChange={(e) =>
+                      onUpdateItem({ style: { textAlign: e.target.value } })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  >
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-600">Background</label>
+                  <input
+                    type="color"
+                    defaultValue={
+                      selectedItem.style?.backgroundColor || '#ffffff00'
+                    }
+                    onChange={(e) =>
+                      onUpdateItem({
+                        style: { backgroundColor: e.target.value },
+                      })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">Z-Index</label>
+                  <input
+                    type="number"
+                    defaultValue={selectedItem.zIndex || 1}
+                    onBlur={(e) =>
+                      onUpdateItem({ zIndex: parseInt(e.target.value) || 1 })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={onDeleteItem}
+                className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete Item
+              </button>
+            </div>
+          ) : (
+            <div className="border rounded-lg p-4 space-y-3">
+              <h3 className="font-medium text-gray-900">Image Settings</h3>
+
+              <input
+                type="url"
+                defaultValue={selectedItem.imageUrl || ''}
+                placeholder="Image URL"
+                onBlur={(e) => onUpdateItem({ imageUrl: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-600">Width</label>
+                  <input
+                    type="number"
+                    defaultValue={selectedItem.width || 100}
+                    onBlur={(e) =>
+                      onUpdateItem({ width: parseInt(e.target.value) || 100 })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">Height</label>
+                  <input
+                    type="number"
+                    defaultValue={selectedItem.height || 100}
+                    onBlur={(e) =>
+                      onUpdateItem({ height: parseInt(e.target.value) || 100 })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-600">Background</label>
+                  <input
+                    type="color"
+                    defaultValue={
+                      selectedItem.style?.backgroundColor || '#ffffff00'
+                    }
+                    onChange={(e) =>
+                      onUpdateItem({
+                        style: { backgroundColor: e.target.value },
+                      })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">Z-Index</label>
+                  <input
+                    type="number"
+                    defaultValue={selectedItem.zIndex || 1}
+                    onBlur={(e) =>
+                      onUpdateItem({ zIndex: parseInt(e.target.value) || 1 })
+                    }
+                    className="w-full px-2 py-1 border rounded"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={onDeleteItem}
+                className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete Item
+              </button>
             </div>
           )}
         </div>
